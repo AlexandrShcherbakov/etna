@@ -1,4 +1,5 @@
 #include <etna/UniqueImage.hpp>
+#include <etna/ShaderProgram.hpp>
 
 #include <iostream>
 
