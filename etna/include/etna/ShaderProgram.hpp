@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <memory>
 
+#include "Error.hpp"
 #include "DescriptorSetLayout.hpp"
 
 namespace etna
@@ -58,7 +59,7 @@ namespace etna
     { 
       auto &prog = *programs.at(id);
       if (set >= MAX_PROGRAM_DESCRIPTORS || !prog.usedDescriptors.test(set))
-        throw std::runtime_error {"ShaderProgram: invalid descriptor set index"};
+        ETNA_RUNTIME_ERROR("ShaderProgram ", prog.name, " invalid descriptor set #", set);
       
       return desciptorLayoutCache.getVkLayout(prog.descriptorIds[set]);
     }
@@ -81,8 +82,9 @@ namespace etna
 
     struct ShaderProgramInternal
     {
-      ShaderProgramInternal(std::vector<uint32_t> &&mod) : moduleIds {std::move(mod)} {}
-
+      ShaderProgramInternal(const std::string &pname, std::vector<uint32_t> &&mod) : name {pname}, moduleIds {std::move(mod)} {}
+      
+      std::string name;
       std::vector<uint32_t> moduleIds;
 
       std::bitset<MAX_PROGRAM_DESCRIPTORS> usedDescriptors;

@@ -1,11 +1,12 @@
 #include <etna/DescriptorSetLayout.hpp>
+#include <etna/Error.hpp>
 
 namespace etna
 {
   void DescriptorSetInfo::addResource(const vk::DescriptorSetLayoutBinding &binding)
   {
     if (binding.binding > MAX_DESCRIPTOR_BINDINGS)
-      throw std::runtime_error {"DescriptorSetInfo: Binding out of MAX_DESCRIPTOR_BINDINGS range"};
+      ETNA_RUNTIME_ERROR("DescriptorSetInfo: Binding ", binding.binding,  " out of MAX_DESCRIPTOR_BINDINGS range");
 
     if (usedBindings.test(binding.binding))
     {
@@ -13,7 +14,7 @@ namespace etna
       if (src.descriptorType != binding.descriptorType
         || src.descriptorCount != binding.descriptorCount)
       {
-        throw std::runtime_error {"DescriptorSetInfo: incompatible bindings"};
+        ETNA_RUNTIME_ERROR("DescriptorSetInfo: incompatible bindings at index ", binding.binding);
       }
 
       src.stageFlags |= binding.stageFlags;
