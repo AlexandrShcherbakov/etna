@@ -176,7 +176,7 @@ namespace etna
     return progId;
   }
   
-  ShaderProgramId ShaderProgramManager::getProgram(const std::string &name)
+  ShaderProgramId ShaderProgramManager::getProgram(const std::string &name) const
   {
     auto it = programNames.find(name);
     if (it == programNames.end())
@@ -225,7 +225,7 @@ namespace etna
     {
       if (!usedDescriptors.test(i))
         continue;
-      auto res = manager.desciptorLayoutCache.get(manager.getDevice(), dstDescriptors[i]);
+      auto res = manager.descriptorLayoutCache.get(manager.getDevice(), dstDescriptors[i]);
       descriptorIds[i] = res.first;
       vkLayouts.push_back(res.second);
     }
@@ -254,7 +254,7 @@ namespace etna
 
   void ShaderProgramManager::reloadPrograms()
   {
-    desciptorLayoutCache.clear(getDevice());
+    descriptorLayoutCache.clear(getDevice());
 
     for (auto &mod : shaderModules)
     {
@@ -279,7 +279,7 @@ namespace etna
       modPtr->reset(getDevice());
     shaderModules.clear();
     
-    desciptorLayoutCache.clear(getDevice());
+    descriptorLayoutCache.clear(getDevice());
   }
 
   std::vector<vk::PipelineShaderStageCreateInfo> ShaderProgramManager::getShaderStages(ShaderProgramId id) const
@@ -299,6 +299,38 @@ namespace etna
       stages.push_back(info);
     }
     return stages;
+  }
+
+  vk::PushConstantRange ShaderProgramInfo::getPushConst() const
+  {
+    auto &prog = mgr.getProgInternal(id);
+    return prog.pushConst;
+  }
+  
+  vk::PipelineLayout ShaderProgramInfo::getPipelineLayout() const
+  {
+    auto &prog = mgr.getProgInternal(id);
+    return prog.progLayout;
+  }
+
+  bool ShaderProgramInfo::isDescriptorSetUsed(uint32_t set) const
+  {
+    auto &prog = mgr.getProgInternal(id);
+    return set < MAX_PROGRAM_DESCRIPTORS && prog.usedDescriptors.test(set);
+  }
+  
+  vk::DescriptorSetLayout ShaderProgramInfo::getDescriptorSetLayout(uint32_t set) const
+  {
+    ETNA_ASSERT(isDescriptorSetUsed(set));
+    auto did = mgr.getProgInternal(id).descriptorIds.at(set);
+    return mgr.descriptorLayoutCache.getVkLayout(did);
+  }
+  
+  const DescriptorSetInfo &ShaderProgramInfo::getDescriptorSetInfo(uint32_t set) const
+  {
+    ETNA_ASSERT(isDescriptorSetUsed(set));
+    auto did = mgr.getProgInternal(id).descriptorIds.at(set);
+    return mgr.descriptorLayoutCache.getLayoutInfo(did);
   }
 
 }

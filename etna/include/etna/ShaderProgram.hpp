@@ -41,7 +41,29 @@ namespace etna
     /*Todo: add vertex input info*/
   };
 
+  struct ShaderProgramManager;
   using ShaderProgramId = uint32_t;
+
+  struct ShaderProgramInfo
+  {
+    ShaderProgramId getId() const { return id; }
+
+    vk::PushConstantRange getPushConst() const;
+    vk::PipelineLayout getPipelineLayout() const;
+
+    bool isDescriptorSetUsed(uint32_t set) const;
+    vk::DescriptorSetLayout getDescriptorSetLayout(uint32_t set) const;
+    const DescriptorSetInfo &getDescriptorSetInfo(uint32_t set) const;
+
+  private:
+    ShaderProgramInfo(const ShaderProgramManager &manager, ShaderProgramId prog_id)
+      : mgr {manager}, id {prog_id} {}
+
+    const ShaderProgramManager &mgr;
+    ShaderProgramId id;
+
+    friend ShaderProgramManager;
+  };
 
   struct ShaderProgramManager
   {
@@ -49,7 +71,17 @@ namespace etna
     ~ShaderProgramManager() { clear(); }
 
     ShaderProgramId loadProgram(const std::string &name, const std::vector<std::string> &shaders_path);
-    ShaderProgramId getProgram(const std::string &name);
+    ShaderProgramId getProgram(const std::string &name) const;
+
+    ShaderProgramInfo getProgramInfo(ShaderProgramId id) const
+    {
+      return ShaderProgramInfo {*this, id};
+    }
+
+    ShaderProgramInfo getProgramInfo(const std::string &name) const
+    {
+      return getProgramInfo(getProgram(name));
+    }
 
     void reloadPrograms(); 
     void clear();
@@ -61,7 +93,7 @@ namespace etna
       if (set >= MAX_PROGRAM_DESCRIPTORS || !prog.usedDescriptors.test(set))
         ETNA_RUNTIME_ERROR("ShaderProgram ", prog.name, " invalid descriptor set #", set);
       
-      return desciptorLayoutCache.getVkLayout(prog.descriptorIds[set]);
+      return descriptorLayoutCache.getVkLayout(prog.descriptorIds[set]);
     }
 
     std::vector<vk::PipelineShaderStageCreateInfo> getShaderStages(ShaderProgramId id) const; /*for pipeline creation*/
@@ -72,7 +104,7 @@ namespace etna
   private:
     vk::Device vkDevice {nullptr};
     
-    DescriptorSetLayoutCache desciptorLayoutCache;
+    DescriptorSetLayoutCache descriptorLayoutCache;
 
     std::unordered_map<std::string, uint32_t> shaderModuleNames;
     std::vector<std::unique_ptr<ShaderModule>> shaderModules;
@@ -101,6 +133,13 @@ namespace etna
     std::vector<std::unique_ptr<ShaderProgramInternal>> programs;
 
     vk::Device getDevice() const { return vkDevice; } /*make device global*/
+
+    const ShaderProgramInternal &getProgInternal(ShaderProgramId id) const
+    {
+      return *programs.at(id);
+    }
+
+    friend ShaderProgramInfo;
   };
 }
 
