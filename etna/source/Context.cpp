@@ -31,6 +31,7 @@ namespace etna
   {
     g_context->getDescriptorSetLayouts().clear(g_context->getDevice());
     g_context->getShaderManager().reloadPrograms();
+    g_context->getDescriptorPool().destroyAllocatedSets();
   }
 
   ShaderProgramInfo get_shader_program(ShaderProgramId id)
@@ -48,5 +49,11 @@ namespace etna
     auto set = g_context->getDescriptorPool().allocateSet(layout);
     write_set(set, bindings);
     return set;
+  }
+
+  /*Todo: submit logic here*/
+  void submit()
+  {
+    g_context->getDescriptorPool().flip();
   }
 }
