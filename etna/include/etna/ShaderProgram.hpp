@@ -67,7 +67,7 @@ namespace etna
 
   struct ShaderProgramManager
   {
-    ShaderProgramManager(vk::Device device) : vkDevice {device} {}
+    ShaderProgramManager() {}
     ~ShaderProgramManager() { clear(); }
 
     ShaderProgramId loadProgram(const std::string &name, const std::vector<std::string> &shaders_path);
@@ -87,13 +87,14 @@ namespace etna
     void clear();
 
     vk::PipelineLayout getProgramLayout(ShaderProgramId id) const { return programs.at(id)->progLayout; } 
-    vk::DescriptorSetLayout getDescriptorLayout(ShaderProgramId id, uint32_t set) const
-    { 
+    vk::DescriptorSetLayout getDescriptorLayout(ShaderProgramId id, uint32_t set) const;
+
+    DescriptorLayoutId getDescriptorLayoutId(ShaderProgramId id, uint32_t set) const
+    {
       auto &prog = *programs.at(id);
       if (set >= MAX_PROGRAM_DESCRIPTORS || !prog.usedDescriptors.test(set))
         ETNA_RUNTIME_ERROR("ShaderProgram ", prog.name, " invalid descriptor set #", set);
-      
-      return descriptorLayoutCache.getVkLayout(prog.descriptorIds[set]);
+      return prog.descriptorIds[set];
     }
 
     std::vector<vk::PipelineShaderStageCreateInfo> getShaderStages(ShaderProgramId id) const; /*for pipeline creation*/
@@ -102,10 +103,6 @@ namespace etna
     ShaderProgramManager &operator=(const ShaderProgramManager &) = delete;
 
   private:
-    vk::Device vkDevice {nullptr};
-    
-    DescriptorSetLayoutCache descriptorLayoutCache;
-
     std::unordered_map<std::string, uint32_t> shaderModuleNames;
     std::vector<std::unique_ptr<ShaderModule>> shaderModules;
 
@@ -126,13 +123,11 @@ namespace etna
       vk::PipelineLayout progLayout {nullptr};
 
       void reload(ShaderProgramManager &manager);
-      void destroy(ShaderProgramManager &manager);
+      void destroy();
     };
 
     std::unordered_map<std::string, uint32_t> programNames;
     std::vector<std::unique_ptr<ShaderProgramInternal>> programs;
-
-    vk::Device getDevice() const { return vkDevice; } /*make device global*/
 
     const ShaderProgramInternal &getProgInternal(ShaderProgramId id) const
     {

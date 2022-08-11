@@ -1,4 +1,4 @@
-#include <etna/ShaderProgram.hpp>
+#include <etna/Context.hpp>
 #include <etna/Error.hpp>
 
 #include <stdexcept>
@@ -116,7 +116,7 @@ namespace etna
 
     uint32_t modId = shaderModules.size();
     std::unique_ptr<ShaderModule> newMod;
-    newMod.reset(new ShaderModule {getDevice(), path}); 
+    newMod.reset(new ShaderModule {get_context().getDevice(), path}); 
     shaderModules.push_back(std::move(newMod));
     return modId;
   }
@@ -186,9 +186,10 @@ namespace etna
 
   void ShaderProgramManager::ShaderProgramInternal::reload(ShaderProgramManager &manager)
   {
-    destroy(manager);
+    destroy();
 
     std::array<DescriptorSetInfo, MAX_PROGRAM_DESCRIPTORS> dstDescriptors;
+    auto &descriptorLayoutCache = get_context().getDescriptorSetLayouts();
 
     for (auto id : moduleIds)
     {
@@ -225,7 +226,7 @@ namespace etna
     {
       if (!usedDescriptors.test(i))
         continue;
-      auto res = manager.descriptorLayoutCache.get(manager.getDevice(), dstDescriptors[i]);
+      auto res = descriptorLayoutCache.get(get_context().getDevice(), dstDescriptors[i]);
       descriptorIds[i] = res.first;
       vkLayouts.push_back(res.second);
     }
@@ -239,13 +240,13 @@ namespace etna
       info.setPushConstantRangeCount(1u);
     }
 
-    progLayout = manager.getDevice().createPipelineLayout(info);
+    progLayout = get_context().getDevice().createPipelineLayout(info);
   }
   
-  void ShaderProgramManager::ShaderProgramInternal::destroy(ShaderProgramManager &manager)
+  void ShaderProgramManager::ShaderProgramInternal::destroy()
   {
     if (progLayout)
-      manager.getDevice().destroyPipelineLayout(progLayout);
+      get_context().getDevice().destroyPipelineLayout(progLayout);
     progLayout = nullptr;
 
     usedDescriptors.reset();
@@ -254,11 +255,9 @@ namespace etna
 
   void ShaderProgramManager::reloadPrograms()
   {
-    descriptorLayoutCache.clear(getDevice());
-
     for (auto &mod : shaderModules)
     {
-      mod->reload(getDevice());
+      mod->reload(get_context().getDevice());
     }
 
     for (auto &progPtr : programs)
@@ -271,15 +270,13 @@ namespace etna
   {
     programNames.clear();
     for (auto &progPtr : programs)
-      progPtr->destroy(*this);
+      progPtr->destroy();
     programs.clear();
 
     shaderModuleNames.clear();
     for (auto &modPtr : shaderModules)
-      modPtr->reset(getDevice());
+      modPtr->reset(get_context().getDevice());
     shaderModules.clear();
-    
-    descriptorLayoutCache.clear(getDevice());
   }
 
   std::vector<vk::PipelineShaderStageCreateInfo> ShaderProgramManager::getShaderStages(ShaderProgramId id) const
@@ -299,6 +296,12 @@ namespace etna
       stages.push_back(info);
     }
     return stages;
+  }
+
+  vk::DescriptorSetLayout ShaderProgramManager::getDescriptorLayout(ShaderProgramId id, uint32_t set) const
+  {
+    auto layoutId = getDescriptorLayoutId(id, set);
+    return get_context().getDescriptorSetLayouts().getVkLayout(layoutId);
   }
 
   vk::PushConstantRange ShaderProgramInfo::getPushConst() const
@@ -323,14 +326,14 @@ namespace etna
   {
     ETNA_ASSERT(isDescriptorSetUsed(set));
     auto did = mgr.getProgInternal(id).descriptorIds.at(set);
-    return mgr.descriptorLayoutCache.getVkLayout(did);
+    return  get_context().getDescriptorSetLayouts().getVkLayout(did);
   }
   
   const DescriptorSetInfo &ShaderProgramInfo::getDescriptorSetInfo(uint32_t set) const
   {
     ETNA_ASSERT(isDescriptorSetUsed(set));
     auto did = mgr.getProgInternal(id).descriptorIds.at(set);
-    return mgr.descriptorLayoutCache.getLayoutInfo(did);
+    return get_context().getDescriptorSetLayouts().getLayoutInfo(did);
   }
 
 }

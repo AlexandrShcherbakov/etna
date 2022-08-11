@@ -31,6 +31,7 @@ namespace etna
 }
 
 #define ETNA_RUNTIME_ERROR(...) etna::runtime_error("(", __FILE__, ":", __LINE__, ")", __VA_ARGS__)
-#define ETNA_ASSERT(expr) (static_cast<bool>(expr)? void(0) : ETNA_RUNTIME_ERROR("Assert", # expr, " failed"));
+#define ETNA_ASSERT(expr) (static_cast<bool>(expr)? void(0) : ETNA_RUNTIME_ERROR("Assert", # expr, " failed"))
+#define ETNA_VK_ASSERT(expr) ETNA_ASSERT((expr) == vk::Result::eSuccess)
 
 #endif
