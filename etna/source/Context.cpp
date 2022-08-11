@@ -7,6 +7,11 @@ namespace etna
 {
   static std::unique_ptr<GlobalContext> g_context {};
 
+  GlobalContext &get_context()
+  {
+    return *g_context;
+  }
+  
   bool is_initilized()
   {
     return static_cast<bool>(g_context);
