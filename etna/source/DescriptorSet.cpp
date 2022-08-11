@@ -30,9 +30,12 @@ namespace etna
     vk::DescriptorPoolSize {vk::DescriptorType::eCombinedImageSampler, NUM_TEXTURES}
   };
 
-  DynamicDescriptorPool::DynamicDescriptorPool(uint32_t frames_in_flight)
-    : numFrames {frames_in_flight}
+  void DynamicDescriptorPool::reset(uint32_t frames_in_flight)
   {
+    numFrames = frames_in_flight;
+    frameIndex = 0;
+    flipsCount = 0;
+
     vk::DescriptorPoolCreateInfo info {};
     info.setMaxSets(NUM_DESCRIPORS);
     info.setPoolSizes(g_default_pool_size);

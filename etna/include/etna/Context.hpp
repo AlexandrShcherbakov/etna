@@ -12,11 +12,11 @@ namespace etna
 {
   struct GlobalContext
   {
-    GlobalContext(vk::Instance instance, vk::Device device, uint32_t frames_in_flight)
+    GlobalContext(vk::Instance instance, vk::Device device)
       : vkInstance {instance}, vkDevice {device},
         descriptorSetLayouts {},
         shaderPrograms {},
-        descriptorPool {frames_in_flight}
+        descriptorPool {}
       {}
 
     vk::Device getDevice() const

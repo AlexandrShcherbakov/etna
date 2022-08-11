@@ -43,12 +43,13 @@ namespace etna
   For long-living descriptor sets (e.g bindless resource sets) separate allocator shoud be added, with ManagedDescriptorSet with destructor*/
   struct DynamicDescriptorPool
   {
-    DynamicDescriptorPool(uint32_t frames_in_flight);
+    DynamicDescriptorPool() {}
     ~DynamicDescriptorPool();
-
+    
     void flip();
     void destroyAllocatedSets();
-    
+    void reset(uint32_t frames_in_flight);
+
     DescriptorSet allocateSet(DescriptorLayoutId layoutId);
 
     vk::DescriptorPool getCurrentPool() const

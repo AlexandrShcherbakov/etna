@@ -19,7 +19,8 @@ namespace etna
   
   void initialize(const InitParams &params)
   {
-    g_context.reset(new GlobalContext {params.instance, params.device, params.numFramesInFlight});
+    g_context.reset(new GlobalContext {params.instance, params.device});
+    g_context->getDescriptorPool().reset(params.numFramesInFlight);
   }
   
   void shutdown()
