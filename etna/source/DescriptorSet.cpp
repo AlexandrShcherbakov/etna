@@ -32,6 +32,10 @@ namespace etna
 
   void DynamicDescriptorPool::reset(uint32_t frames_in_flight)
   {
+    for (auto pool : pools)
+      get_context().getDevice().destroyDescriptorPool(pool);
+    pools.clear();
+
     numFrames = frames_in_flight;
     frameIndex = 0;
     flipsCount = 0;
@@ -102,7 +106,7 @@ namespace etna
     return false;
   }
 
-  static void validate_descriptor_write(const DescriptorSet &dst, const vk::ArrayProxy<Binding> &bindings)
+  static void validate_descriptor_write(const DescriptorSet &dst, const vk::ArrayProxy<const Binding> &bindings)
   {
     auto &layoutInfo = get_context().getDescriptorSetLayouts().getLayoutInfo(dst.getLayoutId());
 
@@ -139,7 +143,7 @@ namespace etna
     }
   }
 
-  void write_set(const DescriptorSet &dst, const vk::ArrayProxy<Binding> &bindings)
+  void write_set(const DescriptorSet &dst, const vk::ArrayProxy<const Binding> &bindings)
   {
     ETNA_ASSERT(dst.isValid());
     validate_descriptor_write(dst, bindings);

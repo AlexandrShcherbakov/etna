@@ -25,6 +25,7 @@ namespace etna
   
   void shutdown()
   {
+    g_context->getDescriptorPool().reset(0);
     g_context.reset(nullptr);
   }
 
@@ -50,7 +51,7 @@ namespace etna
     return g_context->getShaderManager().getProgramInfo(name);
   }
 
-  DescriptorSet create_descriptor_set(DescriptorLayoutId layout, const vk::ArrayProxy<Binding> &bindings)
+  DescriptorSet create_descriptor_set(DescriptorLayoutId layout, const vk::ArrayProxy<const Binding> &bindings)
   {
     auto set = g_context->getDescriptorPool().allocateSet(layout);
     write_set(set, bindings);

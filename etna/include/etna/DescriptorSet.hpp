@@ -87,7 +87,7 @@ namespace etna
     std::variant<vk::DescriptorImageInfo, vk::DescriptorBufferInfo> resources;
   };
 
-  void write_set(const DescriptorSet &dst, const vk::ArrayProxy<Binding> &bindings);
+  void write_set(const DescriptorSet &dst, const vk::ArrayProxy<const Binding> &bindings);
 }
 
 #endif

@@ -4,6 +4,9 @@
 #include <stdexcept>
 #include <fstream>
 
+#include <vulkan/vulkan.hpp>
+#include <spirv_reflect.h>
+
 namespace etna
 {
   ShaderModule::ShaderModule(vk::Device device, const std::string &shader_path)

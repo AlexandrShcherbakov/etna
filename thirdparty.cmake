@@ -35,6 +35,6 @@ if (StbLibraries_ADDED)
 endif ()
 
 if (SpirvReflect_ADDED)
-    add_library(SpirvReflect ${SpirvReflect_SOURCE_DIR}/spirv_reflect.cpp)
+    add_library(SpirvReflect ${SpirvReflect_SOURCE_DIR}/spirv_reflect.h ${SpirvReflect_SOURCE_DIR}/spirv_reflect.c)
     target_include_directories(SpirvReflect INTERFACE ${SpirvReflect_SOURCE_DIR}/)
 endif ()

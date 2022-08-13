@@ -35,7 +35,7 @@ namespace etna
   ShaderProgramInfo get_shader_program(const std::string &name);
 
   
-  DescriptorSet create_descriptor_set(DescriptorLayoutId layout, const vk::ArrayProxy<Binding> &bindings);
+  DescriptorSet create_descriptor_set(DescriptorLayoutId layout, const vk::ArrayProxy<const Binding> &bindings);
 
 }
 
