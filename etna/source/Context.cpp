@@ -25,6 +25,8 @@ namespace etna
   
   void shutdown()
   {
+    g_context->getShaderManager().clear();
+    g_context->getDescriptorSetLayouts().clear(g_context->getDevice());
     g_context->getDescriptorPool().reset(0);
     g_context.reset(nullptr);
   }
