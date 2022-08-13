@@ -53,6 +53,7 @@ namespace etna
 
     bool isDescriptorSetUsed(uint32_t set) const;
     vk::DescriptorSetLayout getDescriptorSetLayout(uint32_t set) const;
+    DescriptorLayoutId getDescriptorLayoutId(uint32_t set) const;
     const DescriptorSetInfo &getDescriptorSetInfo(uint32_t set) const;
 
   private:

@@ -324,19 +324,21 @@ namespace etna
     auto &prog = mgr.getProgInternal(id);
     return set < MAX_PROGRAM_DESCRIPTORS && prog.usedDescriptors.test(set);
   }
-  
-  vk::DescriptorSetLayout ShaderProgramInfo::getDescriptorSetLayout(uint32_t set) const
+
+  DescriptorLayoutId ShaderProgramInfo::getDescriptorLayoutId(uint32_t set) const
   {
     ETNA_ASSERT(isDescriptorSetUsed(set));
-    auto did = mgr.getProgInternal(id).descriptorIds.at(set);
-    return  get_context().getDescriptorSetLayouts().getVkLayout(did);
+    return mgr.getProgInternal(id).descriptorIds.at(set);
+  }
+
+  vk::DescriptorSetLayout ShaderProgramInfo::getDescriptorSetLayout(uint32_t set) const
+  {
+    return  get_context().getDescriptorSetLayouts().getVkLayout(getDescriptorLayoutId(set));
   }
   
   const DescriptorSetInfo &ShaderProgramInfo::getDescriptorSetInfo(uint32_t set) const
   {
-    ETNA_ASSERT(isDescriptorSetUsed(set));
-    auto did = mgr.getProgInternal(id).descriptorIds.at(set);
-    return get_context().getDescriptorSetLayouts().getLayoutInfo(did);
+    return get_context().getDescriptorSetLayouts().getLayoutInfo(getDescriptorLayoutId(set));
   }
 
 }
