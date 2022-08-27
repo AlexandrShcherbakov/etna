@@ -3,7 +3,7 @@
 #define ETNA_DESCRIPTOR_SET_LAYOUT_HPP_INCLUDED
 
 #include <vulkan/vulkan.hpp>
-#include <SPIRV-Reflect/spirv_reflect.h>
+#include <spirv_reflect.h>
 
 #include <array>
 #include <bitset>
