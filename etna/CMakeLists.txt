@@ -5,7 +5,10 @@ add_library(etna
 	"source/UniqueImage.cpp"
  	"source/VmaImplementation.cpp"
  	"source/ShaderProgram.cpp"
-	"source/DescriptorSetLayout.cpp")
+	"source/DescriptorSetLayout.cpp"
+	"source/Context.cpp"
+	"source/DescriptorSet.cpp"
+	)
 
 target_include_directories(etna PUBLIC include)
 target_include_directories(etna PRIVATE source)

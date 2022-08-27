@@ -3,12 +3,14 @@
 #define ETNA_DESCRIPTOR_SET_LAYOUT_HPP_INCLUDED
 
 #include <vulkan/vulkan.hpp>
-#include <SPIRV-Reflect/spirv_reflect.h>
+#include <spirv_reflect.h>
 
 #include <array>
 #include <bitset>
 #include <vector>
 #include <unordered_map>
+
+#include "Error.hpp"
 
 namespace etna
 {
@@ -28,6 +30,18 @@ namespace etna
     vk::DescriptorSetLayout createVkLayout(vk::Device device) const;
 
     void clear();
+
+    bool isBindingUsed(uint32_t binding) const
+    {
+      return binding < maxUsedBinding && usedBindings.test(binding);  
+    }
+
+    const vk::DescriptorSetLayoutBinding &getBinding(uint32_t binding) const
+    {
+      ETNA_ASSERT(isBindingUsed(binding));
+      return bindings.at(binding);
+    }
+
   private:
     uint32_t maxUsedBinding = 0;
     uint32_t dynOffsets = 0;
