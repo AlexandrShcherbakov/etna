@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 
 
 add_library(etna
-	"source/UniqueImage.cpp"
+	"source/Image.cpp"
+	"source/Buffer.cpp"
  	"source/VmaImplementation.cpp"
  	"source/ShaderProgram.cpp"
 	"source/DescriptorSetLayout.cpp"
@@ -13,4 +14,5 @@ add_library(etna
 target_include_directories(etna PUBLIC include)
 target_include_directories(etna PRIVATE source)
 
-target_link_libraries(etna Vulkan::Vulkan VulkanMemoryAllocator StbLibraries SpirvReflect)
+target_link_libraries(etna Vulkan::Vulkan VulkanMemoryAllocator StbLibraries "spirv-reflect-static")
+target_compile_definitions(etna PUBLIC VULKAN_HPP_NO_STRUCT_CONSTRUCTORS)
