@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 
 
 add_library(etna
-	"source/UniqueImage.cpp"
+	"source/Image.cpp"
+	"source/Buffer.cpp"
  	"source/VmaImplementation.cpp"
  	"source/ShaderProgram.cpp"
 	"source/DescriptorSetLayout.cpp")
