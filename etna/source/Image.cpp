@@ -30,7 +30,7 @@ Image::Image(CreateInfo info)
   {
     throw std::runtime_error("Unable to create a VMA image!");
   }
-  image = img;
+  image = vk::Image(img);
 }
 
 void Image::swap(Image& other)
@@ -54,7 +54,7 @@ Image& Image::operator =(Image&& other) noexcept
 
   if (image)
   {
-    vmaDestroyImage(allocator, image, allocation);
+    vmaDestroyImage(allocator, VkImage(image), allocation);
     allocator = {};
     allocation = {};
     image = vk::Image{};
@@ -69,7 +69,7 @@ Image::~Image()
 {
   if (image)
   {
-    vmaDestroyImage(allocator, image, allocation);
+    vmaDestroyImage(allocator, VkImage(image), allocation);
   }
 }
 

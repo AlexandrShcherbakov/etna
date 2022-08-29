@@ -13,7 +13,7 @@ namespace etna
     void collect_args(std::stringstream &stream, T &&val, Args&&... args)
     {
       stream << val;
-      if constexpr (sizeof...(Args))
+      if constexpr (sizeof...(Args) != 0)
       {
         collect_args(stream, std::forward<Args>(args)...);
       }

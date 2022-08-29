@@ -24,7 +24,7 @@ Buffer::Buffer(CreateInfo info)
   {
     throw std::runtime_error("Unable to create a VAM buffer!");
   }
-  buffer = buf;
+  buffer = vk::Buffer(buf);
 }
 
 void Buffer::swap(Buffer& other)
@@ -49,7 +49,7 @@ Buffer& Buffer::operator=(Buffer&& other) noexcept
 
   if (buffer)
   {
-    vmaDestroyBuffer(allocator, buffer, allocation);
+    vmaDestroyBuffer(allocator, VkBuffer(buffer), allocation);
     allocator = {};
     allocation = {};
     buffer = vk::Buffer{};
@@ -69,7 +69,7 @@ Buffer::~Buffer()
     {
       unmap();
     }
-    vmaDestroyBuffer(allocator, buffer, allocation);
+    vmaDestroyBuffer(allocator, VkBuffer(buffer), allocation);
   }
 }
 
