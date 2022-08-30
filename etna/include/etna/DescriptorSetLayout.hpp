@@ -3,7 +3,6 @@
 #define ETNA_DESCRIPTOR_SET_LAYOUT_HPP_INCLUDED
 
 #include <vulkan/vulkan.hpp>
-#include <spirv_reflect.h>
 
 #include <array>
 #include <bitset>
@@ -11,6 +10,8 @@
 #include <unordered_map>
 
 #include "Error.hpp"
+
+struct SpvReflectDescriptorSet;
 
 namespace etna
 {

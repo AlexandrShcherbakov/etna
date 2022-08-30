@@ -1,6 +1,8 @@
 #include <etna/DescriptorSetLayout.hpp>
 #include <etna/Error.hpp>
 
+#include <spirv_reflect.h>
+
 namespace etna
 {
   void DescriptorSetInfo::addResource(const vk::DescriptorSetLayoutBinding &binding)
