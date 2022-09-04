@@ -16,9 +16,10 @@ target_include_directories(etna PRIVATE source)
 
 target_link_libraries(etna Vulkan::Vulkan VulkanMemoryAllocator StbLibraries "spirv-reflect-static" spdlog::spdlog)
 target_compile_definitions(etna PUBLIC
-	VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
-	VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1
-	VULKAN_HPP_NO_EXCEPTIONS)
+  VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
+  VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1
+  VULKAN_HPP_NO_EXCEPTIONS
+)
 
 if (CMAKE_SYSTEM_NAME STREQUAL Windows)
   target_compile_definitions(etna PUBLIC VK_USE_PLATFORM_WIN32_KHR)
