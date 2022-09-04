@@ -3,7 +3,7 @@
 #define ETNA_UPDATE_DESCRIPTOR_SETS_HPP_INCLUDED
 
 #include <variant>
-#include <vulkan/vulkan.hpp>
+#include <etna/Vulkan.hpp>
 #include "DescriptorSetLayout.hpp"
 
 namespace etna
@@ -43,7 +43,7 @@ namespace etna
   For long-living descriptor sets (e.g bindless resource sets) separate allocator shoud be added, with ManagedDescriptorSet with destructor*/
   struct DynamicDescriptorPool
   {
-    DynamicDescriptorPool() {}
+    DynamicDescriptorPool(vk::Device dev, uint32_t framesInFlight);
     ~DynamicDescriptorPool();
     
     void flip();
@@ -68,6 +68,8 @@ namespace etna
     }
 
   private:
+    vk::Device vkDevice;
+
     uint32_t numFrames = 0;
     uint32_t frameIndex = 0;
     uint64_t flipsCount = 0; /*for tracking invalid sets*/

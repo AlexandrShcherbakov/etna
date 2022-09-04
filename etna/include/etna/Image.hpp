@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
+#include <etna/Vulkan.hpp>
 #include <vk_mem_alloc.h>
 
 

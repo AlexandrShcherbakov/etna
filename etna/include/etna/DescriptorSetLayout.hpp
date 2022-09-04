@@ -2,14 +2,13 @@
 #ifndef ETNA_DESCRIPTOR_SET_LAYOUT_HPP_INCLUDED
 #define ETNA_DESCRIPTOR_SET_LAYOUT_HPP_INCLUDED
 
-#include <vulkan/vulkan.hpp>
+#include <etna/Vulkan.hpp>
 
 #include <array>
 #include <bitset>
 #include <vector>
 #include <unordered_map>
 
-#include "Error.hpp"
 
 struct SpvReflectDescriptorSet;
 
