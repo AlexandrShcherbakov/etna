@@ -174,15 +174,15 @@ namespace etna
     }
     else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
     {
-	    spdlog::warn(pCallbackData->pMessage);
+      spdlog::warn(pCallbackData->pMessage);
     }
     else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
     {
-	    spdlog::info(pCallbackData->pMessage);
+      spdlog::info(pCallbackData->pMessage);
     }
     else
     {
-	    spdlog::trace(pCallbackData->pMessage);
+      spdlog::trace(pCallbackData->pMessage);
     }
 
     return VK_FALSE;
@@ -213,15 +213,15 @@ namespace etna
         vk::DebugUtilsMessengerCreateInfoEXT
         {
           .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
-			      | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo
-			      | vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose
-			      | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning,
+            | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo
+            | vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose
+            | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning,
           .messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral
-			      | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
-			      | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation,
+            | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
+            | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation,
           .pfnUserCallback = debugCallback,
           .pUserData = this,
-		    });
+        });
     #endif
 
     vkPhysDevice = pickPhysicalDevice(vkInstance.get(), params);

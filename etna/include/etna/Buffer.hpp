@@ -14,10 +14,10 @@ public:
 
   struct CreateInfo
   {
-	VmaAllocator allocator;
-	std::size_t size;
+    VmaAllocator allocator;
+    std::size_t size;
     vk::BufferUsageFlags bufferUsage = vk::BufferUsageFlagBits::eStorageBuffer;
-	VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY;
+    VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY;
   };
 
   Buffer(CreateInfo info);
