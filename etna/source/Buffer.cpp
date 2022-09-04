@@ -4,8 +4,8 @@
 namespace etna
 {
 
-Buffer::Buffer(CreateInfo info)
-  : allocator{info.allocator}
+Buffer::Buffer(VmaAllocator alloc, CreateInfo info)
+  : allocator{alloc}
 {
   vk::BufferCreateInfo buf_info{
     .size = info.size,

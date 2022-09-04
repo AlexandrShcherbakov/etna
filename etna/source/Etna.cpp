@@ -4,8 +4,6 @@
 #include <etna/Etna.hpp>
 
 
-VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
-
 namespace etna
 {
   static std::unique_ptr<GlobalContext> g_context {};

@@ -267,4 +267,14 @@ namespace etna
     }
     descriptorPool.emplace(vkDevice.get(), params.numFramesInFlight);
   }
+  
+  Image GlobalContext::createImage(Image::CreateInfo info)
+  {
+    return Image(vmaAllocator.get(), info);
+  }
+
+  Buffer GlobalContext::createBuffer(Buffer::CreateInfo info)
+  {
+    return Buffer(vmaAllocator.get(), info);
+  }
 }

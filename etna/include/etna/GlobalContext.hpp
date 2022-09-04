@@ -6,6 +6,8 @@
 #include <etna/DescriptorSetLayout.hpp>
 #include <etna/ShaderProgram.hpp>
 #include <etna/DescriptorSet.hpp>
+#include <etna/Image.hpp>
+#include <etna/Buffer.hpp>
 
 #include <vk_mem_alloc.h>
 
@@ -19,6 +21,9 @@ namespace etna
     GlobalContext(const struct InitParams &params);
 
   public:
+    Image createImage(Image::CreateInfo info);
+    Buffer createBuffer(Buffer::CreateInfo info);
+
     vk::Device getDevice() const { return vkDevice.get(); }
     vk::PhysicalDevice getPhysicalDevice() const { return vkPhysDevice; }
     vk::Instance getInstance() const { return vkInstance.get(); }

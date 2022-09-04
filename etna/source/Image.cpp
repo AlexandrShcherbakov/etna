@@ -4,8 +4,8 @@
 namespace etna
 {
 
-Image::Image(CreateInfo info)
-  : allocator{info.allocator}
+Image::Image(VmaAllocator alloc, CreateInfo info)
+  : allocator{alloc}
 {
   vk::ImageCreateInfo image_info{
     .imageType = vk::ImageType::e2D,
