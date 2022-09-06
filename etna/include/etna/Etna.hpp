@@ -1,19 +1,34 @@
+#pragma once
 #ifndef ETNA_ETNA_HPP_INCLUDED
 #define ETNA_ETNA_HPP_INCLUDED
 
-#include <vulkan/vulkan.hpp>
-#include <vector>
-
+#include <etna/Vulkan.hpp>
 #include <etna/ShaderProgram.hpp>
 #include <etna/DescriptorSet.hpp>
+
+#include <vector>
+
 
 namespace etna
 {
   struct InitParams
   {
-    vk::Instance instance {};
-    vk::Device device {};
-    uint32_t numFramesInFlight;
+    // Can be anything
+    const char* applicationName;
+    // Use VK_MAKE_VERSION macro
+    uint32_t applicationVersion;
+
+    std::span<char const * const> instanceExtensions {};
+    std::span<char const * const> deviceExtensions {};
+
+    // Enable optional features like tessellation via this structure
+    vk::PhysicalDeviceFeatures2 features {};
+
+    // Use this if you want to select specific GPU or
+    // the automatic detection fails
+    std::optional<uint32_t> physicalDeviceIndexOverride = std::nullopt;
+
+    uint32_t numFramesInFlight = 2;
   };
 
   bool is_initilized();

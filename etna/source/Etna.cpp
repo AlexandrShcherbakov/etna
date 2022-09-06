@@ -1,7 +1,8 @@
 #include <memory>
 
-#include <etna/Context.hpp>
+#include <etna/GlobalContext.hpp>
 #include <etna/Etna.hpp>
+
 
 namespace etna
 {
@@ -19,15 +20,12 @@ namespace etna
   
   void initialize(const InitParams &params)
   {
-    g_context.reset(new GlobalContext {params.instance, params.device});
-    g_context->getDescriptorPool().reset(params.numFramesInFlight);
+    g_context.reset(new GlobalContext(params));
   }
   
   void shutdown()
   {
-    g_context->getShaderManager().clear();
     g_context->getDescriptorSetLayouts().clear(g_context->getDevice());
-    g_context->getDescriptorPool().reset(0);
     g_context.reset(nullptr);
   }
 

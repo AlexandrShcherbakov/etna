@@ -2,7 +2,8 @@
 #ifndef ETNA_SHADER_PROGRAM_HPP_INCLUDED
 #define ETNA_SHADER_PROGRAM_HPP_INCLUDED
 
-#include <vulkan/vulkan.hpp>
+#include <etna/Vulkan.hpp>
+#include <etna/DescriptorSetLayout.hpp>
 
 #include <array>
 #include <bitset>
@@ -10,8 +11,6 @@
 #include <unordered_map>
 #include <memory>
 
-#include "Error.hpp"
-#include "DescriptorSetLayout.hpp"
 
 namespace etna
 {
@@ -20,10 +19,9 @@ namespace etna
     ShaderModule(vk::Device device, const std::string &shader_path);
 
     void reload(vk::Device device);
-    void reset(vk::Device device);
 
     const auto &getResources() const { return resources; }
-    vk::ShaderModule getVkModule() const { return vkModule; }
+    vk::ShaderModule getVkModule() const { return vkModule.get(); }
     vk::ShaderStageFlagBits getStage() const { return stage; }
     const std::string &getName() const { return entryPoint; }
     vk::PushConstantRange getPushConst() const { return pushConst; }
@@ -35,7 +33,7 @@ namespace etna
     std::string entryPoint {};
     vk::ShaderStageFlagBits stage;
 
-    vk::ShaderModule vkModule {nullptr};
+    vk::UniqueShaderModule vkModule;
     std::vector<std::pair<uint32_t, DescriptorSetInfo>> resources {}; /*set index - set resources*/
     vk::PushConstantRange pushConst {};
     /*Todo: add vertex input info*/
@@ -87,14 +85,14 @@ namespace etna
     void reloadPrograms(); 
     void clear();
 
-    vk::PipelineLayout getProgramLayout(ShaderProgramId id) const { return programs.at(id)->progLayout; } 
+    vk::PipelineLayout getProgramLayout(ShaderProgramId id) const { return programs.at(id)->progLayout.get(); } 
     vk::DescriptorSetLayout getDescriptorLayout(ShaderProgramId id, uint32_t set) const;
 
     DescriptorLayoutId getDescriptorLayoutId(ShaderProgramId id, uint32_t set) const
     {
       auto &prog = *programs.at(id);
       if (set >= MAX_PROGRAM_DESCRIPTORS || !prog.usedDescriptors.test(set))
-        ETNA_RUNTIME_ERROR("ShaderProgram ", prog.name, " invalid descriptor set #", set);
+        ETNA_PANIC("ShaderProgram ", prog.name, " invalid descriptor set #", set);
       return prog.descriptorIds[set];
     }
 
@@ -121,10 +119,9 @@ namespace etna
       std::array<DescriptorLayoutId, MAX_PROGRAM_DESCRIPTORS> descriptorIds;
     
       vk::PushConstantRange pushConst {};
-      vk::PipelineLayout progLayout {nullptr};
+      vk::UniquePipelineLayout progLayout;
 
       void reload(ShaderProgramManager &manager);
-      void destroy();
     };
 
     std::unordered_map<std::string, uint32_t> programNames;

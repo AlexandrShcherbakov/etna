@@ -1,5 +1,5 @@
 #include <etna/DescriptorSetLayout.hpp>
-#include <etna/Error.hpp>
+#include <etna/Assert.hpp>
 
 #include <spirv_reflect.h>
 
@@ -8,7 +8,7 @@ namespace etna
   void DescriptorSetInfo::addResource(const vk::DescriptorSetLayoutBinding &binding)
   {
     if (binding.binding > MAX_DESCRIPTOR_BINDINGS)
-      ETNA_RUNTIME_ERROR("DescriptorSetInfo: Binding ", binding.binding,  " out of MAX_DESCRIPTOR_BINDINGS range");
+      ETNA_PANIC("DescriptorSetInfo: Binding ", binding.binding,  " out of MAX_DESCRIPTOR_BINDINGS range");
 
     if (usedBindings.test(binding.binding))
     {
@@ -16,7 +16,7 @@ namespace etna
       if (src.descriptorType != binding.descriptorType
         || src.descriptorCount != binding.descriptorCount)
       {
-        ETNA_RUNTIME_ERROR("DescriptorSetInfo: incompatible bindings at index ", binding.binding);
+        ETNA_PANIC("DescriptorSetInfo: incompatible bindings at index ", binding.binding);
       }
 
       src.stageFlags |= binding.stageFlags;
@@ -101,7 +101,7 @@ namespace etna
     vk::DescriptorSetLayoutCreateInfo info {};
     info.setBindings(apiBindings);
     
-    return device.createDescriptorSetLayout(info);
+    return device.createDescriptorSetLayout(info).value;
   }
 
   template <typename T>
@@ -140,7 +140,7 @@ namespace etna
     if (it != map.end())
       return {it->second, vkLayouts[it->second]};
     
-    DescriptorLayoutId id = descriptors.size();
+    DescriptorLayoutId id = static_cast<DescriptorLayoutId>(descriptors.size());
     map.insert({info, id});
     descriptors.push_back(info);
     vkLayouts.push_back(info.createVkLayout(device));

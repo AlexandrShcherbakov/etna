@@ -1,4 +1,4 @@
-#include <etna/Context.hpp>
+#include <etna/GlobalContext.hpp>
 #include <etna/DescriptorSet.hpp>
 
 #include <array>
@@ -30,13 +30,10 @@ namespace etna
     vk::DescriptorPoolSize {vk::DescriptorType::eCombinedImageSampler, NUM_TEXTURES}
   };
 
-  void DynamicDescriptorPool::reset(uint32_t frames_in_flight)
+  DynamicDescriptorPool::DynamicDescriptorPool(vk::Device dev, uint32_t frames_in_flight)
+    : vkDevice{dev}
+    , numFrames{frames_in_flight}
   {
-    for (auto pool : pools)
-      get_context().getDevice().destroyDescriptorPool(pool);
-    pools.clear();
-
-    numFrames = frames_in_flight;
     frameIndex = 0;
     flipsCount = 0;
 
@@ -46,21 +43,21 @@ namespace etna
 
     for (uint32_t i = 0; i < numFrames; i++)
     {
-      pools.push_back(get_context().getDevice().createDescriptorPool(info));
+      pools.push_back(vkDevice.createDescriptorPool(info).value);
     }
   }
 
   DynamicDescriptorPool::~DynamicDescriptorPool()
   {
     for (auto pool : pools)
-      get_context().getDevice().destroyDescriptorPool(pool);
+      vkDevice.destroyDescriptorPool(pool);
   }
 
   void DynamicDescriptorPool::flip()
   {
     frameIndex = (frameIndex + 1) % numFrames;
     flipsCount++;
-    get_context().getDevice().resetDescriptorPool(pools[frameIndex]); /*All allocated sets are destroyed*/
+    vkDevice.resetDescriptorPool(pools[frameIndex]); /*All allocated sets are destroyed*/
   }
 
   void DynamicDescriptorPool::destroyAllocatedSets()
@@ -71,7 +68,6 @@ namespace etna
     
   DescriptorSet DynamicDescriptorPool::allocateSet(DescriptorLayoutId layoutId)
   {
-    auto vkDevice = get_context().getDevice();
     auto &dslCache = get_context().getDescriptorSetLayouts();
     auto setLayouts = {dslCache.getVkLayout(layoutId)};
 
@@ -102,7 +98,7 @@ namespace etna
       break;
     }
 
-    ETNA_RUNTIME_ERROR("Descriptor write error : unsupported resource ", vk::to_string(dsType));
+    ETNA_PANIC("Descriptor write error : unsupported resource ", vk::to_string(dsType));
     return false;
   }
 
@@ -121,14 +117,14 @@ namespace etna
     for (auto &binding : bindings)
     {
       if (!layoutInfo.isBindingUsed(binding.binding))
-        ETNA_RUNTIME_ERROR("Descriptor write error: descriptor set doesn't have ", binding.binding, " slot");
+        ETNA_PANIC("Descriptor write error: descriptor set doesn't have ", binding.binding, " slot");
 
       auto &bindingInfo = layoutInfo.getBinding(binding.binding);
       bool isImageRequied = is_image_resource(bindingInfo.descriptorType); 
       bool isImageBinding = std::get_if<vk::DescriptorImageInfo>(&binding.resources) != nullptr;
       if (isImageRequied != isImageBinding)
       {
-        ETNA_RUNTIME_ERROR("Descriptor write error: slot ", binding.binding,
+        ETNA_PANIC("Descriptor write error: slot ", binding.binding,
           (isImageRequied? " image required" : " buffer requied"),
           (isImageBinding? " but image bound" : "but buffer bound"));
       }
@@ -139,7 +135,7 @@ namespace etna
     for (uint32_t binding = 0; binding < MAX_DESCRIPTOR_BINDINGS; binding++)
     {
       if (unboundResources[binding])
-        ETNA_RUNTIME_ERROR("Descriptor write error: slot ", binding, " has ", unboundResources[binding], " unbound resources");
+        ETNA_PANIC("Descriptor write error: slot ", binding, " has ", unboundResources[binding], " unbound resources");
     }
   }
 
