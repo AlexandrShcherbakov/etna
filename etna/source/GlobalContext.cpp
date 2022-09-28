@@ -251,10 +251,8 @@ namespace etna
           .preferredLargeHeapBlockSize = {},
           .pAllocationCallbacks = {},
           .pDeviceMemoryCallbacks = {},
-          .frameInUseCount = params.numFramesInFlight,
           .pHeapSizeLimit = {},
           .pVulkanFunctions = {},
-          .pRecordSettings = {},
           
           .instance = vkInstance.get(),
           .vulkanApiVersion = VULKAN_API_VERSION,

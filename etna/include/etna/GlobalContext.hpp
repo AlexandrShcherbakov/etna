@@ -10,6 +10,7 @@
 #include <etna/Buffer.hpp>
 
 #include <vk_mem_alloc.h>
+#include <optional>
 
 
 namespace etna

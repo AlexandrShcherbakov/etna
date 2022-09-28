@@ -7,6 +7,7 @@
 #include <etna/DescriptorSet.hpp>
 
 #include <vector>
+#include <span>
 
 
 namespace etna
