@@ -35,12 +35,33 @@ public:
   [[nodiscard]] vk::Image get() const { return image; }
 
   ~Image();
+  void reset();
+
+  struct ViewParams
+  {
+    uint32_t baseMip = 0;
+    bool operator==(ViewParams b) const
+    {
+      return baseMip == b.baseMip;
+    }
+  };
+  vk::ImageView getView(ViewParams params) const;
 
 private:
+  struct ViewParamsHasher
+  {
+    size_t operator()(ViewParams params) const
+    {
+      auto hasher = std::hash<uint32_t>();
+      return hasher(params.baseMip);
+    }
+  };
+  mutable std::unordered_map<ViewParams, vk::ImageView, ViewParamsHasher> views;
   VmaAllocator allocator{};
 
   VmaAllocation allocation{};
   vk::Image image{};
+  vk::Format format;
 };
 
 }
