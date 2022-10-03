@@ -146,6 +146,11 @@ namespace etna
         },
       };
 
+    vk::PhysicalDeviceDynamicRenderingFeatures dynamic_rendering_feature {
+      .pNext = (void*)&params.features,
+      .dynamicRendering = VK_TRUE
+    };
+
     // NOTE: original design of PhysicalDeviceFeatures did not
     // support extensions, so they had to use a trick to achieve
     // extensions support. Now pNext has to point to a
@@ -154,7 +159,7 @@ namespace etna
     return pdevice.createDeviceUnique(
       vk::DeviceCreateInfo
       {
-        .pNext = &params.features,
+        .pNext = &dynamic_rendering_feature,
         .queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size()),
         .pQueueCreateInfos = queueInfos.data(),
         .enabledExtensionCount = static_cast<uint32_t>(params.deviceExtensions.size()),
@@ -225,8 +230,8 @@ namespace etna
     #endif
 
     vkPhysDevice = pickPhysicalDevice(vkInstance.get(), params);
-
     
+
     constexpr auto UNIVERSAL_QUEUE_FLAGS =
       vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute | vk::QueueFlagBits::eTransfer;
     universalQueueFamilyIdx = getQueueFamilyIndex(vkPhysDevice, UNIVERSAL_QUEUE_FLAGS);
