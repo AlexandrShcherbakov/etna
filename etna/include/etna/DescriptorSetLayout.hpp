@@ -88,4 +88,5 @@ namespace etna
     std::vector<vk::DescriptorSetLayout> vkLayouts;
   };
 }
-#endif
+
+#endif // ETNA_DESCRIPTOR_SET_LAYOUT_HPP_INCLUDED

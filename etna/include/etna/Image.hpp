@@ -1,4 +1,6 @@
 #pragma once
+#ifndef ETNA_IMAGE_HPP_INCLUDED
+#define ETNA_IMAGE_HPP_INCLUDED
 
 #include <etna/Vulkan.hpp>
 #include <vk_mem_alloc.h>
@@ -65,3 +67,5 @@ private:
 };
 
 }
+
+#endif // ETNA_IMAGE_HPP_INCLUDED

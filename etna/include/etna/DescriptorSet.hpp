@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ETNA_UPDATE_DESCRIPTOR_SETS_HPP_INCLUDED
-#define ETNA_UPDATE_DESCRIPTOR_SETS_HPP_INCLUDED
+#ifndef ETNA_DESCRIPTOR_SET_HPP_INCLUDED
+#define ETNA_DESCRIPTOR_SET_HPP_INCLUDED
 
 #include <variant>
 #include <etna/Vulkan.hpp>
@@ -92,4 +92,4 @@ namespace etna
   void write_set(const DescriptorSet &dst, const vk::ArrayProxy<const Binding> &bindings);
 }
 
-#endif
+#endif // ETNA_DESCRIPTOR_SET_HPP_INCLUDED

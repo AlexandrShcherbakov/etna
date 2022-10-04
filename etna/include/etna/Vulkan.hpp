@@ -1,3 +1,7 @@
+#pragma once
+#ifndef ETNA_VULKAN_HPP
+#define ETNA_VULKAN_HPP
+
 // This wrapper has to be used so that our
 // macro customizations work
 #include <etna/Assert.hpp>
@@ -9,3 +13,5 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <vulkan/vulkan.hpp>
+
+#endif // ETNA_VULKAN_HPP

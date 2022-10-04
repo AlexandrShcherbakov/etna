@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ETNA_UTIL_HPP_INCLUDED
-#define ETNA_UTIL_HPP_INCLUDED
+#ifndef ETNA_ASSERT_HPP_INCLUDED
+#define ETNA_ASSERT_HPP_INCLUDED
 
 #include <stdexcept>
 #include <spdlog/spdlog.h>
@@ -53,4 +53,4 @@ while (0)
 // Do NOT use in app code!
 #define ETNA_VULKAN_HPP_ASSERT_ON_RESULT(expr) ETNA_ASSERTF(expr, "{}", message)
 
-#endif
+#endif // ETNA_ASSERT_HPP_INCLUDED

@@ -136,4 +136,4 @@ namespace etna
   };
 }
 
-#endif
+#endif // ETNA_SHADER_PROGRAM_HPP_INCLUDED
