@@ -55,4 +55,4 @@ namespace etna
 
 }
 
-#endif
+#endif // ETNA_ETNA_HPP_INCLUDED

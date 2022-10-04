@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ETNA_CONTEXT_HPP_INCLUDED
-#define ETNA_CONTEXT_HPP_INCLUDED
+#ifndef ETNA_GLOBAL_CONTEXT_HPP_INCLUDED
+#define ETNA_GLOBAL_CONTEXT_HPP_INCLUDED
 
 #include <etna/Vulkan.hpp>
 #include <etna/DescriptorSetLayout.hpp>
@@ -59,5 +59,4 @@ namespace etna
   GlobalContext &get_context();
 }
 
-
-#endif
+#endif // ETNA_GLOBAL_CONTEXT_HPP_INCLUDED

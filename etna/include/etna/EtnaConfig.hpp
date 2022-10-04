@@ -22,4 +22,4 @@ inline constexpr uint32_t ETNA_VERSION = VK_MAKE_VERSION(0, 1, 0);
 
 }
 
-#endif
+#endif // ETNA_ETNA_CONFIG_HPP_INCLUDED

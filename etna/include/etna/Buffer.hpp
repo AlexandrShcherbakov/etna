@@ -1,4 +1,6 @@
 #pragma once
+#ifndef ETNA_BUFFER_HPP_INCLUDED
+#define ETNA_BUFFER_HPP_INCLUDED
 
 #include <etna/Vulkan.hpp>
 #include <vk_mem_alloc.h>
@@ -45,3 +47,5 @@ private:
 };
 
 }
+
+#endif // ETNA_BUFFER_HPP_INCLUDED
