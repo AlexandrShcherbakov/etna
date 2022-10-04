@@ -4,12 +4,14 @@ cmake_minimum_required(VERSION 3.20)
 add_library(etna
   "source/Image.cpp"
   "source/Buffer.cpp"
+  "source/GraphicsPipeline.cpp"
   "source/VmaImplementation.cpp"
   "source/ShaderProgram.cpp"
   "source/DescriptorSetLayout.cpp"
   "source/GlobalContext.cpp"
   "source/DescriptorSet.cpp"
-  "source/VkHppDispatchLoaderStorage.cpp" "source/Etna.cpp")
+  "source/VkHppDispatchLoaderStorage.cpp"
+  "source/Etna.cpp")
 
 target_include_directories(etna PUBLIC include)
 target_include_directories(etna PRIVATE source)
