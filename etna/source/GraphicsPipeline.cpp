@@ -94,7 +94,7 @@ void GraphicsPipeline::recreate(
     };
   pipelineInfo.setStages(stages);
 
-  pipeline = device.createGraphicsPipelineUnique(nullptr, pipelineInfo);
+  pipeline = device.createGraphicsPipelineUnique(nullptr, pipelineInfo).value;
 }
 
 }
