@@ -91,6 +91,12 @@ public:
       };
   };
 
+  // Called whenever shaders are reloaded
+  void recreate(
+    vk::Device device,
+    vk::PipelineLayout layout,
+    std::span<const vk::PipelineShaderStageCreateInfo> stages);
+
 private:
   CreateInfo cachedCreateInfo;
   vk::UniquePipeline pipeline;
