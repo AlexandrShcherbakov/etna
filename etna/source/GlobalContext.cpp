@@ -214,7 +214,7 @@ namespace etna
     // but it is considered to be abandoned in favour of
     // VK_EXT_debug_utils.
     #ifndef NDEBUG
-      vkInstance->createDebugUtilsMessengerEXTUnique(
+      vkDebugCallback = vkInstance->createDebugUtilsMessengerEXTUnique(
         vk::DebugUtilsMessengerCreateInfoEXT
         {
           .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
@@ -226,7 +226,7 @@ namespace etna
             | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation,
           .pfnUserCallback = debugCallback,
           .pUserData = this,
-        });
+        }).value;
     #endif
 
     vkPhysDevice = pickPhysicalDevice(vkInstance.get(), params);
