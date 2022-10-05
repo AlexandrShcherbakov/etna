@@ -4,17 +4,28 @@ namespace etna
 {
 
 GraphicsPipeline::GraphicsPipeline(
-    vk::Device device,
-    vk::PipelineLayout layout,
-    std::span<const vk::PipelineShaderStageCreateInfo> stages, 
-    CreateInfo info)
+  vk::Device device,
+  vk::PipelineLayout layout,
+  std::span<const vk::PipelineShaderStageCreateInfo> stages, 
+  CreateInfo info)
+  : cachedCreateInfo{std::move(info)}
 {
+  recreate(device, layout, stages);
+}
+
+void GraphicsPipeline::recreate(
+  vk::Device device,
+  vk::PipelineLayout layout,
+  std::span<const vk::PipelineShaderStageCreateInfo> stages)
+{
+  pipeline = {};
+
   std::vector<vk::VertexInputAttributeDescription> vertexAttribures;
   std::vector<vk::VertexInputBindingDescription> vertexBindings;
 
-  for (uint32_t i = 0; i < info.vertexShaderInput.bindings.size(); i++)
+  for (uint32_t i = 0; i < cachedCreateInfo.vertexShaderInput.bindings.size(); i++)
   {
-    const auto& bindingDesc = info.vertexShaderInput.bindings[i];
+    const auto& bindingDesc = cachedCreateInfo.vertexShaderInput.bindings[i];
     if (!bindingDesc.has_value())
       continue;
     
@@ -56,11 +67,11 @@ GraphicsPipeline::GraphicsPipeline(
 
   vk::PipelineColorBlendStateCreateInfo blendState
     {
-      .logicOpEnable = info.blendingConfig.logicOpEnable,
-      .logicOp = info.blendingConfig.logicOp,
+      .logicOpEnable = cachedCreateInfo.blendingConfig.logicOpEnable,
+      .logicOp = cachedCreateInfo.blendingConfig.logicOp,
     };
-  blendState.setAttachments(info.blendingConfig.attachments);
-  blendState.blendConstants = info.blendingConfig.blendConstants;
+  blendState.setAttachments(cachedCreateInfo.blendingConfig.attachments);
+  blendState.blendConstants = cachedCreateInfo.blendingConfig.blendConstants;
 
   std::vector<vk::DynamicState> dynamicStates = {
     vk::DynamicState::eViewport,
@@ -72,11 +83,11 @@ GraphicsPipeline::GraphicsPipeline(
   vk::GraphicsPipelineCreateInfo pipelineInfo
     {
       .pVertexInputState = &vertexInput,
-      .pInputAssemblyState = &info.inputAssemblyConfig,
+      .pInputAssemblyState = &cachedCreateInfo.inputAssemblyConfig,
       .pViewportState = &viewportState,
-      .pRasterizationState = &info.rasterizationConfig,
+      .pRasterizationState = &cachedCreateInfo.rasterizationConfig,
       .pMultisampleState = &multisampleState,
-      .pDepthStencilState = &info.depthConfig,
+      .pDepthStencilState = &cachedCreateInfo.depthConfig,
       .pColorBlendState = &blendState,
       .pDynamicState = &dynamicState,
       .layout = layout
