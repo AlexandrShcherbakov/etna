@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.20)
 add_library(etna
   "source/Image.cpp"
   "source/Buffer.cpp"
-  "source/GraphicsPipeline.cpp"
+  "source/PipelineBase.cpp"
+  "source/PipelineManager.cpp"
   "source/VmaImplementation.cpp"
   "source/ShaderProgram.cpp"
   "source/DescriptorSetLayout.cpp"
