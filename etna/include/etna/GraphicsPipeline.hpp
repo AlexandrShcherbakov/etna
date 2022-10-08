@@ -5,7 +5,7 @@
 #include <etna/Vulkan.hpp>
 #include <etna/VertexInput.hpp>
 #include <etna/PipelineBase.hpp>
-
+#include <variant>
 
 namespace etna
 {
@@ -15,7 +15,10 @@ class PipelineManager;
 class GraphicsPipeline : public PipelineBase
 {
   friend class PipelineManager;
-  GraphicsPipeline(PipelineManager* inOwner, std::size_t inId) : PipelineBase(inOwner, inId) {}
+  GraphicsPipeline(PipelineManager* inOwner, PipelineId inId, ShaderProgramId inShaderProgramId)
+    : PipelineBase(inOwner, inId, inShaderProgramId)
+  {
+  }
 public:
   // Use PipelineManager to create pipelines
   GraphicsPipeline() = default;
@@ -83,6 +86,18 @@ public:
         // Max allowed depth, usually changed for tricky hacks
         .maxDepthBounds = 1.f,
       };
+
+    // For the GPU driver to compile a SPIR-V shader into native GPU bytecode,
+    // on almost all platforms it needs to know at least a little bit of info
+    // about what the shader will be outputting it's result to, i.e. formats
+    // of all attachments. vk::Format::eUndefined here means that the attachment
+    // is not outputted to by this pipeline.
+    struct FragmentShaderOutputDescription
+    {
+      std::vector<vk::Format> colorAttachmentFormats;
+      vk::Format depthAttachmentFormat = vk::Format::eUndefined;
+      vk::Format stencilAttachmentFormat = vk::Format::eUndefined;
+    } fragmentShaderOutput;
   };
 };
 

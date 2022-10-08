@@ -3,19 +3,16 @@
 #define ETNA_PIPELINE_BASE_HPP_INCLUDED
 
 #include <etna/Vulkan.hpp>
+#include <etna/Forward.hpp>
 
 
 namespace etna
 {
 
-class PipelineManager;
-
-using PipelineId = std::size_t;
-inline constexpr PipelineId INVALID_PIPELINE_ID = -1;
-
 class PipelineBase
 {
 public:
+  vk::PipelineLayout getVkPipelineLayout() const;
   vk::Pipeline getVkPipeline() const;
 
   PipelineBase(const PipelineBase&) = delete;
@@ -25,13 +22,14 @@ public:
   PipelineBase& operator=(PipelineBase&&) noexcept;
 
 protected:
-  PipelineBase(PipelineManager* owner, PipelineId inId);
+  PipelineBase(PipelineManager* owner, PipelineId inId, ShaderProgramId inShaderProgramId);
   PipelineBase() = default;
   ~PipelineBase();
 
 private:
   PipelineManager* owner{nullptr};
   PipelineId id{INVALID_PIPELINE_ID};
+  ShaderProgramId shaderProgramId{INVALID_SHADER_PROGRAM_ID};
 };
 
 }

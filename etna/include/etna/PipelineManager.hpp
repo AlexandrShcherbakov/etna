@@ -28,6 +28,7 @@ public:
 private:
   void destroyPipeline(PipelineId id);
   vk::Pipeline getVkPipeline(PipelineId id) const;
+  vk::PipelineLayout getVkPipelineLayout(ShaderProgramId id) const;
 
 private:
   vk::Device device;
@@ -37,7 +38,7 @@ private:
   PipelineId pipelineIdCounter{0};
   struct PipelineParameters
   {
-    std::string shaderProgramName;
+    ShaderProgramId shaderProgram;
     GraphicsPipeline::CreateInfo info;
   };
   std::unordered_map<PipelineId, vk::UniquePipeline> pipelines;

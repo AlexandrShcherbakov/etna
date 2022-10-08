@@ -1,3 +1,4 @@
+#include "etna/Assert.hpp"
 #include <etna/PipelineManager.hpp>
 
 #include <span>
@@ -73,9 +74,17 @@ vk::UniquePipeline createGraphicsPipelineInternal(
   };
   vk::PipelineDynamicStateCreateInfo dynamicState {};
   dynamicState.setDynamicStates(dynamicStates);
+
+  vk::PipelineRenderingCreateInfo rendering 
+    {
+      .depthAttachmentFormat = info.fragmentShaderOutput.depthAttachmentFormat,
+      .stencilAttachmentFormat = info.fragmentShaderOutput.stencilAttachmentFormat
+    };
+  rendering.setColorAttachmentFormats(info.fragmentShaderOutput.colorAttachmentFormats);
   
   vk::GraphicsPipelineCreateInfo pipelineInfo
     {
+      .pNext = &rendering,
       .pVertexInputState = &vertexInput,
       .pInputAssemblyState = &info.inputAssemblyConfig,
       .pViewportState = &viewportState,
@@ -107,24 +116,37 @@ GraphicsPipeline PipelineManager::createGraphicsPipeline(std::string shader_prog
     createGraphicsPipelineInternal(device,
       shaderManager.getProgramLayout(progId),
       shaderManager.getShaderStages(progId), info));
-  graphicsPipelineParameters.emplace(pipelineId, PipelineParameters{shader_program_name, std::move(info)});
+  graphicsPipelineParameters.emplace(pipelineId, PipelineParameters{progId, std::move(info)});
   
-  return GraphicsPipeline(this, pipelineId);
+  return GraphicsPipeline(this, pipelineId, progId);
 }
 
 void PipelineManager::recreate()
 {
   pipelines.clear();
+  for (const auto&[id, params] : graphicsPipelineParameters)
+    pipelines.emplace(id, 
+      createGraphicsPipelineInternal(device,
+        shaderManager.getProgramLayout(params.shaderProgram),
+        shaderManager.getShaderStages(params.shaderProgram), params.info));
 }
 
 void PipelineManager::destroyPipeline(PipelineId id)
 {
-  pipelines.erase(id);
+  if (id != INVALID_PIPELINE_ID)
+    pipelines.erase(id);
 }
 
 vk::Pipeline PipelineManager::getVkPipeline(PipelineId id) const
 {
+  ETNA_ASSERT(id != INVALID_PIPELINE_ID);
   return pipelines.find(id)->second.get();
+}
+
+vk::PipelineLayout PipelineManager::getVkPipelineLayout(ShaderProgramId id) const
+{
+  ETNA_ASSERT(id != INVALID_SHADER_PROGRAM_ID);
+  return shaderManager.getProgramLayout(id);
 }
 
 }
