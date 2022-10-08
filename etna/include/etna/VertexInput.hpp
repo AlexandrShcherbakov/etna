@@ -7,6 +7,9 @@
 #include <etna/Vulkan.hpp>
 
 
+namespace etna
+{
+
 // This structure describes how the vertex shader should interpret
 // a stream of bytes.
 // NOTE: The intention here is for model loading facilities to provide
@@ -32,6 +35,14 @@ struct VertexByteStreamFormatDescription
 
   // Each vertex may contain multiple attributes, e.g. position, normal and UV coords
   std::vector<Attribute> attributes;
+
+  std::vector<uint32_t> identityAttributeMapping() const
+  {
+    std::vector<uint32_t> result(attributes.size());
+    for (uint32_t i = 0; i < result.size(); ++i)
+      result[i] = i;
+    return result;
+  }
 };
 
 struct VertexShaderInputDescription
@@ -51,12 +62,13 @@ struct VertexShaderInputDescription
 
     // How often should variables inside this binding be updated
     // with a new value? For every "vertex" or every "instance"?
-    vk::VertexInputRate inputRate = vk::VertexInputRate::eInstance;
+    vk::VertexInputRate inputRate = vk::VertexInputRate::eVertex;
 
     // For every input variable inside your GLSL vertex shader with `location = i`,
     // you should have `attributeMapping[i]` saying which attribute from the
-    // byte stream description should be used for this variable;
-    std::vector<uint32_t> attributeMapping;
+    // byte stream description should be used for this variable.
+    // Default is identity i -> i mapping.
+    std::vector<uint32_t> attributeMapping = byteStreamDescription.identityAttributeMapping();
   };
   
   // Note that the `binding` annotation value that you specified in GLSL
@@ -65,5 +77,6 @@ struct VertexShaderInputDescription
   std::vector<std::optional<Binding>> bindings;
 };
 
+}
 
 #endif // ETNA_VERTEX_INPUT_HPP_INCLUDED

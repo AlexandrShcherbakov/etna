@@ -3,6 +3,7 @@
 #define ETNA_SHADER_PROGRAM_HPP_INCLUDED
 
 #include <etna/Vulkan.hpp>
+#include <etna/Forward.hpp>
 #include <etna/DescriptorSetLayout.hpp>
 
 #include <array>
@@ -38,9 +39,6 @@ namespace etna
     vk::PushConstantRange pushConst {};
     /*Todo: add vertex input info*/
   };
-
-  struct ShaderProgramManager;
-  using ShaderProgramId = uint32_t;
 
   struct ShaderProgramInfo
   {

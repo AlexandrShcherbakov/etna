@@ -38,6 +38,7 @@ namespace etna
   {
     g_context->getDescriptorSetLayouts().clear(g_context->getDevice());
     g_context->getShaderManager().reloadPrograms();
+    g_context->getPipelineManager().recreate();
     g_context->getDescriptorPool().destroyAllocatedSets();
   }
 
