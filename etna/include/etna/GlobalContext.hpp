@@ -5,6 +5,7 @@
 #include <etna/Vulkan.hpp>
 #include <etna/DescriptorSetLayout.hpp>
 #include <etna/ShaderProgram.hpp>
+#include <etna/PipelineManager.hpp>
 #include <etna/DescriptorSet.hpp>
 #include <etna/Image.hpp>
 #include <etna/Buffer.hpp>
@@ -32,6 +33,7 @@ namespace etna
     uint32_t getQueueFamilyIdx() const { return universalQueueFamilyIdx; }
 
     ShaderProgramManager &getShaderManager() { return shaderPrograms; }
+    PipelineManager &getPipelineManager() { return pipelineManager.value(); }
     DescriptorSetLayoutCache &getDescriptorSetLayouts() { return descriptorSetLayouts; }
     DynamicDescriptorPool &getDescriptorPool() { return *descriptorPool; }
 
@@ -53,6 +55,9 @@ namespace etna
 
     DescriptorSetLayoutCache descriptorSetLayouts {}; 
     ShaderProgramManager shaderPrograms {};
+
+    // Optionals for late init
+    std::optional<PipelineManager> pipelineManager;
     std::optional<DynamicDescriptorPool> descriptorPool;
   };
 

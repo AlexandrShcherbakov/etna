@@ -4,27 +4,21 @@
 
 #include <etna/Vulkan.hpp>
 #include <etna/VertexInput.hpp>
+#include <etna/PipelineBase.hpp>
 
 
 namespace etna
 {
 
-class GraphicsPipeline
+class PipelineManager;
+
+class GraphicsPipeline : public PipelineBase
 {
+  friend class PipelineManager;
+  GraphicsPipeline(PipelineManager* inOwner, std::size_t inId) : PipelineBase(inOwner, inId) {}
 public:
-  // The configuration structure is pretty big,
-  // but has sensible defaults for most things,
-  // see below.
-  struct CreateInfo;
-
-  // Don't use directly!
-  GraphicsPipeline(
-    vk::Device device,
-    vk::PipelineLayout layout,
-    std::span<const vk::PipelineShaderStageCreateInfo> stages, 
-    CreateInfo info);
-
-  vk::Pipeline getVkPipeline() const { return pipeline.get(); }
+  // Use PipelineManager to create pipelines
+  GraphicsPipeline() = default;
 
   struct CreateInfo
   {
@@ -90,16 +84,6 @@ public:
         .maxDepthBounds = 1.f,
       };
   };
-
-  // Called whenever shaders are reloaded
-  void recreate(
-    vk::Device device,
-    vk::PipelineLayout layout,
-    std::span<const vk::PipelineShaderStageCreateInfo> stages);
-
-private:
-  CreateInfo cachedCreateInfo;
-  vk::UniquePipeline pipeline;
 };
 
 }

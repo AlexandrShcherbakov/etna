@@ -1,3 +1,4 @@
+#include "etna/ShaderProgram.hpp"
 #include <etna/GlobalContext.hpp>
 #include <etna/Etna.hpp>
 #include <etna/Assert.hpp>
@@ -268,6 +269,8 @@ namespace etna
       
       vmaAllocator = {allocator, &::vmaDestroyAllocator};
     }
+
+    pipelineManager.emplace(vkDevice.get(), shaderPrograms);
     descriptorPool.emplace(vkDevice.get(), params.numFramesInFlight);
   }
   

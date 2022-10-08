@@ -1,31 +1,25 @@
-#include <etna/GraphicsPipeline.hpp>
+#include <etna/PipelineManager.hpp>
+
+#include <span>
+#include <vector>
+#include <etna/ShaderProgram.hpp>
+
 
 namespace etna
 {
 
-GraphicsPipeline::GraphicsPipeline(
+vk::UniquePipeline createGraphicsPipelineInternal(
   vk::Device device,
   vk::PipelineLayout layout,
-  std::span<const vk::PipelineShaderStageCreateInfo> stages, 
-  CreateInfo info)
-  : cachedCreateInfo{std::move(info)}
+  std::span<const vk::PipelineShaderStageCreateInfo> stages,
+  const GraphicsPipeline::CreateInfo& info)
 {
-  recreate(device, layout, stages);
-}
-
-void GraphicsPipeline::recreate(
-  vk::Device device,
-  vk::PipelineLayout layout,
-  std::span<const vk::PipelineShaderStageCreateInfo> stages)
-{
-  pipeline = {};
-
   std::vector<vk::VertexInputAttributeDescription> vertexAttribures;
   std::vector<vk::VertexInputBindingDescription> vertexBindings;
 
-  for (uint32_t i = 0; i < cachedCreateInfo.vertexShaderInput.bindings.size(); i++)
+  for (uint32_t i = 0; i < info.vertexShaderInput.bindings.size(); i++)
   {
-    const auto& bindingDesc = cachedCreateInfo.vertexShaderInput.bindings[i];
+    const auto& bindingDesc = info.vertexShaderInput.bindings[i];
     if (!bindingDesc.has_value())
       continue;
     
@@ -67,11 +61,11 @@ void GraphicsPipeline::recreate(
 
   vk::PipelineColorBlendStateCreateInfo blendState
     {
-      .logicOpEnable = cachedCreateInfo.blendingConfig.logicOpEnable,
-      .logicOp = cachedCreateInfo.blendingConfig.logicOp,
+      .logicOpEnable = info.blendingConfig.logicOpEnable,
+      .logicOp = info.blendingConfig.logicOp,
     };
-  blendState.setAttachments(cachedCreateInfo.blendingConfig.attachments);
-  blendState.blendConstants = cachedCreateInfo.blendingConfig.blendConstants;
+  blendState.setAttachments(info.blendingConfig.attachments);
+  blendState.blendConstants = info.blendingConfig.blendConstants;
 
   std::vector<vk::DynamicState> dynamicStates = {
     vk::DynamicState::eViewport,
@@ -83,18 +77,54 @@ void GraphicsPipeline::recreate(
   vk::GraphicsPipelineCreateInfo pipelineInfo
     {
       .pVertexInputState = &vertexInput,
-      .pInputAssemblyState = &cachedCreateInfo.inputAssemblyConfig,
+      .pInputAssemblyState = &info.inputAssemblyConfig,
       .pViewportState = &viewportState,
-      .pRasterizationState = &cachedCreateInfo.rasterizationConfig,
+      .pRasterizationState = &info.rasterizationConfig,
       .pMultisampleState = &multisampleState,
-      .pDepthStencilState = &cachedCreateInfo.depthConfig,
+      .pDepthStencilState = &info.depthConfig,
       .pColorBlendState = &blendState,
       .pDynamicState = &dynamicState,
       .layout = layout
     };
   pipelineInfo.setStages(stages);
 
-  pipeline = device.createGraphicsPipelineUnique(nullptr, pipelineInfo).value;
+  return device.createGraphicsPipelineUnique(nullptr, pipelineInfo).value;
+}
+
+PipelineManager::PipelineManager(vk::Device dev, ShaderProgramManager& shader_manager)
+  : device{dev}
+  , shaderManager{shader_manager}
+{
+
+}
+
+GraphicsPipeline PipelineManager::createGraphicsPipeline(std::string shader_program_name, GraphicsPipeline::CreateInfo info)
+{
+  const PipelineId pipelineId = pipelineIdCounter++;  
+  const ShaderProgramId progId = shaderManager.getProgram(shader_program_name);
+
+  pipelines.emplace(pipelineId,
+    createGraphicsPipelineInternal(device,
+      shaderManager.getProgramLayout(progId),
+      shaderManager.getShaderStages(progId), info));
+  graphicsPipelineParameters.emplace(pipelineId, PipelineParameters{shader_program_name, std::move(info)});
+  
+  return GraphicsPipeline(this, pipelineId);
+}
+
+void PipelineManager::recreate()
+{
+  pipelines.clear();
+}
+
+void PipelineManager::destroyPipeline(PipelineId id)
+{
+  pipelines.erase(id);
+}
+
+vk::Pipeline PipelineManager::getVkPipeline(PipelineId id) const
+{
+  return pipelines.find(id)->second.get();
 }
 
 }
