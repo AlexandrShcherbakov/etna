@@ -133,8 +133,11 @@ void PipelineManager::recreate()
 
 void PipelineManager::destroyPipeline(PipelineId id)
 {
-  if (id != INVALID_PIPELINE_ID)
-    pipelines.erase(id);
+  if (id == INVALID_PIPELINE_ID)
+    return;
+  
+  pipelines.erase(id);
+  graphicsPipelineParameters.erase(id);
 }
 
 vk::Pipeline PipelineManager::getVkPipeline(PipelineId id) const
