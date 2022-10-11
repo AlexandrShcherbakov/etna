@@ -95,7 +95,7 @@ vk::ImageView Image::getView(Image::ViewParams params) const
       .layerCount = 1
     }
   };
-  views[params] = etna::get_context().getDevice().createImageView(viewInfo, nullptr, VULKAN_HPP_DEFAULT_DISPATCHER).value;
+  views[params] = etna::get_context().getDevice().createImageView(viewInfo).value;
   return views[params];
 }
 
