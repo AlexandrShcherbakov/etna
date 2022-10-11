@@ -42,10 +42,8 @@ public:
   struct ViewParams
   {
     uint32_t baseMip = 0;
-    bool operator==(ViewParams b) const
-    {
-      return baseMip == b.baseMip;
-    }
+
+    bool operator==(const ViewParams& b) const = default;
   };
   vk::ImageView getView(ViewParams params) const;
 
