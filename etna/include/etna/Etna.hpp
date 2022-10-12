@@ -6,6 +6,7 @@
 #include <etna/ShaderProgram.hpp>
 #include <etna/DescriptorSet.hpp>
 
+#include <optional>
 #include <vector>
 #include <span>
 
