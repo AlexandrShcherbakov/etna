@@ -20,7 +20,9 @@
 
 // vulkan.hpp somehow includes windows.h :(
 #if defined(_WIN32) || defined(_WIN64)
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <vulkan/vulkan.hpp>

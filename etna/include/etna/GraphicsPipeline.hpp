@@ -73,7 +73,7 @@ public:
       bool logicOpEnable = false;
       vk::LogicOp logicOp;
       std::array<float, 4> blendConstants {0, 0, 0, 0};
-    } blendingConfig;
+    } blendingConfig = {};
 
     vk::PipelineDepthStencilStateCreateInfo depthConfig = 
       {
@@ -94,7 +94,7 @@ public:
     // is not outputted to by this pipeline.
     struct FragmentShaderOutputDescription
     {
-      std::vector<vk::Format> colorAttachmentFormats;
+      std::vector<vk::Format> colorAttachmentFormats = {};
       vk::Format depthAttachmentFormat = vk::Format::eUndefined;
       vk::Format stencilAttachmentFormat = vk::Format::eUndefined;
     } fragmentShaderOutput;

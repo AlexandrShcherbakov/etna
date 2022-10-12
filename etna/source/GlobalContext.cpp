@@ -168,6 +168,7 @@ namespace etna
       }).value;
   }
   
+#ifndef NDEBUG
   static VkBool32 debugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT /*messageType*/,
@@ -193,6 +194,7 @@ namespace etna
 
     return VK_FALSE;
   }
+#endif
 
   GlobalContext::GlobalContext(const InitParams &params)
   {
@@ -242,11 +244,9 @@ namespace etna
     universalQueue = vkDevice->getQueue(universalQueueFamilyIdx, 0);
 
     {
-      VmaVulkanFunctions vulkanFunctions
-        {
-          .vkGetInstanceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr,
-          .vkGetDeviceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceProcAddr,
-        };
+      // VmaVulkanFunctions vulkanFunctions {};
+      // vulkanFunctions.vkGetInstanceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr;
+      // vulkanFunctions.vkGetDeviceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceProcAddr;
 
       VmaAllocatorCreateInfo alloc_info
         {
@@ -262,6 +262,7 @@ namespace etna
           
           .instance = vkInstance.get(),
           .vulkanApiVersion = VULKAN_API_VERSION,
+          .pTypeExternalMemoryHandleTypes = nullptr
         };
       
       VmaAllocator allocator;

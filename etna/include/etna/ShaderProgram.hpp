@@ -108,7 +108,7 @@ namespace etna
 
     struct ShaderProgramInternal
     {
-      ShaderProgramInternal(std::string name, std::vector<uint32_t> &&mod) : name(std::move(name)), moduleIds {std::move(mod)} {}
+      ShaderProgramInternal(std::string name_, std::vector<uint32_t> &&mod) : name(std::move(name_)), moduleIds {std::move(mod)} {}
 
       std::string name;
       std::vector<uint32_t> moduleIds;

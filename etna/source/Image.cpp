@@ -21,7 +21,14 @@ Image::Image(VmaAllocator alloc, CreateInfo info)
     .initialLayout = vk::ImageLayout::eUndefined
   };
   VmaAllocationCreateInfo alloc_info{
-    .usage = info.memoryUsage
+    .flags = 0,
+    .usage = info.memoryUsage,
+    .requiredFlags = 0,
+    .preferredFlags = 0,
+    .memoryTypeBits = 0,
+    .pool = nullptr,
+    .pUserData = nullptr,
+    .priority = 0.f
   };
   VkImage img;
 

@@ -14,7 +14,14 @@ Buffer::Buffer(VmaAllocator alloc, CreateInfo info)
   };
 
   VmaAllocationCreateInfo alloc_info{
-    .usage = info.memoryUsage
+    .flags = 0,
+    .usage = info.memoryUsage,
+    .requiredFlags = 0,
+    .preferredFlags = 0,
+    .memoryTypeBits = 0,
+    .pool = nullptr,
+    .pUserData = nullptr,
+    .priority = 0.f
   };
 
   VkBuffer buf;
