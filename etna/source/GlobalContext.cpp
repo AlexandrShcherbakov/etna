@@ -7,6 +7,7 @@
 #include <spdlog/fmt/ranges.h>
 
 #include <unordered_set>
+#include <vulkan/vulkan_structs.hpp>
 
 
 namespace etna
@@ -148,9 +149,16 @@ namespace etna
       };
 
     vk::PhysicalDeviceDynamicRenderingFeatures dynamic_rendering_feature {
-      .pNext = (void*)&params.features,
+      // Evil const cast due to C not having const
+      .pNext = const_cast<vk::PhysicalDeviceFeatures2*>(&params.features),
       .dynamicRendering = VK_TRUE
     };
+
+    vk::PhysicalDeviceSynchronization2Features sync2_feature {
+      .pNext = &dynamic_rendering_feature,
+      .synchronization2 = VK_TRUE
+    };
+
 
     // NOTE: original design of PhysicalDeviceFeatures did not
     // support extensions, so they had to use a trick to achieve
@@ -160,7 +168,7 @@ namespace etna
     return pdevice.createDeviceUnique(
       vk::DeviceCreateInfo
       {
-        .pNext = &dynamic_rendering_feature,
+        .pNext = &sync2_feature,
         .queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size()),
         .pQueueCreateInfos = queueInfos.data(),
         .enabledExtensionCount = static_cast<uint32_t>(params.deviceExtensions.size()),
