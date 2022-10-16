@@ -75,6 +75,8 @@ void Image::reset()
     allocator = {};
     allocation = {};
     image = vk::Image{};
+    for (auto & view : views)
+      etna::get_context().getDevice().destroyImageView(view.second);
     views.clear();
   }
 }
