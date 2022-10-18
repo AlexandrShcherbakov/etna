@@ -34,10 +34,11 @@ Image::Image(VmaAllocator alloc, CreateInfo info)
 
   auto retcode = vmaCreateImage(allocator, &static_cast<const VkImageCreateInfo&>(image_info), &alloc_info,
       &img, &allocation, nullptr);
-  if (retcode != VK_SUCCESS)
-  {
-    throw std::runtime_error("Unable to create a VMA image!");
-  }
+  // Note that usually vulkan.hpp handles doing the assertion
+  // and a pretty message, but VMA cannot do that.
+  ETNA_ASSERTF(retcode == VK_SUCCESS,
+    "Error %s occurred while trying to allocate an etna::Image!",
+    vk::to_string(static_cast<vk::Result>(retcode)));
   image = vk::Image(img);
 }
 
@@ -57,9 +58,7 @@ Image::Image(Image&& other) noexcept
 Image& Image::operator =(Image&& other) noexcept
 {
   if (this == &other)
-  {
     return *this;
-  }
 
   reset();
   swap(other);
@@ -69,16 +68,14 @@ Image& Image::operator =(Image&& other) noexcept
 
 void Image::reset()
 {
-  if (image)
-  {
-    vmaDestroyImage(allocator, VkImage(image), allocation);
-    allocator = {};
-    allocation = {};
-    image = vk::Image{};
-    for (auto & view : views)
-      etna::get_context().getDevice().destroyImageView(view.second);
-    views.clear();
-  }
+  if (!image)
+    return;
+  
+  views.clear();
+  vmaDestroyImage(allocator, VkImage(image), allocation);
+  allocator = {};
+  allocation = {};
+  image = vk::Image{};
 }
 
 Image::~Image()
@@ -88,24 +85,28 @@ Image::~Image()
 
 vk::ImageView Image::getView(Image::ViewParams params) const
 {
-  if (views.contains(params))
-    return views[params];
-  vk::ImageViewCreateInfo viewInfo
+  auto it = views.find(params);
+  
+  if (it == views.end())
   {
-    .image = image,
-    .viewType = vk::ImageViewType::e2D, // TODO: support other types
-    .format = format, // TODO: Maybe support anothe type view
-    .subresourceRange = vk::ImageSubresourceRange
+    vk::ImageViewCreateInfo viewInfo
     {
-      .aspectMask = vk::ImageAspectFlagBits::eDepth, // TODO: Remove hardcoded value
-      .baseMipLevel = params.baseMip,
-      .levelCount = 1, // TODO: get the following params from ViewParams
-      .baseArrayLayer = 0,
-      .layerCount = 1
-    }
-  };
-  views[params] = etna::get_context().getDevice().createImageView(viewInfo).value;
-  return views[params];
+      .image = image,
+      .viewType = vk::ImageViewType::e2D, // TODO: support other types
+      .format = format, // TODO: Maybe support anothe type view
+      .subresourceRange = vk::ImageSubresourceRange
+      {
+        .aspectMask = vk::ImageAspectFlagBits::eDepth, // TODO: Remove hardcoded value
+        .baseMipLevel = params.baseMip,
+        .levelCount = 1, // TODO: get the following params from ViewParams
+        .baseArrayLayer = 0,
+        .layerCount = 1
+      }
+    };
+    it = views.emplace(params, etna::get_context().getDevice().createImageViewUnique(viewInfo).value).first;
+  }
+
+  return views[params].get();
 }
 
 }

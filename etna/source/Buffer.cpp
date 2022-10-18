@@ -1,4 +1,5 @@
 #include <etna/Buffer.hpp>
+#include <vulkan/vulkan_enums.hpp>
 
 
 namespace etna
@@ -27,10 +28,11 @@ Buffer::Buffer(VmaAllocator alloc, CreateInfo info)
   VkBuffer buf;
   auto retcode = vmaCreateBuffer(allocator, &static_cast<const VkBufferCreateInfo&>(buf_info), &alloc_info,
     &buf, &allocation, nullptr);
-  if (retcode != VK_SUCCESS)
-  {
-    throw std::runtime_error("Unable to create a VAM buffer!");
-  }
+  // Note that usually vulkan.hpp handles doing the assertion
+  // and a pretty message, but VMA cannot do that.
+  ETNA_ASSERTF(retcode == VK_SUCCESS,
+    "Error %s occurred while trying to allocate an etna::Buffer!",
+    vk::to_string(static_cast<vk::Result>(retcode)));
   buffer = vk::Buffer(buf);
 }
 
@@ -50,19 +52,9 @@ Buffer::Buffer(Buffer&& other) noexcept
 Buffer& Buffer::operator=(Buffer&& other) noexcept
 {
   if (this == &other)
-  {
     return *this;
-  }
 
-  if (buffer)
-  {
-    vmaDestroyBuffer(allocator, VkBuffer(buffer), allocation);
-    allocator = {};
-    allocation = {};
-    buffer = vk::Buffer{};
-    mapped = {};
-  }
-
+  reset();
   swap(other);
 
   return *this;
@@ -70,34 +62,42 @@ Buffer& Buffer::operator=(Buffer&& other) noexcept
 
 Buffer::~Buffer()
 {
-  if (buffer)
-  {
-    if (mapped)
-    {
-      unmap();
-    }
-    vmaDestroyBuffer(allocator, VkBuffer(buffer), allocation);
-  }
+  reset();
+}
+
+void Buffer::reset()
+{
+  if (!buffer)
+    return;
+
+  if (mapped != nullptr)
+    unmap();
+
+  vmaDestroyBuffer(allocator, VkBuffer(buffer), allocation);
+  allocator = {};
+  allocation = {};
+  buffer = vk::Buffer{};
 }
 
 std::byte* Buffer::map()
 {
   void* result;
-  if (vmaMapMemory(allocator, allocation, &result) != VK_SUCCESS)
-  {
-    throw std::runtime_error("Mapping failed");
-  }
+
+  // I can't think of a use case where failing to do a mapping
+  // is acceptable and recoverable from.
+  auto retcode = vmaMapMemory(allocator, allocation, &result);
+  ETNA_ASSERTF(retcode == VK_SUCCESS,
+    "Error %s occurred while trying to map an etna::Buffer!",
+    vk::to_string(static_cast<vk::Result>(retcode)));
 
   return mapped = static_cast<std::byte*>(result);
 }
 
 void Buffer::unmap()
 {
-  if (mapped)
-  {
-    vmaUnmapMemory(allocator, allocation);
-    mapped = nullptr;
-  }
+  ETNA_ASSERT(mapped != nullptr);
+  vmaUnmapMemory(allocator, allocation);
+  mapped = nullptr;
 }
 
 }

@@ -37,6 +37,7 @@ public:
   void unmap();
 
   ~Buffer();
+  void reset();
 
 private:
   VmaAllocator allocator{};

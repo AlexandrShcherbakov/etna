@@ -22,8 +22,6 @@ public:
 
   [[nodiscard]] vk::Sampler get() const { return sampler.get(); }
 
-  void reset();
-
 private:
   vk::UniqueSampler sampler{};
 };
