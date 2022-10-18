@@ -24,32 +24,7 @@ Sampler::Sampler(CreateInfo info)
 
 void Sampler::reset()
 {
-  etna::get_context().getDevice().destroySampler(sampler);
-}
-
-Sampler::~Sampler()
-{
-  reset();
-}
-
-void Sampler::swap(Sampler& other)
-{
-  vk::Sampler tmp = other.sampler;
-  other.sampler = sampler;
-  sampler = tmp;
-}
-
-Sampler::Sampler(Sampler&& other)  noexcept
-{
-  swap(other);
-  other.reset();
-}
-
-Sampler& Sampler::operator=(Sampler&& other)  noexcept
-{
-  swap(other);
-  other.reset();
-  return *this;
+  sampler.reset();
 }
 
 }
