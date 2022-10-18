@@ -20,20 +20,12 @@ public:
 
   Sampler(CreateInfo info);
 
-  Sampler(const Sampler&) = delete;
-  Sampler& operator=(const Sampler&) = delete;
+  [[nodiscard]] vk::Sampler get() const { return sampler.get(); }
 
-  void swap(Sampler& other);
-  Sampler(Sampler&&) noexcept;
-  Sampler& operator=(Sampler&&) noexcept;
-
-  [[nodiscard]] vk::Sampler get() const { return sampler; }
-
-  ~Sampler();
   void reset();
 
 private:
-  vk::Sampler sampler{};
+  vk::UniqueSampler sampler{};
 };
 
 }
