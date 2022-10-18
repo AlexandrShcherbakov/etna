@@ -56,7 +56,7 @@ private:
       return hasher(params.baseMip);
     }
   };
-  mutable std::unordered_map<ViewParams, vk::ImageView, ViewParamsHasher> views;
+  mutable std::unordered_map<ViewParams, vk::UniqueImageView, ViewParamsHasher> views;
   VmaAllocator allocator{};
 
   VmaAllocation allocation{};
