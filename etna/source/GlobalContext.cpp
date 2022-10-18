@@ -25,17 +25,23 @@ namespace etna
 
     std::vector<const char*> extensions(
       params.instanceExtensions.begin(), params.instanceExtensions.end());
-
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
-    return vk::createInstanceUnique(vk::InstanceCreateInfo
+    std::vector<const char*> layers(VALIDATION_LAYERS.begin(), VALIDATION_LAYERS.end());
+    // Compatibility layer for devices that do not implement this extension natively.
+    // Sync2 provides potential for driver optimization and a saner programmer API,
+    // but is able to be translated into old synchronization calls if needed.
+    layers.push_back("VK_LAYER_KHRONOS_synchronization2");
+
+    vk::InstanceCreateInfo createInfo
       {
         .pApplicationInfo = &appInfo,
-        .enabledLayerCount = static_cast<uint32_t>(VALIDATION_LAYERS.size()),
-        .ppEnabledLayerNames = VALIDATION_LAYERS.data(),
-        .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
-        .ppEnabledExtensionNames = extensions.data()
-      }).value;
+      };
+    
+    createInfo.setPEnabledLayerNames(layers);
+    createInfo.setPEnabledExtensionNames(extensions);
+
+    return vk::createInstanceUnique(createInfo).value;
   }
 
   static bool checkPhysicalDeviceSupportsExtensions(vk::PhysicalDevice pdevice, std::span<char const * const> extensions)
