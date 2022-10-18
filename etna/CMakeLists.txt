@@ -13,7 +13,8 @@ add_library(etna
   "source/DescriptorSet.cpp"
   "source/VkHppDispatchLoaderStorage.cpp"
   "source/Etna.cpp"
-  "source/Sampler.cpp")
+  "source/Sampler.cpp"
+  "source/RenderTargetStates.cpp")
 
 target_include_directories(etna PUBLIC include)
 target_include_directories(etna PRIVATE source)
