@@ -9,6 +9,23 @@
 namespace etna
 {
 
+vk::UniquePipeline createComputePipelineInternal(
+  vk::Device device,
+  vk::PipelineLayout layout,
+  std::span<const vk::PipelineShaderStageCreateInfo> stages,
+  const ComputePipeline::CreateInfo& info)
+{
+  
+  vk::ComputePipelineCreateInfo pipelineInfo
+    {
+      .layout = layout
+    };
+  pipelineInfo.setStage(stages[0]);
+
+  return device.createComputePipelineUnique(nullptr, pipelineInfo).value;
+}
+
+
 vk::UniquePipeline createGraphicsPipelineInternal(
   vk::Device device,
   vk::PipelineLayout layout,
@@ -106,6 +123,20 @@ PipelineManager::PipelineManager(vk::Device dev, ShaderProgramManager& shader_ma
 {
 
 }
+
+ComputePipeline PipelineManager::createComputePipeline(std::string shader_program_name, ComputePipeline::CreateInfo info)
+{
+  const PipelineId pipelineId = pipelineIdCounter++;  
+  const ShaderProgramId progId = shaderManager.getProgram(shader_program_name);
+
+  pipelines.emplace(pipelineId,
+    createComputePipelineInternal(device,
+      shaderManager.getProgramLayout(progId),
+      shaderManager.getShaderStages(progId), info));
+  computePipelineParameters.emplace(pipelineId, ComputeParameters{progId, std::move(info)});
+  
+  return ComputePipeline(this, pipelineId, progId);
+};
 
 GraphicsPipeline PipelineManager::createGraphicsPipeline(std::string shader_program_name, GraphicsPipeline::CreateInfo info)
 {

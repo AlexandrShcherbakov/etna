@@ -7,7 +7,7 @@
 #include <etna/Vulkan.hpp>
 #include <etna/PipelineBase.hpp>
 #include <etna/GraphicsPipeline.hpp>
-
+#include <etna/ComputePipeline.hpp>
 
 namespace etna
 {
@@ -21,7 +21,9 @@ public:
   PipelineManager(vk::Device dev, ShaderProgramManager& shader_manager);
 
   GraphicsPipeline createGraphicsPipeline(std::string shaderProgramName, GraphicsPipeline::CreateInfo info);
-  // TODO: createComputePipeline, createRaytracePipeline, createMeshletPipeline
+
+  ComputePipeline createComputePipeline(std::string shaderProgramName, ComputePipeline::CreateInfo info);
+  // TODO: createRaytracePipeline, createMeshletPipeline
 
   void recreate();
 
@@ -41,7 +43,14 @@ private:
     ShaderProgramId shaderProgram;
     GraphicsPipeline::CreateInfo info;
   };
+
+  struct ComputeParameters
+  {
+    ShaderProgramId shaderProgram;
+    ComputePipeline::CreateInfo info;
+  };
   std::unordered_map<PipelineId, vk::UniquePipeline> pipelines;
+  std::unordered_multimap<PipelineId, ComputeParameters> computePipelineParameters;
   std::unordered_multimap<PipelineId, PipelineParameters> graphicsPipelineParameters;
 };
 
