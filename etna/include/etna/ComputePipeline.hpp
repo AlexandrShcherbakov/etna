@@ -22,11 +22,7 @@ class ComputePipeline: public PipelineBase
 public:
   // Use PipelineManager to create pipelines
   ComputePipeline() = default;
-  struct CreateInfo
-  {
-    // The only info we need is VkPipelineShaderStageCreateInfo
-    vk::PipelineShaderStageCreateInfo stage = {};
-  };
+  struct CreateInfo{};
 
 };
 }
