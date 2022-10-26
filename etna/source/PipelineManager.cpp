@@ -12,7 +12,7 @@ namespace etna
 vk::UniquePipeline createComputePipelineInternal(
   vk::Device device,
   vk::PipelineLayout layout,
-  std::span<const vk::PipelineShaderStageCreateInfo> stages,
+  const vk::PipelineShaderStageCreateInfo stage,
   const ComputePipeline::CreateInfo& info)
 {
   
@@ -20,7 +20,7 @@ vk::UniquePipeline createComputePipelineInternal(
     {
       .layout = layout
     };
-  pipelineInfo.setStage(stages[0]);
+  pipelineInfo.setStage(stage);
 
   return device.createComputePipelineUnique(nullptr, pipelineInfo).value;
 }
@@ -132,7 +132,7 @@ ComputePipeline PipelineManager::createComputePipeline(std::string shader_progra
   pipelines.emplace(pipelineId,
     createComputePipelineInternal(device,
       shaderManager.getProgramLayout(progId),
-      shaderManager.getShaderStages(progId), info));
+      shaderManager.getShaderStages(progId)[0], info));
   computePipelineParameters.emplace(pipelineId, ComputeParameters{progId, std::move(info)});
   
   return ComputePipeline(this, pipelineId, progId);
