@@ -129,6 +129,10 @@ ComputePipeline PipelineManager::createComputePipeline(std::string shader_progra
   const PipelineId pipelineId = pipelineIdCounter++;  
   const ShaderProgramId progId = shaderManager.getProgram(shader_program_name);
 
+  ETNA_ASSERT(shaderManager.getShaderStages(progId).size() == 1,
+    "Incorrect shader program, expected 1 stage for ComputePipeline, but got %d!",
+    shaderManager.getShaderStages(progId).size());
+
   pipelines.emplace(pipelineId,
     createComputePipelineInternal(device,
       shaderManager.getProgramLayout(progId),
