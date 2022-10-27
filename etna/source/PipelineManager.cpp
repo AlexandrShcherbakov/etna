@@ -128,15 +128,16 @@ ComputePipeline PipelineManager::createComputePipeline(std::string shader_progra
 {
   const PipelineId pipelineId = pipelineIdCounter++;  
   const ShaderProgramId progId = shaderManager.getProgram(shader_program_name);
+  const std::vector<vk::PipelineShaderStageCreateInfo> shaderStages = shaderManager.getShaderStages(progId);
 
-  ETNA_ASSERT(shaderManager.getShaderStages(progId).size() == 1,
+  ETNA_ASSERT(shaderStages.size() == 1,
     "Incorrect shader program, expected 1 stage for ComputePipeline, but got %d!",
-    shaderManager.getShaderStages(progId).size());
+    shaderStages.size());
 
   pipelines.emplace(pipelineId,
     createComputePipelineInternal(device,
       shaderManager.getProgramLayout(progId),
-      shaderManager.getShaderStages(progId)[0], info));
+      shaderStages[0], info));
   computePipelineParameters.emplace(pipelineId, ComputeParameters{progId, std::move(info)});
   
   return ComputePipeline(this, pipelineId, progId);
