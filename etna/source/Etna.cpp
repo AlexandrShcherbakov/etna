@@ -1,5 +1,7 @@
 #include <memory>
 
+#include "StateTracking.hpp"
+
 #include <etna/GlobalContext.hpp>
 #include <etna/Etna.hpp>
 

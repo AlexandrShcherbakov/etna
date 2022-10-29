@@ -2,6 +2,8 @@
 #ifndef ETNA_STATES_HPP_INCLUDED
 #define ETNA_STATES_HPP_INCLUDED
 
+#include <etna/Image.hpp>
+
 #include <vulkan/vulkan.hpp>
 
 #include <vector>
@@ -16,9 +18,11 @@ public:
     struct AttachmentParams
     {
         // TODO: Add new fields for clearing etc.
+        vk::Image image = VK_NULL_HANDLE;
         vk::ImageView view = VK_NULL_HANDLE;
         AttachmentParams() = default;
-        AttachmentParams(vk::ImageView v) : view(v) {}
+        AttachmentParams(vk::Image i, vk::ImageView v) : image(i), view(v) {}
+        AttachmentParams(const Image &img) : image(img.get()), view(img.getView({})) {}
     };
     
     RenderTargetState(VkCommandBuffer cmd_buff, vk::Extent2D extend,
