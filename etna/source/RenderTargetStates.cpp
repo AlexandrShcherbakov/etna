@@ -1,5 +1,8 @@
 #include "etna/RenderTargetStates.hpp"
 
+#include "etna/GlobalContext.hpp"
+#include "StateTracking.hpp"
+
 #include <unordered_map>
 #include <variant>
 
@@ -37,11 +40,12 @@ RenderTargetState::RenderTargetState(
   std::vector<vk::RenderingAttachmentInfo> attachmentInfos(color_attachments.size());
   for (uint32_t i = 0; i < color_attachments.size(); ++i)
   {
-  attachmentInfos[i].imageView = color_attachments[i].view;
+    attachmentInfos[i].imageView = color_attachments[i].view;
     attachmentInfos[i].imageLayout = vk::ImageLayout::eColorAttachmentOptimal;
     attachmentInfos[i].loadOp = vk::AttachmentLoadOp::eClear;
     attachmentInfos[i].storeOp = vk::AttachmentStoreOp::eStore;
     attachmentInfos[i].clearValue = vk::ClearColorValue{std::array<float, 4>({0.0f, 0.0f, 0.0f, 1.0f})};
+    etna::get_context().getResourceTracker().setRenderTarget(commandBuffer, color_attachments[i].image);
   }
   vk::RenderingAttachmentInfo depthAttInfo {
     .imageView = depth_attachment.view,
@@ -50,6 +54,8 @@ RenderTargetState::RenderTargetState(
     .storeOp = vk::AttachmentStoreOp::eStore,
     .clearValue = vk::ClearDepthStencilValue{1.0f, 0}
   };
+  if (depth_attachment.image)
+    etna::get_context().getResourceTracker().setRenderTarget(commandBuffer, depth_attachment.image);
   vk::RenderingInfo renderInfo {
     .renderArea = scissor,
     .layerCount = 1,
@@ -59,6 +65,7 @@ RenderTargetState::RenderTargetState(
   };
   VkRenderingInfo rInf = (VkRenderingInfo)renderInfo;
   vkCmdBeginRendering(commandBuffer, &rInf);
+  etna::get_context().getResourceTracker().flushBarriers(commandBuffer);
 }
 
 RenderTargetState::~RenderTargetState()

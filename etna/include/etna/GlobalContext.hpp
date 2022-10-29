@@ -16,6 +16,8 @@
 
 namespace etna
 {
+  class ResourceStates;
+
   class GlobalContext
   {
     friend void initialize(const struct InitParams &);
@@ -39,6 +41,9 @@ namespace etna
 
     GlobalContext(const GlobalContext&) = delete;
     GlobalContext &operator=(const GlobalContext&) = delete;
+    ~GlobalContext();
+
+    ResourceStates &getResourceTracker();
 
   private:
     vk::UniqueInstance vkInstance {};
@@ -59,6 +64,8 @@ namespace etna
     // Optionals for late init
     std::optional<PipelineManager> pipelineManager;
     std::optional<DynamicDescriptorPool> descriptorPool;
+
+    std::unique_ptr<ResourceStates> resourceTracking;
   };
 
   GlobalContext &get_context();
