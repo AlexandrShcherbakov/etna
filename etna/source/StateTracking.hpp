@@ -31,6 +31,7 @@ class ResourceStates
   void setRenderTargetBase(VkCommandBuffer com_buffer, VkImage image);
 public:
   void setRenderTarget(VkCommandBuffer com_buffer, VkImage image);
+  void setDepthRenderTarget(VkCommandBuffer com_buffer, VkImage image);
   void flushBarriers(VkCommandBuffer com_buf);
 };
 
