@@ -61,6 +61,7 @@ void ResourceStates::flushBarriers(VkCommandBuffer com_buf)
     .pImageMemoryBarriers = barriersToFlush.data(),
   };
   vkCmdPipelineBarrier2(com_buf, &depInfo);
+  barriersToFlush.clear();
 }
 
 void ResourceStates::setRenderTarget(VkCommandBuffer com_buffer, VkImage image)
@@ -70,6 +71,16 @@ void ResourceStates::setRenderTarget(VkCommandBuffer com_buffer, VkImage image)
     VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
     VK_IMAGE_ASPECT_COLOR_BIT
+  >(com_buffer, image);
+}
+
+void ResourceStates::setDepthRenderTarget(VkCommandBuffer com_buffer, VkImage image)
+{
+  setRenderTargetBase<
+    VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+    VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+    VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    VK_IMAGE_ASPECT_DEPTH_BIT
   >(com_buffer, image);
 }
 

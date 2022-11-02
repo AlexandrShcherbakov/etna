@@ -55,7 +55,10 @@ RenderTargetState::RenderTargetState(
     .clearValue = vk::ClearDepthStencilValue{1.0f, 0}
   };
   if (depth_attachment.image)
-    etna::get_context().getResourceTracker().setRenderTarget(commandBuffer, depth_attachment.image);
+    etna::get_context().getResourceTracker().setDepthRenderTarget(commandBuffer, depth_attachment.image);
+
+  etna::get_context().getResourceTracker().flushBarriers(commandBuffer);
+
   vk::RenderingInfo renderInfo {
     .renderArea = scissor,
     .layerCount = 1,
@@ -65,7 +68,6 @@ RenderTargetState::RenderTargetState(
   };
   VkRenderingInfo rInf = (VkRenderingInfo)renderInfo;
   vkCmdBeginRendering(commandBuffer, &rInf);
-  etna::get_context().getResourceTracker().flushBarriers(commandBuffer);
 }
 
 RenderTargetState::~RenderTargetState()
