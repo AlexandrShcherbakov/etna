@@ -13,6 +13,8 @@
 
 namespace etna
 {
+  class Image;
+
   struct InitParams
   {
     // Can be anything
@@ -53,6 +55,12 @@ namespace etna
 
   
   DescriptorSet create_descriptor_set(DescriptorLayoutId layout, const vk::ArrayProxy<const Binding> &bindings);
+
+  void set_state(VkCommandBuffer com_buffer, vk::Image image,
+    vk::PipelineStageFlagBits2 pipeline_stage_flag, vk::AccessFlags2 access_flags,
+    vk::ImageLayout layout, vk::ImageAspectFlags aspect_flags);
+
+  void finish_frame(VkCommandBuffer com_buffer);
 
 }
 

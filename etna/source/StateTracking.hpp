@@ -15,9 +15,9 @@ class ResourceStates
   using HandleType = uint64_t;
   struct TextureState
   {
-    VkPipelineStageFlags piplineStageFlags = VK_PIPELINE_STAGE_NONE;
-    VkAccessFlags accessFlags = VK_ACCESS_NONE;
-    VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
+    vk::PipelineStageFlags2 piplineStageFlags = vk::PipelineStageFlags2();
+    vk::AccessFlags2 accessFlags = vk::AccessFlags2();
+    vk::ImageLayout layout = vk::ImageLayout::eUndefined;
     VkCommandBuffer owner = VK_NULL_HANDLE;
     bool operator==(const TextureState &other) const
     {
@@ -26,12 +26,15 @@ class ResourceStates
   };
   using State = std::variant<TextureState>; // TODO: Add buffers
   std::unordered_map<HandleType, State> currentStates;
-  std::vector<VkImageMemoryBarrier2> barriersToFlush;
-  template<VkPipelineStageFlagBits PipelineStageFlag, VkAccessFlags AccessFlags, VkImageLayout Layout, VkImageAspectFlags AspectFlags>
-  void setRenderTargetBase(VkCommandBuffer com_buffer, VkImage image);
+  std::vector<vk::ImageMemoryBarrier2> barriersToFlush;
 public:
+  void setTextureState(VkCommandBuffer com_buffer, VkImage image,
+    vk::PipelineStageFlagBits2 pipeline_stage_flag, vk::AccessFlags2 access_flags,
+    vk::ImageLayout layout, vk::ImageAspectFlags aspect_flags);
+
   void setRenderTarget(VkCommandBuffer com_buffer, VkImage image);
   void setDepthRenderTarget(VkCommandBuffer com_buffer, VkImage image);
+
   void flushBarriers(VkCommandBuffer com_buf);
 };
 
