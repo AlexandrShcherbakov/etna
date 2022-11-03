@@ -96,9 +96,9 @@ vk::ImageView Image::getView(Image::ViewParams params) const
       .format = format, // TODO: Maybe support anothe type view
       .subresourceRange = vk::ImageSubresourceRange
       {
-        .aspectMask = vk::ImageAspectFlagBits::eDepth, // TODO: Remove hardcoded value
+        .aspectMask = params.aspectMask,
         .baseMipLevel = params.baseMip,
-        .levelCount = 1, // TODO: get the following params from ViewParams
+        .levelCount = params.levelCount,
         .baseArrayLayer = 0,
         .layerCount = 1
       }
