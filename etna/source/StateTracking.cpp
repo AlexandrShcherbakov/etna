@@ -3,11 +3,11 @@
 namespace etna
 {
 
-void ResourceStates::setTextureState(VkCommandBuffer com_buffer, VkImage image,
+void ResourceStates::setTextureState(vk::CommandBuffer com_buffer, vk::Image image,
   vk::PipelineStageFlagBits2 pipeline_stage_flag, vk::AccessFlags2 access_flags,
   vk::ImageLayout layout, vk::ImageAspectFlags aspect_flags)
 {
-  HandleType resHandle = reinterpret_cast<HandleType>(image);
+  HandleType resHandle = reinterpret_cast<HandleType>((VkImage)image);
   if (currentStates.count(resHandle) == 0)
   {
     currentStates[resHandle] = TextureState{
@@ -48,7 +48,7 @@ void ResourceStates::setTextureState(VkCommandBuffer com_buffer, VkImage image,
   oldState = newState;
 }
 
-void ResourceStates::flushBarriers(VkCommandBuffer com_buf)
+void ResourceStates::flushBarriers(vk::CommandBuffer com_buf)
 {
   if (barriersToFlush.empty())
     return;
@@ -63,7 +63,7 @@ void ResourceStates::flushBarriers(VkCommandBuffer com_buf)
   barriersToFlush.clear();
 }
 
-void ResourceStates::setRenderTarget(VkCommandBuffer com_buffer, VkImage image)
+void ResourceStates::setColorTarget(vk::CommandBuffer com_buffer, vk::Image image)
 {
   setTextureState(com_buffer, image,
     vk::PipelineStageFlagBits2::eColorAttachmentOutput,
@@ -72,7 +72,7 @@ void ResourceStates::setRenderTarget(VkCommandBuffer com_buffer, VkImage image)
     vk::ImageAspectFlagBits::eColor);
 }
 
-void ResourceStates::setDepthRenderTarget(VkCommandBuffer com_buffer, VkImage image)
+void ResourceStates::setDepthTarget(vk::CommandBuffer com_buffer, vk::Image image)
 {
   setTextureState(com_buffer, image,
     vk::PipelineStageFlagBits2::eEarlyFragmentTests,

@@ -45,7 +45,7 @@ RenderTargetState::RenderTargetState(
     attachmentInfos[i].loadOp = vk::AttachmentLoadOp::eClear;
     attachmentInfos[i].storeOp = vk::AttachmentStoreOp::eStore;
     attachmentInfos[i].clearValue = vk::ClearColorValue{std::array<float, 4>({0.0f, 0.0f, 0.0f, 1.0f})};
-    etna::get_context().getResourceTracker().setRenderTarget(commandBuffer, color_attachments[i].image);
+    etna::get_context().getResourceTracker().setColorTarget(commandBuffer, color_attachments[i].image);
   }
   vk::RenderingAttachmentInfo depthAttInfo {
     .imageView = depth_attachment.view,
@@ -55,7 +55,7 @@ RenderTargetState::RenderTargetState(
     .clearValue = vk::ClearDepthStencilValue{1.0f, 0}
   };
   if (depth_attachment.image)
-    etna::get_context().getResourceTracker().setDepthRenderTarget(commandBuffer, depth_attachment.image);
+    etna::get_context().getResourceTracker().setDepthTarget(commandBuffer, depth_attachment.image);
 
   etna::get_context().getResourceTracker().flushBarriers(commandBuffer);
 
