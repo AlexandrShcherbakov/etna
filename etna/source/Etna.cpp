@@ -66,4 +66,17 @@ namespace etna
   {
     g_context->getDescriptorPool().flip();
   }
+
+  void set_state(VkCommandBuffer com_buffer, vk::Image image,
+    vk::PipelineStageFlagBits2 pipeline_stage_flag, vk::AccessFlags2 access_flags,
+    vk::ImageLayout layout, vk::ImageAspectFlags aspect_flags)
+  {
+    etna::get_context().getResourceTracker().setTextureState(com_buffer, image,
+      pipeline_stage_flag, access_flags, layout, aspect_flags);
+  }
+
+  void finish_frame(VkCommandBuffer com_buffer)
+  {
+    etna::get_context().getResourceTracker().flushBarriers(com_buffer);
+  }
 }
