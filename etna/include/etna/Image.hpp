@@ -54,8 +54,17 @@ private:
   {
     size_t operator()(ViewParams params) const
     {
+      uint32_t hash = 0;
+      hashPack(hash, params.baseMip, static_cast<uint32_t>(params.aspectMask), params.levelCount);
+      return hash;
+    }
+  private:
+    template<typename HashT, typename... HashTs>
+    inline void hashPack(uint32_t& hash, const HashT& first, HashTs&&... other) const
+    {
       auto hasher = std::hash<uint32_t>();
-      return hasher(params.baseMip);
+      hash ^= hasher(first) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+      (hashPack(hash, std::forward<HashTs>(other)), ...);
     }
   };
   mutable std::unordered_map<ViewParams, vk::UniqueImageView, ViewParamsHasher> views;
