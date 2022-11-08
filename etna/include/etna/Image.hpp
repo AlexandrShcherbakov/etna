@@ -42,7 +42,6 @@ public:
   struct ViewParams
   {
     uint32_t baseMip = 0;
-    vk::ImageAspectFlags aspectMask = vk::ImageAspectFlagBits::eNone;
     uint32_t levelCount = 1;
 
     bool operator==(const ViewParams& b) const = default;
@@ -55,7 +54,7 @@ private:
     size_t operator()(ViewParams params) const
     {
       uint32_t hash = 0;
-      hashPack(hash, params.baseMip, static_cast<uint32_t>(params.aspectMask), params.levelCount);
+      hashPack(hash, params.baseMip, params.levelCount);
       return hash;
     }
   private:

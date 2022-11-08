@@ -83,6 +83,22 @@ Image::~Image()
   reset();
 }
 
+static vk::ImageAspectFlags get_aspeck_mask(vk::Format format)
+{
+  switch (format)
+  {
+  case vk::Format::eD16Unorm:
+  case vk::Format::eD32Sfloat:
+    return vk::ImageAspectFlagBits::eDepth;
+  case vk::Format::eD16UnormS8Uint:
+  case vk::Format::eD24UnormS8Uint:
+  case vk::Format::eD32SfloatS8Uint:
+    return vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil;
+  default:
+    return vk::ImageAspectFlagBits::eColor;
+  }
+}
+
 vk::ImageView Image::getView(Image::ViewParams params) const
 {
   auto it = views.find(params);
@@ -96,7 +112,7 @@ vk::ImageView Image::getView(Image::ViewParams params) const
       .format = format, // TODO: Maybe support anothe type view
       .subresourceRange = vk::ImageSubresourceRange
       {
-        .aspectMask = params.aspectMask,
+        .aspectMask = get_aspeck_mask(format),
         .baseMipLevel = params.baseMip,
         .levelCount = params.levelCount,
         .baseArrayLayer = 0,
