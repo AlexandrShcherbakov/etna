@@ -168,6 +168,11 @@ void PipelineManager::recreate()
       createGraphicsPipelineInternal(device,
         shaderManager.getProgramLayout(params.shaderProgram),
         shaderManager.getShaderStages(params.shaderProgram), params.info));
+  for (const auto&[id, params] : computePipelineParameters)
+    pipelines.emplace(id,
+      createComputePipelineInternal(device,
+        shaderManager.getProgramLayout(params.shaderProgram),
+        shaderManager.getShaderStages(params.shaderProgram)[0]));
 }
 
 void PipelineManager::destroyPipeline(PipelineId id)
