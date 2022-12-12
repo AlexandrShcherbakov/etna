@@ -1,6 +1,7 @@
 #include "etna/Assert.hpp"
 #include <etna/PipelineManager.hpp>
 
+#include <iostream>
 #include <span>
 #include <vector>
 #include <etna/ShaderProgram.hpp>
@@ -146,6 +147,33 @@ ComputePipeline PipelineManager::createComputePipeline(std::string shader_progra
   return ComputePipeline(this, pipelineId, progId);
 };
 
+static void print_prog_info(const etna::ShaderProgramInfo &info, const std::string &name)
+{
+  std::cout << "Program Info " << name << "\n";
+
+  for (uint32_t set = 0u; set < etna::MAX_PROGRAM_DESCRIPTORS; set++)
+  {
+    if (!info.isDescriptorSetUsed(set))
+      continue;
+    auto setInfo = info.getDescriptorSetInfo(set);
+    for (uint32_t binding = 0; binding < etna::MAX_DESCRIPTOR_BINDINGS; binding++)
+    {
+      if (!setInfo.isBindingUsed(binding))
+        continue;
+      auto &vkBinding = setInfo.getBinding(binding);
+
+      std::cout << "Binding " << binding << " " << vk::to_string(vkBinding.descriptorType) << ", count = " << vkBinding.descriptorCount << " ";
+      std::cout << " " << vk::to_string(vkBinding.stageFlags) << "\n"; 
+    }
+  }
+
+  auto pc = info.getPushConst();
+  if (pc.size)
+  {
+    std::cout << "PushConst " << " size = " << pc.size << " stages = " << vk::to_string(pc.stageFlags) << "\n";
+  }
+}
+
 GraphicsPipeline PipelineManager::createGraphicsPipeline(std::string shader_program_name, GraphicsPipeline::CreateInfo info)
 {
   const PipelineId pipelineId = pipelineIdCounter++;  
@@ -157,7 +185,9 @@ GraphicsPipeline PipelineManager::createGraphicsPipeline(std::string shader_prog
       shaderManager.getShaderStages(progId), info));
   graphicsPipelineParameters.emplace(pipelineId, PipelineParameters{progId, std::move(info)});
   
-  return GraphicsPipeline(this, pipelineId, progId);
+  GraphicsPipeline pipeline(this, pipelineId, progId);
+  print_prog_info(shaderManager.getProgramInfo(shader_program_name), shader_program_name);
+  return pipeline;
 }
 
 void PipelineManager::recreate()
