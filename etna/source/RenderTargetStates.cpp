@@ -9,12 +9,16 @@
 namespace etna
 {
 
+bool RenderTargetState::inScope = false;
+
 RenderTargetState::RenderTargetState(
   VkCommandBuffer cmd_buff,
   vk::Extent2D extend,
   const std::vector<AttachmentParams> &color_attachments,
   AttachmentParams depth_attachment)
 {
+  ETNA_ASSERTF(!inScope, "RenderTargetState scopes shouldn't overlap.");
+  inScope = true;
   // TODO: add resource state tracking
   commandBuffer = cmd_buff;
   vk::Viewport viewport
@@ -73,5 +77,6 @@ RenderTargetState::RenderTargetState(
 RenderTargetState::~RenderTargetState()
 {
   vkCmdEndRendering(commandBuffer);
+  inScope = false;
 }
 }
