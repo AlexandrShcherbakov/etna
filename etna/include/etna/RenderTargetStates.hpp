@@ -14,6 +14,7 @@ namespace etna
 class RenderTargetState
 {
     VkCommandBuffer commandBuffer;
+    static bool inScope;
 public:
     struct AttachmentParams
     {
