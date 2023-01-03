@@ -166,6 +166,10 @@ namespace etna
       .synchronization2 = VK_TRUE
     };
 
+    std::vector<char const *> deviceExtensions(params.deviceExtensions.begin(), params.deviceExtensions.end());
+    deviceExtensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
+    deviceExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
+
 
     // NOTE: original design of PhysicalDeviceFeatures did not
     // support extensions, so they had to use a trick to achieve
@@ -178,8 +182,8 @@ namespace etna
         .pNext = &sync2_feature,
         .queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size()),
         .pQueueCreateInfos = queueInfos.data(),
-        .enabledExtensionCount = static_cast<uint32_t>(params.deviceExtensions.size()),
-        .ppEnabledExtensionNames = params.deviceExtensions.data(),
+        .enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size()),
+        .ppEnabledExtensionNames = deviceExtensions.data(),
       }).value;
   }
   
