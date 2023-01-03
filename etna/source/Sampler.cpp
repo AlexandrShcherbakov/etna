@@ -2,7 +2,7 @@
 
 #include "etna/GlobalContext.hpp"
 
-#include <etna/DebugUtils.hpp>
+#include "DebugUtils.hpp"
 
 namespace etna
 {
