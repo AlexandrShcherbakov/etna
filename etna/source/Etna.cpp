@@ -14,24 +14,24 @@ namespace etna
   {
     return *g_context;
   }
-  
+
   bool is_initilized()
   {
     return static_cast<bool>(g_context);
   }
-  
+
   void initialize(const InitParams &params)
   {
     g_context.reset(new GlobalContext(params));
   }
-  
+
   void shutdown()
   {
     g_context->getDescriptorSetLayouts().clear(g_context->getDevice());
     g_context.reset(nullptr);
   }
 
-  ShaderProgramId create_program(const std::string &name, const std::vector<std::string> &shaders_path)
+  ShaderProgramId create_program(const std::string &name, const std::vector<std::filesystem::path> &shaders_path)
   {
     return g_context->getShaderManager().loadProgram(name, shaders_path);
   }
@@ -48,7 +48,7 @@ namespace etna
   {
     return g_context->getShaderManager().getProgramInfo(id);
   }
-  
+
   ShaderProgramInfo get_shader_program(const std::string &name)
   {
     return g_context->getShaderManager().getProgramInfo(name);

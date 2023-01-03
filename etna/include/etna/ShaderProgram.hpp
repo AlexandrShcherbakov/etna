@@ -10,15 +10,15 @@
 #include <array>
 #include <bitset>
 #include <vector>
-#include <unordered_map>
 #include <memory>
+#include <filesystem>
 
 
 namespace etna
 {
   struct ShaderModule
   {
-    ShaderModule(vk::Device device, const std::string &shader_path);
+    ShaderModule(vk::Device device, std::filesystem::path shader_path);
 
     void reload(vk::Device device);
 
@@ -30,7 +30,7 @@ namespace etna
     vk::PushConstantRange getPushConst() const { return pushConst; }
 
   private:
-    std::string path {};
+    std::filesystem::path path;
     std::string entryPoint;
     vk::ShaderStageFlagBits stage;
 
@@ -67,7 +67,7 @@ namespace etna
     ShaderProgramManager() {}
     ~ShaderProgramManager() { clear(); }
 
-    ShaderProgramId loadProgram(std::string_view name, const std::vector<std::string> &shaders_path);
+    ShaderProgramId loadProgram(std::string_view name, std::span<const std::filesystem::path> shaders_path);
     ShaderProgramId getProgram(std::string_view name) const;
 
     ShaderProgramInfo getProgramInfo(ShaderProgramId id) const
@@ -102,10 +102,10 @@ namespace etna
     ShaderProgramManager &operator=(const ShaderProgramManager &) = delete;
 
   private:
-    std::unordered_map<std::string, uint32_t> shaderModuleNames;
+    std::unordered_map<std::filesystem::path, uint32_t> shaderModuleNames;
     std::vector<std::unique_ptr<ShaderModule>> shaderModules;
 
-    uint32_t registerModule(const std::string &path);
+    uint32_t registerModule(const std::filesystem::path& path);
     const ShaderModule &getModule(uint32_t id) const { return *shaderModules.at(id); }
 
     struct ShaderProgramInternal

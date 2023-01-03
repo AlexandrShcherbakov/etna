@@ -1,43 +1,35 @@
 #include <etna/GlobalContext.hpp>
 #include <etna/Vulkan.hpp>
 
-#include <stdexcept>
 #include <fstream>
+#include <fmt/std.h>
 
 #include <spirv_reflect.h>
 
 namespace etna
 {
-  ShaderModule::ShaderModule(vk::Device device, const std::string &shader_path)
-    : path {shader_path}
+  ShaderModule::ShaderModule(vk::Device device, std::filesystem::path shader_path)
+    : path {std::move(shader_path)}
   {
     reload(device);
   }
 
-  static std::vector<char> read_file(const std::string& filename) {
-    std::ifstream file(filename, std::ios::ate | std::ios::binary);
+  static std::vector<std::byte> read_file(std::filesystem::path filename)
+  {
+    std::basic_ifstream<std::byte> file(filename, std::ios::ate | std::ios::binary);
 
-    if (!file.is_open()) {
-      ETNA_PANIC("Failed to open file {}", filename);
-    }
+    ETNA_ASSERTF(file.is_open(), "Failed to open file '{}'", filename);
 
-    size_t fileSize = (size_t) file.tellg();
-    std::vector<char> buffer(fileSize);
+    size_t fileSize = static_cast<size_t>(file.tellg());
+    std::vector<std::byte> buffer(fileSize);
 
     file.seekg(0);
     file.read(buffer.data(), fileSize);
-    file.close();
+
+    ETNA_ASSERTF(file.gcount() == buffer.size(), "Failed to read file '{}'", filename);
+
     return buffer;
   }
-
-  struct SpvModDeleter
-  {
-    SpvModDeleter() {}
-    void operator()(SpvReflectShaderModule *mod) const
-    {
-      spvReflectDestroyShaderModule(mod);
-    }
-  };
 
   #define SPRV_ASSERT(res, ...) if ((res) != SPV_REFLECT_RESULT_SUCCESS) ETNA_PANIC("SPIRV parse error", __VA_ARGS__)
 
@@ -55,8 +47,8 @@ namespace etna
 
     vkModule = device.createShaderModuleUnique(info).value;
 
-    std::unique_ptr<SpvReflectShaderModule, SpvModDeleter> spvModule;
-    spvModule.reset(new SpvReflectShaderModule {});
+    std::unique_ptr<SpvReflectShaderModule, void(*)(SpvReflectShaderModule*)> spvModule
+      {new SpvReflectShaderModule, spvReflectDestroyShaderModule};
 
     SPRV_ASSERT(spvReflectCreateShaderModule(code.size(), code.data(), spvModule.get()), path);
 
@@ -103,16 +95,17 @@ namespace etna
     }
   }
 
-  uint32_t ShaderProgramManager::registerModule(const std::string &path)
+  uint32_t ShaderProgramManager::registerModule(const std::filesystem::path& path)
   {
     auto it = shaderModuleNames.find(path);
     if (it != shaderModuleNames.end())
       return it->second;
 
     uint32_t modId = static_cast<uint32_t>(shaderModules.size());
-    std::unique_ptr<ShaderModule> newMod;
-    newMod.reset(new ShaderModule {get_context().getDevice(), path}); 
-    shaderModules.push_back(std::move(newMod));
+
+    shaderModules.push_back(std::make_unique<ShaderModule>(get_context().getDevice(), path));
+    shaderModuleNames.emplace(std::pair{path, modId});
+
     return modId;
   }
 
@@ -146,7 +139,7 @@ namespace etna
     }
   }
 
-  ShaderProgramId ShaderProgramManager::loadProgram(std::string_view name, const std::vector<std::string> &shaders_path)
+  ShaderProgramId ShaderProgramManager::loadProgram(std::string_view name, std::span<const std::filesystem::path> shaders_path)
   {
     ETNA_ASSERTF(!programNameToId.contains(name), "Shader program '{}' redefenition", name);
 

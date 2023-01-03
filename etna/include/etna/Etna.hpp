@@ -41,8 +41,8 @@ namespace etna
 
   void submit();
 
-  ShaderProgramId create_program(const std::string &name, const std::vector<std::string> &shaders_path);
-  
+  ShaderProgramId create_program(const std::string &name, const std::vector<std::filesystem::path> &shaders_path);
+
   /*
     Reload shader files. Warning:
     1) This function must be called from gpu idle state
