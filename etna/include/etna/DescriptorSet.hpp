@@ -16,7 +16,7 @@ namespace etna
       : generation {gen}, layoutId {id}, set {vk_set} {}
 
     bool isValid() const;
-    
+
     vk::DescriptorSet getVkSet() const
     {
       return set;
@@ -39,13 +39,13 @@ namespace etna
   };
 
   /*Base version. Allocate and use descriptor sets while writing command buffer, they will be destroyed
-  automaticaly. Resource allocation tracking shoud be added. 
+  automaticaly. Resource allocation tracking shoud be added.
   For long-living descriptor sets (e.g bindless resource sets) separate allocator shoud be added, with ManagedDescriptorSet with destructor*/
   struct DynamicDescriptorPool
   {
     DynamicDescriptorPool(vk::Device dev, uint32_t framesInFlight);
     ~DynamicDescriptorPool();
-    
+
     void flip();
     void destroyAllocatedSets();
     void reset(uint32_t frames_in_flight);
@@ -56,7 +56,7 @@ namespace etna
     {
       return pools[frameIndex];
     }
-    
+
     uint64_t getNumFlips() const
     {
       return flipsCount;
@@ -83,7 +83,7 @@ namespace etna
       : binding {rbinding}, arrayElem {array_index}, resources {image_info} {}
     Binding(uint32_t rbinding, const vk::DescriptorBufferInfo &buffer_info, uint32_t array_index = 0)
       : binding {rbinding}, arrayElem {array_index}, resources {buffer_info} {}
-  
+
     uint32_t binding;
     uint32_t arrayElem;
     std::variant<vk::DescriptorImageInfo, vk::DescriptorBufferInfo> resources;

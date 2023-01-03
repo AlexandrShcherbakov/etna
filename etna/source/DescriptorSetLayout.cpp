@@ -139,14 +139,14 @@ namespace etna
     auto it = map.find(info);
     if (it != map.end())
       return {it->second, vkLayouts[it->second]};
-    
+
     DescriptorLayoutId id = static_cast<DescriptorLayoutId>(descriptors.size());
     map.insert({info, id});
     descriptors.push_back(info);
     vkLayouts.push_back(info.createVkLayout(device));
     return {id, vkLayouts[id]};
   }
-  
+
   void DescriptorSetLayoutCache::clear(vk::Device device)
   {
     for (auto layout : vkLayouts) {

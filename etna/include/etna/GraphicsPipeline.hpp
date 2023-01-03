@@ -28,7 +28,7 @@ public:
     // Specifies the format in which vertices are fed to this
     // pipeline's vertex shader
     VertexShaderInputDescription vertexShaderInput;
-    
+
     // Specifies what type of primitives you want to draw:
     // triangles, lines, etc. Also specifies additional tricky
     // stuff that is mostly not needed for basic applications.
@@ -58,7 +58,7 @@ public:
     {
       // Should contain an element for every color attachment that
       // your pixel shader will output to, i.e. for every output variable.
-      std::vector<vk::PipelineColorBlendAttachmentState> attachments = 
+      std::vector<vk::PipelineColorBlendAttachmentState> attachments =
         {
           vk::PipelineColorBlendAttachmentState
           {
@@ -75,7 +75,7 @@ public:
       std::array<float, 4> blendConstants {0, 0, 0, 0};
     } blendingConfig = {};
 
-    vk::PipelineDepthStencilStateCreateInfo depthConfig = 
+    vk::PipelineDepthStencilStateCreateInfo depthConfig =
       {
         // Discard fragments that are covered by other fragments?
         .depthTestEnable = true,

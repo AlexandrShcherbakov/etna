@@ -38,7 +38,7 @@ namespace etna
   bool is_initilized();
   void initialize(const InitParams &params);
   void shutdown();
-  
+
   void submit();
 
   ShaderProgramId create_program(const std::string &name, const std::vector<std::string> &shaders_path);
@@ -53,7 +53,7 @@ namespace etna
   ShaderProgramInfo get_shader_program(ShaderProgramId id);
   ShaderProgramInfo get_shader_program(const std::string &name);
 
-  
+
   DescriptorSet create_descriptor_set(DescriptorLayoutId layout, const vk::ArrayProxy<const Binding> &bindings);
 
   void set_state(vk::CommandBuffer com_buffer, vk::Image image,

@@ -252,7 +252,7 @@ namespace etna
     #endif
 
     vkPhysDevice = pickPhysicalDevice(vkInstance.get(), params);
-    
+
 
     constexpr auto UNIVERSAL_QUEUE_FLAGS =
       vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute | vk::QueueFlagBits::eTransfer;
