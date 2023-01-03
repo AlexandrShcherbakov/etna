@@ -1,5 +1,6 @@
 #include <etna/Image.hpp>
 #include <etna/GlobalContext.hpp>
+#include <etna/DebugUtils.hpp>
 
 namespace etna
 {
@@ -40,6 +41,7 @@ Image::Image(VmaAllocator alloc, CreateInfo info)
     "Error %s occurred while trying to allocate an etna::Image!",
     vk::to_string(static_cast<vk::Result>(retcode)));
   image = vk::Image(img);
+  etna::set_debug_name(image, info.name.data());
 }
 
 void Image::swap(Image& other)

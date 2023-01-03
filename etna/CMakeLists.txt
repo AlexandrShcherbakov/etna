@@ -15,7 +15,8 @@ add_library(etna
   "source/Etna.cpp"
   "source/Sampler.cpp"
   "source/RenderTargetStates.cpp"
-  "source/StateTracking.cpp")
+  "source/StateTracking.cpp"
+  "source/DebugUtils.cpp")
 
 target_include_directories(etna PUBLIC include)
 target_include_directories(etna PRIVATE source)
