@@ -80,7 +80,9 @@ namespace etna
       return getProgramInfo(getProgram(name));
     }
 
-    void reloadPrograms(); 
+    void logProgramInfo(const std::string& name) const;
+
+    void reloadPrograms();
     void clear();
 
     vk::PipelineLayout getProgramLayout(ShaderProgramId id) const { return programs.at(id)->progLayout.get(); } 

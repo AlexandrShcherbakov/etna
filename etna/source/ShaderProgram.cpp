@@ -240,6 +240,36 @@ namespace etna
     progLayout = get_context().getDevice().createPipelineLayoutUnique(info).value;
   }
 
+  void ShaderProgramManager::logProgramInfo(const std::string& name) const
+  {
+    spdlog::info("Info for shader program '{}':", name);
+
+    auto info = getProgramInfo(name);
+
+    for (uint32_t set = 0u; set < etna::MAX_PROGRAM_DESCRIPTORS; set++)
+    {
+      if (!info.isDescriptorSetUsed(set))
+        continue;
+      auto setInfo = info.getDescriptorSetInfo(set);
+      for (uint32_t binding = 0; binding < etna::MAX_DESCRIPTOR_BINDINGS; binding++)
+      {
+        if (!setInfo.isBindingUsed(binding))
+          continue;
+        auto &vkBinding = setInfo.getBinding(binding);
+
+        spdlog::info("    Binding {}: type {}, stages {}, count {}",
+          binding, vk::to_string(vkBinding.descriptorType),
+          vkBinding.descriptorCount, vk::to_string(vkBinding.stageFlags));
+      }
+    }
+
+    auto pc = info.getPushConst();
+    if (pc.size)
+    {
+      spdlog::info("    Push constant block: size {}, stages {}", pc.size, vk::to_string(pc.stageFlags));
+    }
+  }
+
   void ShaderProgramManager::reloadPrograms()
   {
     for (auto &mod : shaderModules)
