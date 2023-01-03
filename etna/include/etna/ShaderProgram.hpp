@@ -5,6 +5,7 @@
 #include <etna/Vulkan.hpp>
 #include <etna/Forward.hpp>
 #include <etna/DescriptorSetLayout.hpp>
+#include <etna/detail/StringMap.hpp>
 
 #include <array>
 #include <bitset>
@@ -24,19 +25,18 @@ namespace etna
     const auto &getResources() const { return resources; }
     vk::ShaderModule getVkModule() const { return vkModule.get(); }
     vk::ShaderStageFlagBits getStage() const { return stage; }
-    const std::string &getName() const { return entryPoint; }
+    std::string_view getName() const { return entryPoint; }
+    const char* getNameCstr() const { return entryPoint.c_str(); }
     vk::PushConstantRange getPushConst() const { return pushConst; }
 
-    ShaderModule(const ShaderModule &mod) = delete;
-    ShaderModule &operator=(const ShaderModule &mod) = delete;  
   private:
     std::string path {};
-    std::string entryPoint {};
+    std::string entryPoint;
     vk::ShaderStageFlagBits stage;
 
     vk::UniqueShaderModule vkModule;
-    std::vector<std::pair<uint32_t, DescriptorSetInfo>> resources {}; /*set index - set resources*/
-    vk::PushConstantRange pushConst {};
+    std::vector<std::pair<uint32_t, DescriptorSetInfo>> resources; /*set index - set resources*/
+    vk::PushConstantRange pushConst;
     /*Todo: add vertex input info*/
   };
 
@@ -67,15 +67,15 @@ namespace etna
     ShaderProgramManager() {}
     ~ShaderProgramManager() { clear(); }
 
-    ShaderProgramId loadProgram(const std::string &name, const std::vector<std::string> &shaders_path);
-    ShaderProgramId getProgram(const std::string &name) const;
+    ShaderProgramId loadProgram(std::string_view name, const std::vector<std::string> &shaders_path);
+    ShaderProgramId getProgram(std::string_view name) const;
 
     ShaderProgramInfo getProgramInfo(ShaderProgramId id) const
     {
       return ShaderProgramInfo {*this, id};
     }
 
-    ShaderProgramInfo getProgramInfo(const std::string &name) const
+    ShaderProgramInfo getProgramInfo(std::string_view name) const
     {
       return getProgramInfo(getProgram(name));
     }
@@ -85,12 +85,12 @@ namespace etna
     void reloadPrograms();
     void clear();
 
-    vk::PipelineLayout getProgramLayout(ShaderProgramId id) const { return programs.at(id)->progLayout.get(); } 
+    vk::PipelineLayout getProgramLayout(ShaderProgramId id) const { return programById.at(id)->progLayout.get(); }
     vk::DescriptorSetLayout getDescriptorLayout(ShaderProgramId id, uint32_t set) const;
 
     DescriptorLayoutId getDescriptorLayoutId(ShaderProgramId id, uint32_t set) const
     {
-      auto &prog = *programs.at(id);
+      auto &prog = *programById.at(id);
       if (set >= MAX_PROGRAM_DESCRIPTORS || !prog.usedDescriptors.test(set))
         ETNA_PANIC("ShaderProgram ", prog.name, " invalid descriptor set #", set);
       return prog.descriptorIds[set];
@@ -110,26 +110,26 @@ namespace etna
 
     struct ShaderProgramInternal
     {
-      ShaderProgramInternal(std::string name_, std::vector<uint32_t> &&mod) : name(std::move(name_)), moduleIds {std::move(mod)} {}
+      ShaderProgramInternal(std::string_view name_, std::vector<uint32_t> &&mod) : name{name_}, moduleIds{std::move(mod)} {}
 
       std::string name;
       std::vector<uint32_t> moduleIds;
 
       std::bitset<MAX_PROGRAM_DESCRIPTORS> usedDescriptors;
       std::array<DescriptorLayoutId, MAX_PROGRAM_DESCRIPTORS> descriptorIds;
-    
+
       vk::PushConstantRange pushConst {};
       vk::UniquePipelineLayout progLayout;
 
       void reload(ShaderProgramManager &manager);
     };
 
-    std::unordered_map<std::string, uint32_t> programNames;
-    std::vector<std::unique_ptr<ShaderProgramInternal>> programs;
+    StringMap<uint32_t> programNameToId;
+    std::vector<std::unique_ptr<ShaderProgramInternal>> programById;
 
     const ShaderProgramInternal &getProgInternal(ShaderProgramId id) const
     {
-      return *programs.at(id);
+      return *programById.at(id);
     }
 
     friend ShaderProgramInfo;

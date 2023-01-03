@@ -116,8 +116,8 @@ namespace etna
     return modId;
   }
 
-  static void validate_program_shaders(const std::string &name, const std::vector<vk::ShaderStageFlagBits> &stages) {
-    auto supportedShaders = 
+  static void validate_program_shaders(std::string_view name, const std::vector<vk::ShaderStageFlagBits> &stages) {
+    auto supportedShaders =
       vk::ShaderStageFlagBits::eVertex|
       vk::ShaderStageFlagBits::eTessellationControl|
       vk::ShaderStageFlagBits::eTessellationEvaluation|
@@ -146,14 +146,13 @@ namespace etna
     }
   }
 
-  ShaderProgramId ShaderProgramManager::loadProgram(const std::string &name, const std::vector<std::string> &shaders_path)
+  ShaderProgramId ShaderProgramManager::loadProgram(std::string_view name, const std::vector<std::string> &shaders_path)
   {
-    if (programNames.find(name) != programNames.end())
-      ETNA_PANIC("Shader program ", name, " redefenition");
-    
+    ETNA_ASSERTF(!programNameToId.contains(name), "Shader program '{}' redefenition", name);
+
     std::vector<uint32_t> moduleIds;
     std::vector<vk::ShaderStageFlagBits> stages;
-    for (const auto &path : shaders_path)
+    for (const auto& path : shaders_path)
     {
       auto id = registerModule(path);
       auto stage = getModule(id).getStage();
@@ -164,18 +163,20 @@ namespace etna
 
     validate_program_shaders(name, stages);
 
-    ShaderProgramId progId = static_cast<ShaderProgramId>(programs.size());
-    programs.emplace_back(new ShaderProgramInternal {name, std::move(moduleIds)});
-    programs[progId]->reload(*this);
-    programNames[name] = progId;
+    auto progId = static_cast<ShaderProgramId>(programById.size());
+
+    programById.emplace_back(new ShaderProgramInternal {name, std::move(moduleIds)});
+    programById.back()->reload(*this);
+
+    programNameToId.emplace(std::pair{std::string{name}, progId});
+
     return progId;
   }
-  
-  ShaderProgramId ShaderProgramManager::getProgram(const std::string &name) const
+
+  ShaderProgramId ShaderProgramManager::getProgram(std::string_view name) const
   {
-    auto it = programNames.find(name);
-    if (it == programNames.end())
-      ETNA_PANIC("Shader program ", name, " not found");
+    auto it = programNameToId.find(name);
+    ETNA_ASSERTF(it != programNameToId.end(), "Shader program '{}' not found", name);
     return it->second;
   }
 
@@ -277,23 +278,23 @@ namespace etna
       mod->reload(get_context().getDevice());
     }
 
-    for (auto &progPtr : programs)
+    for (auto &progPtr : programById)
     {
       progPtr->reload(*this);
     }
   }
-  
+
   void ShaderProgramManager::clear()
   {
-    programNames.clear();
-    programs.clear();
+    programNameToId.clear();
+    programById.clear();
     shaderModuleNames.clear();
     shaderModules.clear();
   }
 
   std::vector<vk::PipelineShaderStageCreateInfo> ShaderProgramManager::getShaderStages(ShaderProgramId id) const
   {
-    auto &prog = *programs.at(id);
+    auto &prog = *programById.at(id);
 
     std::vector<vk::PipelineShaderStageCreateInfo> stages;
     stages.reserve(prog.moduleIds.size());
@@ -304,7 +305,7 @@ namespace etna
       vk::PipelineShaderStageCreateInfo info {};
       info.setModule(shaderMod.getVkModule());
       info.setStage(shaderMod.getStage());
-      info.setPName(shaderMod.getName().c_str());
+      info.setPName(shaderMod.getNameCstr());
       stages.push_back(info);
     }
     return stages;
