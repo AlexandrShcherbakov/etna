@@ -17,6 +17,7 @@ public:
   struct CreateInfo
   {
     vk::Extent3D extent;
+    std::string_view name;
     vk::Format format = vk::Format::eR8G8B8A8Srgb;
     vk::ImageUsageFlags imageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled;
     VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY;
