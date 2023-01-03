@@ -1,5 +1,5 @@
-#include <etna/GlobalContext.hpp>
-#include <etna/Vulkan.hpp>
+#include <etna/ShaderProgram.hpp>
+#include <etna/DescriptorSetLayout.hpp>
 
 #include <fstream>
 #include <fmt/std.h>
@@ -103,7 +103,7 @@ namespace etna
 
     uint32_t modId = static_cast<uint32_t>(shaderModules.size());
 
-    shaderModules.push_back(std::make_unique<ShaderModule>(get_context().getDevice(), path));
+    shaderModules.push_back(std::make_unique<ShaderModule>(vkDevice, path));
     shaderModuleNames.emplace(std::pair{path, modId});
 
     return modId;
@@ -180,7 +180,6 @@ namespace etna
     pushConst = vk::PushConstantRange {};
 
     std::array<DescriptorSetInfo, MAX_PROGRAM_DESCRIPTORS> dstDescriptors;
-    auto &descriptorLayoutCache = get_context().getDescriptorSetLayouts();
 
     for (auto id : moduleIds)
     {
@@ -217,7 +216,7 @@ namespace etna
     {
       if (!usedDescriptors.test(i))
         continue;
-      auto res = descriptorLayoutCache.get(get_context().getDevice(), dstDescriptors[i]);
+      auto res = manager.descriptorSetLayoutCache.get(manager.vkDevice, dstDescriptors[i]);
       descriptorIds[i] = res.first;
       vkLayouts.push_back(res.second);
     }
@@ -231,7 +230,7 @@ namespace etna
       info.setPushConstantRangeCount(1u);
     }
 
-    progLayout = get_context().getDevice().createPipelineLayoutUnique(info).value;
+    progLayout = manager.vkDevice.createPipelineLayoutUnique(info).value;
   }
 
   void ShaderProgramManager::logProgramInfo(const std::string& name) const
@@ -268,7 +267,7 @@ namespace etna
   {
     for (auto &mod : shaderModules)
     {
-      mod->reload(get_context().getDevice());
+      mod->reload(vkDevice);
     }
 
     for (auto &progPtr : programById)
@@ -307,7 +306,7 @@ namespace etna
   vk::DescriptorSetLayout ShaderProgramManager::getDescriptorLayout(ShaderProgramId id, uint32_t set) const
   {
     auto layoutId = getDescriptorLayoutId(id, set);
-    return get_context().getDescriptorSetLayouts().getVkLayout(layoutId);
+    return descriptorSetLayoutCache.getVkLayout(layoutId);
   }
 
   vk::PushConstantRange ShaderProgramInfo::getPushConst() const
@@ -315,7 +314,7 @@ namespace etna
     auto &prog = mgr.getProgInternal(id);
     return prog.pushConst;
   }
-  
+
   vk::PipelineLayout ShaderProgramInfo::getPipelineLayout() const
   {
     auto &prog = mgr.getProgInternal(id);
@@ -336,12 +335,11 @@ namespace etna
 
   vk::DescriptorSetLayout ShaderProgramInfo::getDescriptorSetLayout(uint32_t set) const
   {
-    return  get_context().getDescriptorSetLayouts().getVkLayout(getDescriptorLayoutId(set));
-  }
-  
-  const DescriptorSetInfo &ShaderProgramInfo::getDescriptorSetInfo(uint32_t set) const
-  {
-    return get_context().getDescriptorSetLayouts().getLayoutInfo(getDescriptorLayoutId(set));
+    return  mgr.descriptorSetLayoutCache.getVkLayout(getDescriptorLayoutId(set));
   }
 
+  const DescriptorSetInfo &ShaderProgramInfo::getDescriptorSetInfo(uint32_t set) const
+  {
+    return mgr.descriptorSetLayoutCache.getLayoutInfo(getDescriptorLayoutId(set));
+  }
 }

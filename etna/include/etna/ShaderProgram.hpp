@@ -62,9 +62,15 @@ namespace etna
     friend ShaderProgramManager;
   };
 
+  struct DescriptorSetLayoutCache;
+
   struct ShaderProgramManager
   {
-    ShaderProgramManager() {}
+    ShaderProgramManager(vk::Device dev, DescriptorSetLayoutCache& descSetLayoutCache)
+      : vkDevice{dev}, descriptorSetLayoutCache{descSetLayoutCache}
+    {
+    }
+
     ~ShaderProgramManager() { clear(); }
 
     ShaderProgramId loadProgram(std::string_view name, std::span<const std::filesystem::path> shaders_path);
@@ -102,6 +108,9 @@ namespace etna
     ShaderProgramManager &operator=(const ShaderProgramManager &) = delete;
 
   private:
+    vk::Device vkDevice;
+    DescriptorSetLayoutCache& descriptorSetLayoutCache;
+
     std::unordered_map<std::filesystem::path, uint32_t> shaderModuleNames;
     std::vector<std::unique_ptr<ShaderModule>> shaderModules;
 

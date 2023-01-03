@@ -38,7 +38,7 @@ namespace etna
       {
         .pApplicationInfo = &appInfo,
       };
-    
+
     createInfo.setPEnabledLayerNames(layers);
     createInfo.setPEnabledExtensionNames(extensions);
 
@@ -48,11 +48,11 @@ namespace etna
   static bool checkPhysicalDeviceSupportsExtensions(vk::PhysicalDevice pdevice, std::span<char const * const> extensions)
   {
     std::vector availableExtensions = pdevice.enumerateDeviceExtensionProperties().value;
-    
+
     std::unordered_set requestedExtensions(extensions.begin(), extensions.end());
     for (const auto &ext : availableExtensions)
       requestedExtensions.erase(ext.extensionName);
-    
+
     return requestedExtensions.empty();
   }
 
@@ -111,7 +111,7 @@ namespace etna
 
       if (!checkPhysicalDeviceSupportsExtensions(pdevice, params.deviceExtensions))
         continue;
-        
+
       if (deviceTypeIsBetter(props.deviceType, bestDeviceProps.deviceType))
       {
         bestDevice = pdevice;
@@ -121,7 +121,7 @@ namespace etna
 
     return bestDevice;
   }
-  
+
   uint32_t getQueueFamilyIndex(vk::PhysicalDevice pdevice, vk::QueueFlags flags)
   {
     std::vector queueFamilies = pdevice.getQueueFamilyProperties();
@@ -136,7 +136,7 @@ namespace etna
 
     ETNA_PANIC("Could not find a queue family that supports all requested flags!");
   }
-  
+
   static vk::UniqueDevice createDevice(vk::PhysicalDevice pdevice,
     uint32_t universalQueueFamily, const InitParams &params)
   {
@@ -186,7 +186,7 @@ namespace etna
         .ppEnabledExtensionNames = deviceExtensions.data(),
       }).value;
   }
-  
+
 #ifndef NDEBUG
   static VkBool32 debugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -228,10 +228,10 @@ namespace etna
     vk::DynamicLoader dl;
     VULKAN_HPP_DEFAULT_DISPATCHER.init(
       dl.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr"));
-    
+
     vkInstance = createInstance(params);
     VULKAN_HPP_DEFAULT_DISPATCHER.init(vkInstance.get());
-    
+
     // NOTE: Previously we used VK_EXT_debug_report extension,
     // but it is considered to be abandoned in favour of
     // VK_EXT_debug_utils.
@@ -272,30 +272,31 @@ namespace etna
           .flags = {},
           .physicalDevice = vkPhysDevice,
           .device = vkDevice.get(),
-          
+
           .preferredLargeHeapBlockSize = {},
           .pAllocationCallbacks = {},
           .pDeviceMemoryCallbacks = {},
           .pHeapSizeLimit = {},
           .pVulkanFunctions = {},
-          
+
           .instance = vkInstance.get(),
           .vulkanApiVersion = VULKAN_API_VERSION,
           .pTypeExternalMemoryHandleTypes = nullptr
         };
-      
+
       VmaAllocator allocator;
       ::vmaCreateAllocator(&alloc_info, &allocator);
-      
+
       vmaAllocator = {allocator, &::vmaDestroyAllocator};
     }
 
-    pipelineManager.emplace(vkDevice.get(), shaderPrograms);
+    shaderPrograms.emplace(vkDevice.get(), descriptorSetLayouts);
+    pipelineManager.emplace(vkDevice.get(), *shaderPrograms);
     descriptorPool.emplace(vkDevice.get(), params.numFramesInFlight);
 
     resourceTracking = std::make_unique<ResourceStates>();
   }
-  
+
   Image GlobalContext::createImage(Image::CreateInfo info)
   {
     return Image(vmaAllocator.get(), info);
