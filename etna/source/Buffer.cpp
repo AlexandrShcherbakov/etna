@@ -1,5 +1,6 @@
 #include <etna/Buffer.hpp>
 #include <vulkan/vulkan_enums.hpp>
+#include <etna/DebugUtils.hpp>
 
 
 namespace etna
@@ -34,6 +35,7 @@ Buffer::Buffer(VmaAllocator alloc, CreateInfo info)
     "Error %s occurred while trying to allocate an etna::Buffer!",
     vk::to_string(static_cast<vk::Result>(retcode)));
   buffer = vk::Buffer(buf);
+  etna::set_debug_name(buffer, info.name.data());
 }
 
 void Buffer::swap(Buffer& other)

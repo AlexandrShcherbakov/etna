@@ -20,4 +20,14 @@ namespace etna
     set_debug_name_base((uint64_t)(VkImage)image, vk::DebugReportObjectTypeEXT::eImage, name);
   }
 
+  void set_debug_name(vk::Buffer buffer, const char *name)
+  {
+    set_debug_name_base((uint64_t)(VkBuffer)buffer, vk::DebugReportObjectTypeEXT::eBuffer, name);
+  }
+
+  void set_debug_name(vk::Sampler sampler, const char *name)
+  {
+    set_debug_name_base((uint64_t)(VkSampler)sampler, vk::DebugReportObjectTypeEXT::eSampler, name);
+  }
+
 }
