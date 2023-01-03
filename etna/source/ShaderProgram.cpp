@@ -4,7 +4,8 @@
 #include <fstream>
 #include <fmt/std.h>
 
-#include <spirv_reflect.h>
+#include <SpvReflectHelpers.hpp>
+
 
 namespace etna
 {
@@ -31,8 +32,6 @@ namespace etna
     return buffer;
   }
 
-  #define SPRV_ASSERT(res, ...) if ((res) != SPV_REFLECT_RESULT_SUCCESS) ETNA_PANIC("SPIRV parse error", __VA_ARGS__)
-
   void ShaderModule::reload(vk::Device device)
   {
     vkModule = {};
@@ -42,15 +41,15 @@ namespace etna
     info.setPCode(reinterpret_cast<const uint32_t*>(code.data()));
     info.setCodeSize(code.size());
 
-    if (code.size() % 4 != 0)
-      ETNA_PANIC("SPIRV ", path, " broken");
+    ETNA_ASSERTF(code.size() % 4 == 0, "SPIR-V file '{}' is corrupted!", path);
 
     vkModule = device.createShaderModuleUnique(info).value;
 
     std::unique_ptr<SpvReflectShaderModule, void(*)(SpvReflectShaderModule*)> spvModule
       {new SpvReflectShaderModule, spvReflectDestroyShaderModule};
 
-    SPRV_ASSERT(spvReflectCreateShaderModule(code.size(), code.data(), spvModule.get()), path);
+
+    SPV_REFLECT_SAFE_CALL(spvReflectCreateShaderModule(code.size(), code.data(), spvModule.get()), path);
 
     stage = static_cast<vk::ShaderStageFlagBits>(spvModule->shader_stage);
     entryPoint = spvModule->entry_point_name;
@@ -58,10 +57,10 @@ namespace etna
     resources.clear();
 
     uint32_t count = 0;
-    SPRV_ASSERT(spvReflectEnumerateDescriptorSets(spvModule.get(), &count, nullptr), path);
+    SPV_REFLECT_SAFE_CALL(spvReflectEnumerateDescriptorSets(spvModule.get(), &count, nullptr), path);
 
     std::vector<SpvReflectDescriptorSet*> sets(count);
-    SPRV_ASSERT(spvReflectEnumerateDescriptorSets(spvModule.get(), &count, sets.data()), path);
+    SPV_REFLECT_SAFE_CALL(spvReflectEnumerateDescriptorSets(spvModule.get(), &count, sets.data()), path);
 
     resources.reserve(sets.size());
 
@@ -76,16 +75,16 @@ namespace etna
     if (spvModule->push_constant_block_count == 1)
     {
       auto &blk = spvModule->push_constant_blocks[0];
-      if (blk.offset != 0) {
-        ETNA_PANIC("SPIRV ", path, " parse error: PushConst offset is not zero");
-      }
+
+      ETNA_ASSERTF(blk.offset == 0, "SPIR-V file '{}' parse error: PushConst offset is not zero", path);
+
       pushConst.stageFlags = stage;
       pushConst.offset = 0u;
       pushConst.size = blk.size;
     }
     else if (spvModule->push_constant_block_count > 1)
     {
-      ETNA_PANIC("SPIRV ", path, " parse error: only 1 push_const block per shader supported");
+      ETNA_PANIC("SPIR-V file '{}' parse error: only 1 push_const block per shader supported", path);
     }
     else
     {
