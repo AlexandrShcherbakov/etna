@@ -1,4 +1,4 @@
-#include "etna/DebugUtils.hpp"
+#include "DebugUtils.hpp"
 
 #include "etna/GlobalContext.hpp"
 
