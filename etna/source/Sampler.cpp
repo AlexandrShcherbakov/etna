@@ -2,6 +2,8 @@
 
 #include "etna/GlobalContext.hpp"
 
+#include <etna/DebugUtils.hpp>
+
 namespace etna
 {
 Sampler::Sampler(CreateInfo info)
@@ -20,6 +22,7 @@ Sampler::Sampler(CreateInfo info)
     .borderColor = vk::BorderColor::eFloatOpaqueWhite
   };
   sampler = etna::get_context().getDevice().createSamplerUnique(createInfo).value;
+  etna::set_debug_name(sampler.get(), info.name.data());
 }
 
 }
