@@ -108,7 +108,8 @@ namespace etna
     return modId;
   }
 
-  static void validate_program_shaders(std::string_view name, const std::vector<vk::ShaderStageFlagBits> &stages) {
+  static void validate_program_shaders(std::string_view name, const std::vector<vk::ShaderStageFlagBits> &stages)
+  {
     auto supportedShaders =
       vk::ShaderStageFlagBits::eVertex|
       vk::ShaderStageFlagBits::eTessellationControl|
@@ -120,22 +121,16 @@ namespace etna
     bool isComputePipeline = false;
     vk::ShaderStageFlags usageMask = static_cast<vk::ShaderStageFlags>(0);
 
-    for (auto stage : stages) {
-      if (!(stage & supportedShaders)) {
-        ETNA_PANIC("Shader program ", name, " creating error, unsupported shader stage ", vk::to_string(stage));
-      }
-
-      if (stage & usageMask) {
-        ETNA_PANIC("Shader program ", name, " creating error, multiple usage of", vk::to_string(stage), " shader stage");
-      }
+    for (auto stage : stages)
+    {
+      ETNA_ASSERTF(stage & supportedShaders, "Shader program '{}' creation error, unsupported shader stage {}", name, vk::to_string(stage));
+      ETNA_ASSERTF(!(stage & usageMask), "Shader program '{}' creation error, multiple files with {} shader stage", name, vk::to_string(stage));
 
       isComputePipeline |= (stage == vk::ShaderStageFlagBits::eCompute);
       usageMask |= stage;
     }
 
-    if (isComputePipeline && stages.size() != 1) {
-      ETNA_PANIC("Shader program ", name, " creating error, usage of compute shader with other stages");
-    }
+    ETNA_ASSERTF(!isComputePipeline || stages.size() == 1, "Shader program '{}' creating error, usage of compute shader with other stages", name);
   }
 
   ShaderProgramId ShaderProgramManager::loadProgram(std::string_view name, std::span<const std::filesystem::path> shaders_path)
@@ -191,9 +186,9 @@ namespace etna
         {
           pushConst = modPushConst;
         }
-        else {
-          if (pushConst.size != modPushConst.size)
-            ETNA_PANIC("ShaderProgram ", name, " : not compatible push constant blocks");
+        else
+        {
+          ETNA_ASSERTF(pushConst.size == modPushConst.size, "ShaderProgram '{}' : not compatible push constant blocks", name);
           pushConst.stageFlags |= modPushConst.stageFlags;
         }
       }
@@ -201,8 +196,8 @@ namespace etna
       const auto &resources = shaderMod.getResources(); //merge descriptors
       for (auto &desc : resources)
       {
-        if (desc.first >= MAX_PROGRAM_DESCRIPTORS)
-          ETNA_PANIC("ShaderProgram ", name, " : set ", desc.first, " out of max sets (", MAX_PROGRAM_DESCRIPTORS, ")");
+        ETNA_ASSERTF(desc.first < MAX_PROGRAM_DESCRIPTORS, "ShaderProgram '{}' : set {} out of max sets ({})",
+          name, desc.first, MAX_PROGRAM_DESCRIPTORS);
 
         usedDescriptors.set(desc.first);
         dstDescriptors[desc.first].merge(desc.second);
