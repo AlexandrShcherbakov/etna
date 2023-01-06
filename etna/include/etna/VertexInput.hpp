@@ -70,7 +70,7 @@ struct VertexShaderInputDescription
     // Default is identity i -> i mapping.
     std::vector<uint32_t> attributeMapping = byteStreamDescription.identityAttributeMapping();
   };
-  
+
   // Note that the `binding` annotation value that you specified in GLSL
   // will be used to index this array. For most use cases, a single element
   // will be enough.

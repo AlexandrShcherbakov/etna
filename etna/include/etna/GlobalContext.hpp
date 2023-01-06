@@ -34,7 +34,7 @@ namespace etna
     vk::Queue getQueue() const { return universalQueue; }
     uint32_t getQueueFamilyIdx() const { return universalQueueFamilyIdx; }
 
-    ShaderProgramManager &getShaderManager() { return shaderPrograms; }
+    ShaderProgramManager &getShaderManager() { return *shaderPrograms; }
     PipelineManager &getPipelineManager() { return pipelineManager.value(); }
     DescriptorSetLayoutCache &getDescriptorSetLayouts() { return descriptorSetLayouts; }
     DynamicDescriptorPool &getDescriptorPool() { return *descriptorPool; }
@@ -58,8 +58,8 @@ namespace etna
 
     std::unique_ptr<VmaAllocator_T, void(*)(VmaAllocator)> vmaAllocator{nullptr, nullptr};
 
-    DescriptorSetLayoutCache descriptorSetLayouts {}; 
-    ShaderProgramManager shaderPrograms {};
+    DescriptorSetLayoutCache descriptorSetLayouts {};
+    std::optional<ShaderProgramManager> shaderPrograms;
 
     // Optionals for late init
     std::optional<PipelineManager> pipelineManager;

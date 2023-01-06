@@ -72,7 +72,7 @@ void Image::reset()
 {
   if (!image)
     return;
-  
+
   views.clear();
   vmaDestroyImage(allocator, VkImage(image), allocation);
   allocator = {};
@@ -104,7 +104,7 @@ static vk::ImageAspectFlags get_aspeck_mask(vk::Format format)
 vk::ImageView Image::getView(Image::ViewParams params) const
 {
   auto it = views.find(params);
-  
+
   if (it == views.end())
   {
     vk::ImageViewCreateInfo viewInfo

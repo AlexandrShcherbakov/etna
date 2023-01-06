@@ -16,7 +16,7 @@ namespace etna
 {
   constexpr uint32_t MAX_PROGRAM_DESCRIPTORS = 4u;
   constexpr uint32_t MAX_DESCRIPTOR_BINDINGS = 32u; /*If you are out of bindings, try using arrays of images/samplers*/
-  
+
   struct DescriptorSetLayoutHash;
 
   struct DescriptorSetInfo
@@ -33,7 +33,7 @@ namespace etna
 
     bool isBindingUsed(uint32_t binding) const
     {
-      return binding < maxUsedBinding && usedBindings.test(binding);  
+      return binding < maxUsedBinding && usedBindings.test(binding);
     }
 
     const vk::DescriptorSetLayoutBinding &getBinding(uint32_t binding) const
@@ -63,7 +63,7 @@ namespace etna
   {
     DescriptorSetLayoutCache() {}
     ~DescriptorSetLayoutCache() { /*make device global and call clear hear*/}
-    
+
     DescriptorLayoutId registerLayout(vk::Device device, const DescriptorSetInfo &info);
     void clear(vk::Device device);
 
@@ -80,7 +80,7 @@ namespace etna
     std::pair<DescriptorLayoutId, vk::DescriptorSetLayout> get(vk::Device device, const DescriptorSetInfo &info);
 
     DescriptorSetLayoutCache(const DescriptorSetLayoutCache&) = delete;
-    DescriptorSetLayoutCache &operator=(const DescriptorSetLayoutCache&) = delete; 
+    DescriptorSetLayoutCache &operator=(const DescriptorSetLayoutCache&) = delete;
 
   private:
     std::unordered_map<DescriptorSetInfo, DescriptorLayoutId, DescriptorSetLayoutHash> map;

@@ -15,9 +15,9 @@ namespace etna
   /*Todo: Add struct with parameters*/
   static constexpr uint32_t NUM_DESCRIPORS = 2048;
 
-  static constexpr uint32_t NUM_TEXTURES = 2048; 
+  static constexpr uint32_t NUM_TEXTURES = 2048;
   static constexpr uint32_t NUM_RW_TEXTURES = 512;
-  static constexpr uint32_t NUM_BUFFERS = 2048; 
+  static constexpr uint32_t NUM_BUFFERS = 2048;
   static constexpr uint32_t NUM_RW_BUFFERS = 512;
   static constexpr uint32_t NUM_SAMPLERS = 128;
 
@@ -65,7 +65,7 @@ namespace etna
     for (uint32_t i = 0; i < numFrames; i++)
       flip();
   }
-    
+
   DescriptorSet DynamicDescriptorPool::allocateSet(DescriptorLayoutId layoutId)
   {
     auto &dslCache = get_context().getDescriptorSetLayouts();
@@ -110,7 +110,7 @@ namespace etna
 
     for (uint32_t binding = 0; binding < MAX_DESCRIPTOR_BINDINGS; binding++)
     {
-      unboundResources[binding] = 
+      unboundResources[binding] =
         layoutInfo.isBindingUsed(binding)? layoutInfo.getBinding(binding).descriptorCount : 0u;
     }
 
@@ -120,7 +120,7 @@ namespace etna
         ETNA_PANIC("Descriptor write error: descriptor set doesn't have ", binding.binding, " slot");
 
       auto &bindingInfo = layoutInfo.getBinding(binding.binding);
-      bool isImageRequied = is_image_resource(bindingInfo.descriptorType); 
+      bool isImageRequied = is_image_resource(bindingInfo.descriptorType);
       bool isImageBinding = std::get_if<vk::DescriptorImageInfo>(&binding.resources) != nullptr;
       if (isImageRequied != isImageBinding)
       {
