@@ -111,7 +111,7 @@ namespace etna
     vk::Device vkDevice;
     DescriptorSetLayoutCache& descriptorSetLayoutCache;
 
-    std::unordered_map<std::filesystem::path, uint32_t> shaderModuleNames;
+    std::unordered_map<std::filesystem::path, uint32_t> shaderModulePathToId;
     std::vector<std::unique_ptr<ShaderModule>> shaderModules;
 
     uint32_t registerModule(const std::filesystem::path& path);

@@ -96,14 +96,14 @@ namespace etna
 
   uint32_t ShaderProgramManager::registerModule(const std::filesystem::path& path)
   {
-    auto it = shaderModuleNames.find(path);
-    if (it != shaderModuleNames.end())
+    auto it = shaderModulePathToId.find(path);
+    if (it != shaderModulePathToId.end())
       return it->second;
 
     uint32_t modId = static_cast<uint32_t>(shaderModules.size());
 
     shaderModules.push_back(std::make_unique<ShaderModule>(vkDevice, path));
-    shaderModuleNames.emplace(std::pair{path, modId});
+    shaderModulePathToId.emplace(std::pair{path, modId});
 
     return modId;
   }
@@ -274,7 +274,7 @@ namespace etna
   {
     programNameToId.clear();
     programById.clear();
-    shaderModuleNames.clear();
+    shaderModulePathToId.clear();
     shaderModules.clear();
   }
 
