@@ -122,7 +122,7 @@ namespace etna
 
       auto &bindingInfo = layoutInfo.getBinding(binding.binding);
       bool isImageRequied = is_image_resource(bindingInfo.descriptorType); 
-      bool isImageBinding = std::get_if<vk::DescriptorImageInfo>(&binding.resources) != nullptr;
+      bool isImageBinding = std::get_if<ImageBinding>(&binding.resources) != nullptr;
       if (isImageRequied != isImageBinding)
       {
         ETNA_PANIC("Descriptor write error: slot ", binding.binding,
@@ -182,14 +182,14 @@ namespace etna
 
       if (is_image_resource(bindingInfo.descriptorType))
       {
-        auto img = std::get<vk::DescriptorImageInfo>(binding.resources);
+        auto img = std::get<ImageBinding>(binding.resources).descriptor_info;
         imageInfos[numImageInfo] = img;
         write.setPImageInfo(imageInfos.data() + numImageInfo);
         numImageInfo++;
       }
       else
       {
-        auto buf = std::get<vk::DescriptorBufferInfo>(binding.resources);
+        auto buf = std::get<BufferBinding>(binding.resources).descriptor_info;
         bufferInfos[numBufferInfo] = buf;
         write.setPBufferInfo(bufferInfos.data() + numBufferInfo);
         numBufferInfo++;

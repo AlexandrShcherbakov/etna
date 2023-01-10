@@ -9,6 +9,8 @@
 namespace etna
 {
 
+struct ImageBinding;
+
 class Image
 {
 public:
@@ -48,6 +50,8 @@ public:
     bool operator==(const ViewParams& b) const = default;
   };
   vk::ImageView getView(ViewParams params) const;
+
+  ImageBinding genBinding(vk::Sampler sampler, vk::ImageLayout layout, ViewParams params = {}) const;
 
 private:
   struct ViewParamsHasher
