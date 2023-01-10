@@ -9,6 +9,8 @@
 namespace etna
 {
 
+struct BufferBinding;
+
 class Buffer
 {
 public:
@@ -33,6 +35,8 @@ public:
 
   [[nodiscard]] vk::Buffer get() const { return buffer; }
   [[nodiscard]] std::byte* data() { return mapped; }
+
+  BufferBinding genBinding(vk::DeviceSize offset = 0, vk::DeviceSize range = VK_WHOLE_SIZE) const;
 
   std::byte* map();
   void unmap();

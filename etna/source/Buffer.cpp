@@ -1,3 +1,4 @@
+#include <etna/BindingItems.hpp>
 #include <etna/Buffer.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include "DebugUtils.hpp"
@@ -100,6 +101,11 @@ void Buffer::unmap()
   ETNA_ASSERT(mapped != nullptr);
   vmaUnmapMemory(allocator, allocation);
   mapped = nullptr;
+}
+
+BufferBinding Buffer::genBinding(vk::DeviceSize offset, vk::DeviceSize range) const
+{
+  return BufferBinding{*this, vk::DescriptorBufferInfo {get(), offset, range}};
 }
 
 }

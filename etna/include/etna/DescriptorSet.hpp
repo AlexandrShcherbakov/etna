@@ -5,20 +5,21 @@
 #include <variant>
 #include <etna/Vulkan.hpp>
 #include "DescriptorSetLayout.hpp"
+#include "BindingItems.hpp"
 
 namespace etna
 {
   struct Binding
   {
     /*Todo: add resource wrappers*/
-    Binding(uint32_t rbinding, const vk::DescriptorImageInfo &image_info, uint32_t array_index = 0)
+    Binding(uint32_t rbinding, const ImageBinding &image_info, uint32_t array_index = 0)
       : binding {rbinding}, arrayElem {array_index}, resources {image_info} {}
-    Binding(uint32_t rbinding, const vk::DescriptorBufferInfo &buffer_info, uint32_t array_index = 0)
+    Binding(uint32_t rbinding, const BufferBinding &buffer_info, uint32_t array_index = 0)
       : binding {rbinding}, arrayElem {array_index}, resources {buffer_info} {}
   
     uint32_t binding;
     uint32_t arrayElem;
-    std::variant<vk::DescriptorImageInfo, vk::DescriptorBufferInfo> resources;
+    std::variant<ImageBinding, BufferBinding> resources;
   };
 
   /*Maybe we need a hierarchy of descriptor sets*/
