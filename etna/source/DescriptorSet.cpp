@@ -1,5 +1,6 @@
 #include <etna/GlobalContext.hpp>
 #include <etna/DescriptorSet.hpp>
+#include <etna/Etna.hpp>
 
 #include <array>
 #include <vector>
@@ -66,7 +67,7 @@ namespace etna
       flip();
   }
     
-  DescriptorSet DynamicDescriptorPool::allocateSet(DescriptorLayoutId layoutId, std::vector<Binding> bindings)
+  DescriptorSet DynamicDescriptorPool::allocateSet(DescriptorLayoutId layoutId, std::vector<Binding> bindings, vk::CommandBuffer command_buffer)
   {
     auto &dslCache = get_context().getDescriptorSetLayouts();
     auto setLayouts = {dslCache.getVkLayout(layoutId)};
@@ -77,7 +78,7 @@ namespace etna
 
     vk::DescriptorSet vkSet {};
     ETNA_ASSERT(vkDevice.allocateDescriptorSets(&info, &vkSet) == vk::Result::eSuccess);
-    return DescriptorSet {flipsCount, layoutId, vkSet, std::move(bindings)};
+    return DescriptorSet {flipsCount, layoutId, vkSet, std::move(bindings), command_buffer};
   }
 
   static bool is_image_resource(vk::DescriptorType dsType)
@@ -199,5 +200,57 @@ namespace etna
     }
 
     get_context().getDevice().updateDescriptorSets(writes, {});
+  }
+
+  static vk::PipelineStageFlagBits2 shader_stage_to_pipeline_stage(vk::ShaderStageFlags shader_stages)
+  {
+    const uint32_t MAPPING_LENGTH = 1;
+    const std::array<vk::ShaderStageFlagBits, MAPPING_LENGTH> shaderStages = {
+      vk::ShaderStageFlagBits::eFragment,
+    };
+    const std::array<vk::PipelineStageFlagBits2, MAPPING_LENGTH> pipelineStages = {
+      vk::PipelineStageFlagBits2::eFragmentShader,
+    };
+    for (int i = 0; i < MAPPING_LENGTH; ++i)
+    {
+      if (shaderStages[i] & shader_stages)
+        return pipelineStages[i];
+    }
+    return vk::PipelineStageFlagBits2::eNone;
+  }
+
+  static vk::AccessFlagBits2 descriptor_type_to_access_flag(vk::DescriptorType decriptor_type)
+  {
+    const uint32_t MAPPING_LENGTH = 1;
+    const std::array<vk::DescriptorType, MAPPING_LENGTH> descritorTypes = {
+      vk::DescriptorType::eSampledImage,
+    };
+    const std::array<vk::AccessFlagBits2, MAPPING_LENGTH> accessFlags = {
+      vk::AccessFlagBits2::eShaderRead,
+    };
+    for (int i = 0; i < MAPPING_LENGTH; ++i)
+    {
+      if (descritorTypes[i] == decriptor_type)
+        return accessFlags[i];
+    }
+    return vk::AccessFlagBits2::eNone;
+  }
+
+  void DescriptorSet::processBarriers() const
+  {
+    auto &layoutInfo = get_context().getDescriptorSetLayouts().getLayoutInfo(layoutId);
+    for (auto &binding : bindings)
+    {
+      if (std::get_if<ImageBinding>(&binding.resources) == nullptr)
+        continue; // Add processing for buffer here if you need.
+
+      auto &bindingInfo = layoutInfo.getBinding(binding.binding);
+      const ImageBinding &imgData = std::get<ImageBinding>(binding.resources);
+      etna::set_state(command_buffer, imgData.image.get(),
+        shader_stage_to_pipeline_stage(bindingInfo.stageFlags),
+        descriptor_type_to_access_flag(bindingInfo.descriptorType),
+        imgData.descriptor_info.imageLayout,
+        imgData.image.getAspectMaskByFormat());
+    }
   }
 }

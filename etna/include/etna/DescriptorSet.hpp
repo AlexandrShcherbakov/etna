@@ -26,8 +26,12 @@ namespace etna
   struct DescriptorSet
   {
     DescriptorSet() {}
-    DescriptorSet(uint64_t gen, DescriptorLayoutId id, vk::DescriptorSet vk_set, std::vector<Binding> bindings)
-      : generation {gen}, layoutId {id}, set {vk_set}, bindings{std::move(bindings)} {}
+    DescriptorSet(uint64_t gen, DescriptorLayoutId id, vk::DescriptorSet vk_set, std::vector<Binding> bindings,
+      vk::CommandBuffer command_buffer)
+      : generation {gen}, layoutId {id}, set {vk_set}, bindings{std::move(bindings)}, command_buffer{command_buffer}
+    {
+      processBarriers();
+    }
 
     bool isValid() const;
     
@@ -51,11 +55,14 @@ namespace etna
       return bindings;
     }
 
+    void processBarriers() const;
+
   private:
     uint64_t generation {};
     DescriptorLayoutId layoutId {};
     vk::DescriptorSet set{};
     std::vector<Binding> bindings{};
+    vk::CommandBuffer command_buffer;
   };
 
   /*Base version. Allocate and use descriptor sets while writing command buffer, they will be destroyed
@@ -70,7 +77,7 @@ namespace etna
     void destroyAllocatedSets();
     void reset(uint32_t frames_in_flight);
 
-    DescriptorSet allocateSet(DescriptorLayoutId layoutId, std::vector<Binding> bindings);
+    DescriptorSet allocateSet(DescriptorLayoutId layoutId, std::vector<Binding> bindings, vk::CommandBuffer command_buffer);
 
     vk::DescriptorPool getCurrentPool() const
     {
