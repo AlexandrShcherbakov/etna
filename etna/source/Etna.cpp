@@ -54,10 +54,10 @@ namespace etna
     return g_context->getShaderManager().getProgramInfo(name);
   }
 
-  DescriptorSet create_descriptor_set(DescriptorLayoutId layout, const vk::ArrayProxy<const Binding> &bindings)
+  DescriptorSet create_descriptor_set(DescriptorLayoutId layout, std::vector<Binding> bindings)
   {
-    auto set = g_context->getDescriptorPool().allocateSet(layout);
-    write_set(set, bindings);
+    auto set = g_context->getDescriptorPool().allocateSet(layout, bindings);
+    write_set(set);
     return set;
   }
 

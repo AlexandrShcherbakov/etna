@@ -8,12 +8,25 @@
 
 namespace etna
 {
+  struct Binding
+  {
+    /*Todo: add resource wrappers*/
+    Binding(uint32_t rbinding, const vk::DescriptorImageInfo &image_info, uint32_t array_index = 0)
+      : binding {rbinding}, arrayElem {array_index}, resources {image_info} {}
+    Binding(uint32_t rbinding, const vk::DescriptorBufferInfo &buffer_info, uint32_t array_index = 0)
+      : binding {rbinding}, arrayElem {array_index}, resources {buffer_info} {}
+  
+    uint32_t binding;
+    uint32_t arrayElem;
+    std::variant<vk::DescriptorImageInfo, vk::DescriptorBufferInfo> resources;
+  };
+
   /*Maybe we need a hierarchy of descriptor sets*/
   struct DescriptorSet
   {
     DescriptorSet() {}
-    DescriptorSet(uint64_t gen, DescriptorLayoutId id, vk::DescriptorSet vk_set)
-      : generation {gen}, layoutId {id}, set {vk_set} {}
+    DescriptorSet(uint64_t gen, DescriptorLayoutId id, vk::DescriptorSet vk_set, std::vector<Binding> bindings)
+      : generation {gen}, layoutId {id}, set {vk_set}, bindings{std::move(bindings)} {}
 
     bool isValid() const;
     
@@ -32,10 +45,16 @@ namespace etna
       return generation;
     }
 
+    const std::vector<Binding>& getBindings() const
+    {
+      return bindings;
+    }
+
   private:
     uint64_t generation {};
     DescriptorLayoutId layoutId {};
     vk::DescriptorSet set{};
+    std::vector<Binding> bindings{};
   };
 
   /*Base version. Allocate and use descriptor sets while writing command buffer, they will be destroyed
@@ -50,7 +69,7 @@ namespace etna
     void destroyAllocatedSets();
     void reset(uint32_t frames_in_flight);
 
-    DescriptorSet allocateSet(DescriptorLayoutId layoutId);
+    DescriptorSet allocateSet(DescriptorLayoutId layoutId, std::vector<Binding> bindings);
 
     vk::DescriptorPool getCurrentPool() const
     {
@@ -76,20 +95,7 @@ namespace etna
     std::vector<vk::DescriptorPool> pools;
   };
 
-  struct Binding
-  {
-    /*Todo: add resource wrappers*/
-    Binding(uint32_t rbinding, const vk::DescriptorImageInfo &image_info, uint32_t array_index = 0)
-      : binding {rbinding}, arrayElem {array_index}, resources {image_info} {}
-    Binding(uint32_t rbinding, const vk::DescriptorBufferInfo &buffer_info, uint32_t array_index = 0)
-      : binding {rbinding}, arrayElem {array_index}, resources {buffer_info} {}
-  
-    uint32_t binding;
-    uint32_t arrayElem;
-    std::variant<vk::DescriptorImageInfo, vk::DescriptorBufferInfo> resources;
-  };
-
-  void write_set(const DescriptorSet &dst, const vk::ArrayProxy<const Binding> &bindings);
+  void write_set(const DescriptorSet &dst);
 }
 
 #endif // ETNA_DESCRIPTOR_SET_HPP_INCLUDED
