@@ -53,6 +53,8 @@ public:
 
   ImageBinding genBinding(vk::Sampler sampler, vk::ImageLayout layout, ViewParams params = {}) const;
 
+  vk::ImageAspectFlags getAspectMaskByFormat() const;
+
 private:
   struct ViewParamsHasher
   {

@@ -101,6 +101,11 @@ static vk::ImageAspectFlags get_aspeck_mask(vk::Format format)
   }
 }
 
+vk::ImageAspectFlags Image::getAspectMaskByFormat() const
+{
+  return get_aspeck_mask(format);
+}
+
 vk::ImageView Image::getView(Image::ViewParams params) const
 {
   auto it = views.find(params);
