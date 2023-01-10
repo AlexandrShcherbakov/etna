@@ -66,7 +66,7 @@ namespace etna
       flip();
   }
     
-  DescriptorSet DynamicDescriptorPool::allocateSet(DescriptorLayoutId layoutId)
+  DescriptorSet DynamicDescriptorPool::allocateSet(DescriptorLayoutId layoutId, std::vector<Binding> bindings)
   {
     auto &dslCache = get_context().getDescriptorSetLayouts();
     auto setLayouts = {dslCache.getVkLayout(layoutId)};
@@ -77,7 +77,7 @@ namespace etna
 
     vk::DescriptorSet vkSet {};
     ETNA_ASSERT(vkDevice.allocateDescriptorSets(&info, &vkSet) == vk::Result::eSuccess);
-    return DescriptorSet {flipsCount, layoutId, vkSet};
+    return DescriptorSet {flipsCount, layoutId, vkSet, std::move(bindings)};
   }
 
   static bool is_image_resource(vk::DescriptorType dsType)
@@ -102,9 +102,10 @@ namespace etna
     return false;
   }
 
-  static void validate_descriptor_write(const DescriptorSet &dst, const vk::ArrayProxy<const Binding> &bindings)
+  static void validate_descriptor_write(const DescriptorSet &dst)
   {
     auto &layoutInfo = get_context().getDescriptorSetLayouts().getLayoutInfo(dst.getLayoutId());
+    const auto &bindings = dst.getBindings();
 
     std::array<uint32_t, MAX_DESCRIPTOR_BINDINGS> unboundResources {};
 
@@ -139,20 +140,20 @@ namespace etna
     }
   }
 
-  void write_set(const DescriptorSet &dst, const vk::ArrayProxy<const Binding> &bindings)
+  void write_set(const DescriptorSet &dst)
   {
     ETNA_ASSERT(dst.isValid());
-    validate_descriptor_write(dst, bindings);
+    validate_descriptor_write(dst);
 
     std::vector<vk::WriteDescriptorSet> writes;
-    writes.reserve(bindings.size());
+    writes.reserve(dst.getBindings().size());
 
     uint32_t numBufferInfo = 0;
     uint32_t numImageInfo = 0;
 
     auto &layoutInfo = get_context().getDescriptorSetLayouts().getLayoutInfo(dst.getLayoutId());
 
-    for (auto &binding : bindings)
+    for (auto &binding : dst.getBindings())
     {
       auto &bindingInfo = layoutInfo.getBinding(binding.binding);
       if (is_image_resource(bindingInfo.descriptorType))
@@ -168,7 +169,7 @@ namespace etna
     numImageInfo = 0;
     numBufferInfo = 0;
 
-    for (auto &binding : bindings)
+    for (auto &binding : dst.getBindings())
     {
       auto &bindingInfo = layoutInfo.getBinding(binding.binding);
       vk::WriteDescriptorSet write {};
