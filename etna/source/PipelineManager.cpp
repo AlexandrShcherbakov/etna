@@ -90,8 +90,8 @@ vk::UniquePipeline createGraphicsPipelineInternal(
   blendState.blendConstants = info.blendingConfig.blendConstants;
 
   std::vector<vk::DynamicState> dynamicStates = {
-    vk::DynamicState::eViewportWithCount,
-    vk::DynamicState::eScissorWithCount
+    vk::DynamicState::eViewport,
+    vk::DynamicState::eScissor
   };
   vk::PipelineDynamicStateCreateInfo dynamicState {};
   dynamicState.setDynamicStates(dynamicStates);
