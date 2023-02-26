@@ -61,7 +61,7 @@ namespace etna
     vk::ImageLayout layout, vk::ImageAspectFlags aspect_flags);
 
   void finish_frame(vk::CommandBuffer com_buffer);
-
+  void flush_barriers(vk::CommandBuffer com_buffer);
 }
 
 #endif // ETNA_ETNA_HPP_INCLUDED
