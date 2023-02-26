@@ -79,4 +79,9 @@ namespace etna
   {
     etna::get_context().getResourceTracker().flushBarriers(com_buffer);
   }
+
+  void flush_barriers(vk::CommandBuffer com_buffer)
+  {
+    etna::get_context().getResourceTracker().flushBarriers(com_buffer);
+  }
 }
