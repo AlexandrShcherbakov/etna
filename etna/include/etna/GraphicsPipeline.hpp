@@ -37,6 +37,13 @@ public:
         .topology = vk::PrimitiveTopology::eTriangleList
       };
 
+    // Tesselation stage configuration
+    vk::PipelineTessellationStateCreateInfo tesselationConfig =
+      {
+        // Number of control points per tesselation patch
+        .patchControlPoints = 4,
+      };
+
     // Configuration for the rasterizer
     vk::PipelineRasterizationStateCreateInfo rasterizationConfig =
       {

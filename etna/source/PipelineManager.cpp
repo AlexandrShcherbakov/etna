@@ -108,6 +108,7 @@ vk::UniquePipeline createGraphicsPipelineInternal(
       .pNext = &rendering,
       .pVertexInputState = &vertexInput,
       .pInputAssemblyState = &info.inputAssemblyConfig,
+      .pTessellationState = &info.tesselationConfig,
       .pViewportState = &viewportState,
       .pRasterizationState = &info.rasterizationConfig,
       .pMultisampleState = &multisampleState,
