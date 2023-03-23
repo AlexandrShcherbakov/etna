@@ -201,7 +201,7 @@ namespace etna
         }
         else {
           if (pushConst.size != modPushConst.size)
-            ETNA_PANIC("ShaderProgram ", name, " : not compatible push constant blocks");
+            ETNA_PANIC("ShaderProgram {} : not compatible push constant blocks", name);
           pushConst.stageFlags |= modPushConst.stageFlags;
         }
       }
@@ -210,7 +210,7 @@ namespace etna
       for (auto &desc : resources)
       {
         if (desc.first >= MAX_PROGRAM_DESCRIPTORS)
-          ETNA_PANIC("ShaderProgram ", name, " : set ", desc.first, " out of max sets (", MAX_PROGRAM_DESCRIPTORS, ")");
+          ETNA_PANIC("ShaderProgram {} : set {} out of max sets ({})", name, desc.first, MAX_PROGRAM_DESCRIPTORS);
 
         usedDescriptors.set(desc.first);
         dstDescriptors[desc.first].merge(desc.second);

@@ -8,7 +8,7 @@ namespace etna
   void DescriptorSetInfo::addResource(const vk::DescriptorSetLayoutBinding &binding)
   {
     if (binding.binding > MAX_DESCRIPTOR_BINDINGS)
-      ETNA_PANIC("DescriptorSetInfo: Binding ", binding.binding,  " out of MAX_DESCRIPTOR_BINDINGS range");
+      ETNA_PANIC("DescriptorSetInfo: Binding {} out of MAX_DESCRIPTOR_BINDINGS range", binding.binding);
 
     if (usedBindings.test(binding.binding))
     {
@@ -16,7 +16,7 @@ namespace etna
       if (src.descriptorType != binding.descriptorType
         || src.descriptorCount != binding.descriptorCount)
       {
-        ETNA_PANIC("DescriptorSetInfo: incompatible bindings at index ", binding.binding);
+        ETNA_PANIC("DescriptorSetInfo: incompatible bindings at index {}", binding.binding);
       }
 
       src.stageFlags |= binding.stageFlags;

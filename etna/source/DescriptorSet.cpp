@@ -119,16 +119,16 @@ namespace etna
     for (auto &binding : bindings)
     {
       if (!layoutInfo.isBindingUsed(binding.binding))
-        ETNA_PANIC("Descriptor write error: descriptor set doesn't have ", binding.binding, " slot");
+        ETNA_PANIC("Descriptor write error: descriptor set doesn't have {} slot", binding.binding);
 
       auto &bindingInfo = layoutInfo.getBinding(binding.binding);
-      bool isImageRequied = is_image_resource(bindingInfo.descriptorType); 
+      bool isImageRequired = is_image_resource(bindingInfo.descriptorType); 
       bool isImageBinding = std::get_if<ImageBinding>(&binding.resources) != nullptr;
-      if (isImageRequied != isImageBinding)
+      if (isImageRequired != isImageBinding)
       {
-        ETNA_PANIC("Descriptor write error: slot ", binding.binding,
-          (isImageRequied? " image required" : " buffer requied"),
-          (isImageBinding? " but image bound" : "but buffer bound"));
+        ETNA_PANIC("Descriptor write error: slot {} {} required but {} bound", binding.binding,
+            (isImageRequired ? "image" : "buffer"),
+            (isImageBinding  ? "imaged" : "buffer"));
       }
 
       unboundResources[binding.binding] -= 1;
