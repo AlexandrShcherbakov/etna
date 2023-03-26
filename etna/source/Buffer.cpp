@@ -33,7 +33,7 @@ Buffer::Buffer(VmaAllocator alloc, CreateInfo info)
   // Note that usually vulkan.hpp handles doing the assertion
   // and a pretty message, but VMA cannot do that.
   ETNA_ASSERTF(retcode == VK_SUCCESS,
-    "Error %s occurred while trying to allocate an etna::Buffer!",
+    "Error {} occurred while trying to allocate an etna::Buffer!",
     vk::to_string(static_cast<vk::Result>(retcode)));
   buffer = vk::Buffer(buf);
   etna::set_debug_name(buffer, info.name.data());
