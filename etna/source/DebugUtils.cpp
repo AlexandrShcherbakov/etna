@@ -12,7 +12,9 @@ namespace etna
       .object = object,
       .pObjectName = name
     };
+    #ifdef DEBUG_NAMES
     etna::get_context().getDevice().debugMarkerSetObjectNameEXT(&debugNameInfo);
+    #endif  
   }
 
   void set_debug_name(vk::Image image, const char *name)

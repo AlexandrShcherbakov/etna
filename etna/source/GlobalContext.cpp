@@ -168,7 +168,9 @@ namespace etna
 
     std::vector<char const *> deviceExtensions(params.deviceExtensions.begin(), params.deviceExtensions.end());
     deviceExtensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
+    #ifdef DEBUG_NAMES
     deviceExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
+    #endif
 
 
     // NOTE: original design of PhysicalDeviceFeatures did not
