@@ -21,6 +21,10 @@ public:
         // TODO: Add new fields for clearing etc.
         vk::Image image = VK_NULL_HANDLE;
         vk::ImageView view = VK_NULL_HANDLE;
+        vk::AttachmentLoadOp loadOp = vk::AttachmentLoadOp::eClear;
+        vk::AttachmentStoreOp storeOp = vk::AttachmentStoreOp::eStore;
+        vk::ClearColorValue clearColorValue = std::array<float, 4>({0.0f, 0.0f, 0.0f, 1.0f});
+        vk::ClearDepthStencilValue clearDepthStencilValue = {1.0f, 0};
         AttachmentParams() = default;
         AttachmentParams(vk::Image i, vk::ImageView v) : image(i), view(v) {}
         AttachmentParams(const Image &img) : image(img.get()), view(img.getView({})) {}
