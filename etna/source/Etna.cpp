@@ -4,6 +4,8 @@
 
 #include <etna/GlobalContext.hpp>
 #include <etna/Etna.hpp>
+#include <vulkan/vulkan_format_traits.hpp>
+#include <vulkan/vulkan_funcs.hpp>
 
 
 namespace etna
@@ -59,6 +61,72 @@ namespace etna
     auto set = g_context->getDescriptorPool().allocateSet(layout, bindings, command_buffer);
     write_set(set);
     return set;
+  }
+
+  Image create_image_from_bytes(Image::CreateInfo info, vk::CommandBuffer command_buffer, const void *data)
+  {
+    const auto block_size = vk::blockSize(info.format);
+    const auto image_size = block_size * info.extent.width * info.extent.height * info.extent.depth;
+    etna::Buffer staging_buf = g_context->createBuffer(etna::Buffer::CreateInfo
+    {
+      .size = image_size, 
+      .bufferUsage = vk::BufferUsageFlagBits::eTransferSrc,
+      .memoryUsage = VMA_MEMORY_USAGE_CPU_ONLY,
+      .name = "tmp_staging_buf"
+    });
+
+    auto *mapped_mem = staging_buf.map();
+    memcpy(mapped_mem, data, image_size);
+    staging_buf.unmap();
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(command_buffer, &beginInfo);
+
+    info.imageUsage |= vk::ImageUsageFlagBits::eTransferDst;
+    auto image = g_context->createImage(info);
+    etna::set_state(command_buffer, image.get(), vk::PipelineStageFlagBits2::eTransfer,
+      vk::AccessFlagBits2::eTransferWrite, vk::ImageLayout::eTransferDstOptimal,
+      image.getAspectMaskByFormat());
+    etna::flush_barriers(command_buffer);
+
+    VkBufferImageCopy region{};
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
+
+    region.imageSubresource.aspectMask = (VkImageAspectFlags)image.getAspectMaskByFormat();
+    region.imageSubresource.mipLevel = 0;
+    region.imageSubresource.baseArrayLayer = 0;
+    region.imageSubresource.layerCount = static_cast<uint32_t>(info.layers);
+
+    region.imageOffset = {0, 0, 0};
+    region.imageExtent = info.extent;
+
+    vkCmdCopyBufferToImage(
+        command_buffer,
+        staging_buf.get(),
+        image.get(),
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        1,
+        &region
+    );
+
+    vkEndCommandBuffer(command_buffer);
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = (VkCommandBuffer *)&command_buffer;
+
+    vkQueueSubmit(g_context->getQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(g_context->getQueue());
+
+    staging_buf.reset();
+
+    return image;
   }
 
   /*Todo: submit logic here*/
