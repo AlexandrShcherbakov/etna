@@ -5,7 +5,6 @@
 #include <etna/GlobalContext.hpp>
 #include <etna/Etna.hpp>
 #include <vulkan/vulkan_format_traits.hpp>
-#include <vulkan/vulkan_funcs.hpp>
 
 
 namespace etna
