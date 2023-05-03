@@ -31,7 +31,7 @@ endif ()
 CPMAddPackage(
   NAME SpirvReflect
   GITHUB_REPOSITORY KhronosGroup/SPIRV-Reflect
-  GIT_TAG master
+  GIT_TAG main
   OPTIONS
     "SPIRV_REFLECT_EXECUTABLE OFF"
     "SPIRV_REFLECT_STRIPPER OFF"
