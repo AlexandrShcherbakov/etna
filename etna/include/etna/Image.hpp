@@ -51,7 +51,7 @@ public:
   };
   vk::ImageView getView(ViewParams params) const;
 
-  ImageBinding genBinding(vk::Sampler sampler, vk::ImageLayout layout, ViewParams params = {}) const;
+  ImageBinding genBinding(vk::Sampler sampler, vk::ImageLayout layout, ViewParams params = {0, 1}) const;
 
   vk::ImageAspectFlags getAspectMaskByFormat() const;
 
