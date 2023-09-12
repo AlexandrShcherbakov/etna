@@ -17,8 +17,8 @@ Sampler::Sampler(CreateInfo info)
     .addressModeW = info.addressMode,
     .mipLodBias = 0.0f,
     .maxAnisotropy = 1.0f,
-    .minLod = 0.0f,
-    .maxLod = 1.0f,
+    .minLod = info.minLod,
+    .maxLod = info.maxLod,
     .borderColor = vk::BorderColor::eFloatOpaqueWhite
   };
   sampler = etna::get_context().getDevice().createSamplerUnique(createInfo).value;
