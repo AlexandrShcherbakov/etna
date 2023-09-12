@@ -17,6 +17,8 @@ public:
     vk::Filter filter = vk::Filter::eNearest;
     vk::SamplerAddressMode addressMode = vk::SamplerAddressMode::eClampToEdge;
     std::string_view name;
+    float minLod = 0.0f;
+    float maxLod = 1.0f;
   };
 
   Sampler(CreateInfo info);
