@@ -102,7 +102,7 @@ namespace etna
     region.imageSubresource.layerCount = static_cast<uint32_t>(info.layers);
 
     region.imageOffset = {0, 0, 0};
-    region.imageExtent = info.extent;
+    region.imageExtent = (VkExtent3D) info.extent;
 
     vkCmdCopyBufferToImage(
         command_buffer,
