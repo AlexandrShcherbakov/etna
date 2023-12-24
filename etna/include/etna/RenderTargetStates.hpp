@@ -30,8 +30,9 @@ public:
         AttachmentParams(const Image &img) : image(img.get()), view(img.getView({})) {}
     };
     
-    RenderTargetState(VkCommandBuffer cmd_buff, vk::Extent2D extend,
+    RenderTargetState(VkCommandBuffer cmd_buff, vk::Rect2D rect,
     const std::vector<AttachmentParams> &color_attachments, AttachmentParams depth_attachment);
+
     ~RenderTargetState();
 };
 
