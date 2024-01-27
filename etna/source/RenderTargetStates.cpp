@@ -12,10 +12,10 @@ namespace etna
 bool RenderTargetState::inScope = false;
 
 RenderTargetState::RenderTargetState(
-  VkCommandBuffer cmd_buff,
-  vk::Extent2D extend,
-  const std::vector<AttachmentParams> &color_attachments,
-  AttachmentParams depth_attachment)
+    VkCommandBuffer cmd_buff,
+    vk::Rect2D rect,
+    const std::vector<AttachmentParams> &color_attachments,
+    AttachmentParams depth_attachment)
 {
   ETNA_ASSERTF(!inScope, "RenderTargetState scopes shouldn't overlap.");
   inScope = true;
@@ -23,21 +23,16 @@ RenderTargetState::RenderTargetState(
   commandBuffer = cmd_buff;
   vk::Viewport viewport
   {
-    .x = 0.0f,
-    .y = 0.0f,
-    .width  = static_cast<float>(extend.width),
-    .height = static_cast<float>(extend.height),
+    .x = static_cast<float>(rect.offset.x),
+    .y = static_cast<float>(rect.offset.y),
+    .width  = static_cast<float>(rect.extent.width),
+    .height = static_cast<float>(rect.extent.height),
     .minDepth = 0.0f,
     .maxDepth = 1.0f
   };
-  vk::Rect2D scissor
-  {
-    .offset = {0, 0},
-    .extent = extend
-  };
 
   VkViewport vp = (VkViewport)viewport;
-  VkRect2D scis = (VkRect2D)scissor;
+  VkRect2D scis = (VkRect2D)rect;
   vkCmdSetViewport(commandBuffer, 0, 1, &vp);
   vkCmdSetScissor(commandBuffer, 0, 1, &scis);
 
@@ -64,7 +59,7 @@ RenderTargetState::RenderTargetState(
   etna::get_context().getResourceTracker().flushBarriers(commandBuffer);
 
   vk::RenderingInfo renderInfo {
-    .renderArea = scissor,
+    .renderArea = rect,
     .layerCount = 1,
     .colorAttachmentCount = static_cast<uint32_t>(attachmentInfos.size()),
     .pColorAttachments = attachmentInfos.size() ? attachmentInfos.data() : nullptr,
