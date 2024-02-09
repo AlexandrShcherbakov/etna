@@ -26,6 +26,7 @@ public:
       vk::ImageTiling tiling = vk::ImageTiling::eOptimal;
     std::size_t layers = 1;
     std::size_t mipLevels = 1;
+    vk::SampleCountFlagBits samples = vk::SampleCountFlagBits::e1;
   };
 
   Image(VmaAllocator alloc, CreateInfo info);
@@ -46,12 +47,13 @@ public:
   {
     uint32_t baseMip = 0;
     uint32_t levelCount = 1;
+    std::optional<vk::ImageAspectFlagBits> aspectMask {};
 
     bool operator==(const ViewParams& b) const = default;
   };
   vk::ImageView getView(ViewParams params) const;
 
-  ImageBinding genBinding(vk::Sampler sampler, vk::ImageLayout layout, ViewParams params = {0, 1}) const;
+  ImageBinding genBinding(vk::Sampler sampler, vk::ImageLayout layout, ViewParams params = {0, 1, {}}) const;
 
   vk::ImageAspectFlags getAspectMaskByFormat() const;
 

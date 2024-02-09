@@ -15,7 +15,7 @@ Image::Image(VmaAllocator alloc, CreateInfo info)
     .extent = info.extent,
     .mipLevels = static_cast<uint32_t>(info.mipLevels),
     .arrayLayers = static_cast<uint32_t>(info.layers),
-    .samples = vk::SampleCountFlagBits::e1,
+    .samples = info.samples,
     .tiling = info.tiling,
     .usage = info.imageUsage,
     .sharingMode = vk::SharingMode::eExclusive,
@@ -89,6 +89,8 @@ static vk::ImageAspectFlags get_aspeck_mask(vk::Format format)
 {
   switch (format)
   {
+  case vk::Format::eS8Uint:
+    return vk::ImageAspectFlagBits::eStencil;
   case vk::Format::eD16Unorm:
   case vk::Format::eD32Sfloat:
     return vk::ImageAspectFlagBits::eDepth;
@@ -119,7 +121,7 @@ vk::ImageView Image::getView(Image::ViewParams params) const
       .format = format, // TODO: Maybe support anothe type view
       .subresourceRange = vk::ImageSubresourceRange
       {
-        .aspectMask = get_aspeck_mask(format),
+        .aspectMask = params.aspectMask ? params.aspectMask.value() : get_aspeck_mask(format),
         .baseMipLevel = params.baseMip,
         .levelCount = params.levelCount,
         .baseArrayLayer = 0,
