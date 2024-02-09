@@ -75,12 +75,6 @@ vk::UniquePipeline createGraphicsPipelineInternal(
     .scissorCount = 1,
   };
 
-  vk::PipelineMultisampleStateCreateInfo multisampleState
-    {
-      .rasterizationSamples = vk::SampleCountFlagBits::e1,
-      .sampleShadingEnable = false,
-    };
-
   vk::PipelineColorBlendStateCreateInfo blendState
     {
       .logicOpEnable = info.blendingConfig.logicOpEnable,
@@ -89,12 +83,8 @@ vk::UniquePipeline createGraphicsPipelineInternal(
   blendState.setAttachments(info.blendingConfig.attachments);
   blendState.blendConstants = info.blendingConfig.blendConstants;
 
-  std::vector<vk::DynamicState> dynamicStates = {
-    vk::DynamicState::eViewport,
-    vk::DynamicState::eScissor
-  };
   vk::PipelineDynamicStateCreateInfo dynamicState {};
-  dynamicState.setDynamicStates(dynamicStates);
+  dynamicState.setDynamicStates(info.dynamicStates);
 
   vk::PipelineRenderingCreateInfo rendering 
     {
@@ -111,7 +101,7 @@ vk::UniquePipeline createGraphicsPipelineInternal(
       .pTessellationState = &info.tessellationConfig,
       .pViewportState = &viewportState,
       .pRasterizationState = &info.rasterizationConfig,
-      .pMultisampleState = &multisampleState,
+      .pMultisampleState = &info.multisampleConfig,
       .pDepthStencilState = &info.depthConfig,
       .pColorBlendState = &blendState,
       .pDynamicState = &dynamicState,
