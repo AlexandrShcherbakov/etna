@@ -56,6 +56,17 @@ public:
         // Width of lines when drawing lines/outlines
         .lineWidth = 1.f,
       };
+    
+    // Configuration for multisample state
+    vk::PipelineMultisampleStateCreateInfo multisampleConfig =
+      {
+        // Number of samples per pixel
+        .rasterizationSamples = vk::SampleCountFlagBits::e1,
+        // Invoke the fragment shader at least max(1, ceil(rasterizationSamples * minSampleShading)) times per fragment?
+        .sampleShadingEnable = false,
+        // Value in range [0.0f, 1.0f]. Ignore if sample shading is disabled
+        .minSampleShading = 0.f,
+      };
 
     // Configuration for alpha blending.
     // Disabled and configured to a single color attachment by default.
@@ -105,6 +116,12 @@ public:
       vk::Format depthAttachmentFormat = vk::Format::eUndefined;
       vk::Format stencilAttachmentFormat = vk::Format::eUndefined;
     } fragmentShaderOutput;
+
+    std::vector<vk::DynamicState> dynamicStates = 
+      {
+        vk::DynamicState::eViewport,
+        vk::DynamicState::eScissor
+      };
   };
 };
 
