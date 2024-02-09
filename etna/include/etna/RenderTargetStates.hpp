@@ -31,7 +31,8 @@ public:
     };
     
     RenderTargetState(VkCommandBuffer cmd_buff, vk::Extent2D extend,
-    const std::vector<AttachmentParams> &color_attachments, AttachmentParams depth_attachment);
+        const std::vector<AttachmentParams> &color_attachments, AttachmentParams depth_attachment,
+        AttachmentParams stencil_attachment);
     ~RenderTargetState();
 };
 
