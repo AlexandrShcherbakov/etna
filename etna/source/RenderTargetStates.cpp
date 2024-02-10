@@ -15,6 +15,15 @@ RenderTargetState::RenderTargetState(
   VkCommandBuffer cmd_buff,
   vk::Extent2D extend,
   const std::vector<AttachmentParams> &color_attachments,
+  AttachmentParams depth_attachment)
+{
+  RenderTargetState(cmd_buff, extend, color_attachments, depth_attachment, {});
+}
+
+RenderTargetState::RenderTargetState(
+  VkCommandBuffer cmd_buff,
+  vk::Extent2D extend,
+  const std::vector<AttachmentParams> &color_attachments,
   AttachmentParams depth_attachment,
   AttachmentParams stencil_attachment)
 {
@@ -69,8 +78,9 @@ RenderTargetState::RenderTargetState(
     .clearValue = stencil_attachment.clearDepthStencilValue
   };
 
-  if (depth_attachment.image && depth_attachment.image == stencil_attachment.image)
+  if (depth_attachment.image && stencil_attachment.image)
   {
+    ETNA_ASSERTF(depth_attachment.view == stencil_attachment.view, "depth and stencil attachments must be created from the same image");
     etna::get_context().getResourceTracker().setDepthStencilTarget(commandBuffer, depth_attachment.image);
   }
   else
