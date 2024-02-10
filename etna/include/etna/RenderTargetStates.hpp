@@ -35,8 +35,9 @@ public:
         AttachmentParams stencil_attachment);
     // We can't use the default argument for stencil_attachment due to gcc bug 88165
     // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88165
-    RenderTargetState(VkCommandBuffer cmd_buff, vk::Extent2D extend,
-        const std::vector<AttachmentParams> &color_attachments, AttachmentParams depth_attachment);
+    RenderTargetState(VkCommandBuffer cmd_buff, vk::Extent2D extend, 
+        const std::vector<AttachmentParams> &color_attachments, AttachmentParams depth_attachment) 
+        : RenderTargetState(cmd_buff, extend, color_attachments, depth_attachment, {}) {};
 
     ~RenderTargetState();
 };

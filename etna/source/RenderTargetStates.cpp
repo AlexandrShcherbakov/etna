@@ -15,15 +15,6 @@ RenderTargetState::RenderTargetState(
   VkCommandBuffer cmd_buff,
   vk::Extent2D extend,
   const std::vector<AttachmentParams> &color_attachments,
-  AttachmentParams depth_attachment)
-{
-  RenderTargetState(cmd_buff, extend, color_attachments, depth_attachment, {});
-}
-
-RenderTargetState::RenderTargetState(
-  VkCommandBuffer cmd_buff,
-  vk::Extent2D extend,
-  const std::vector<AttachmentParams> &color_attachments,
   AttachmentParams depth_attachment,
   AttachmentParams stencil_attachment)
 {
