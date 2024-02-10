@@ -12,10 +12,11 @@ namespace etna
 bool RenderTargetState::inScope = false;
 
 RenderTargetState::RenderTargetState(
-    VkCommandBuffer cmd_buff,
-    vk::Rect2D rect,
-    const std::vector<AttachmentParams> &color_attachments,
-    AttachmentParams depth_attachment)
+  VkCommandBuffer cmd_buff,
+  vk::Extent2D extend,
+  const std::vector<AttachmentParams> &color_attachments,
+  AttachmentParams depth_attachment,
+  AttachmentParams stencil_attachment)
 {
   ETNA_ASSERTF(!inScope, "RenderTargetState scopes shouldn't overlap.");
   inScope = true;
@@ -46,6 +47,7 @@ RenderTargetState::RenderTargetState(
     attachmentInfos[i].clearValue = color_attachments[i].clearColorValue;
     etna::get_context().getResourceTracker().setColorTarget(commandBuffer, color_attachments[i].image);
   }
+
   vk::RenderingAttachmentInfo depthAttInfo {
     .imageView = depth_attachment.view,
     .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
@@ -53,8 +55,27 @@ RenderTargetState::RenderTargetState(
     .storeOp = depth_attachment.storeOp,
     .clearValue = depth_attachment.clearDepthStencilValue
   };
-  if (depth_attachment.image)
-    etna::get_context().getResourceTracker().setDepthTarget(commandBuffer, depth_attachment.image);
+  
+  vk::RenderingAttachmentInfo stencilAttInfo {
+    .imageView = stencil_attachment.view,
+    .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
+    .loadOp = stencil_attachment.loadOp,
+    .storeOp = stencil_attachment.storeOp,
+    .clearValue = stencil_attachment.clearDepthStencilValue
+  };
+
+  if (depth_attachment.image && stencil_attachment.image)
+  {
+    ETNA_ASSERTF(depth_attachment.view == stencil_attachment.view, "depth and stencil attachments must be created from the same image");
+    etna::get_context().getResourceTracker().setDepthStencilTarget(commandBuffer, depth_attachment.image);
+  }
+  else
+  {
+    if (depth_attachment.image)
+      etna::get_context().getResourceTracker().setDepthTarget(commandBuffer, depth_attachment.image);
+    if (stencil_attachment.image)
+      etna::get_context().getResourceTracker().setStencilTarget(commandBuffer, stencil_attachment.image);
+  }
 
   etna::get_context().getResourceTracker().flushBarriers(commandBuffer);
 
@@ -63,7 +84,8 @@ RenderTargetState::RenderTargetState(
     .layerCount = 1,
     .colorAttachmentCount = static_cast<uint32_t>(attachmentInfos.size()),
     .pColorAttachments = attachmentInfos.size() ? attachmentInfos.data() : nullptr,
-    .pDepthAttachment = depth_attachment.view ? &depthAttInfo : nullptr
+    .pDepthAttachment = depth_attachment.view ? &depthAttInfo : nullptr,
+    .pStencilAttachment = stencil_attachment.view ? &stencilAttInfo : nullptr,
   };
   VkRenderingInfo rInf = (VkRenderingInfo)renderInfo;
   vkCmdBeginRendering(commandBuffer, &rInf);
