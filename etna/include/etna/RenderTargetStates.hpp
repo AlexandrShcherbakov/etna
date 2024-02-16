@@ -26,8 +26,9 @@ public:
     vk::ClearColorValue clearColorValue = std::array<float, 4>({0.0f, 0.0f, 0.0f, 1.0f});
     vk::ClearDepthStencilValue clearDepthStencilValue = {1.0f, 0};
     AttachmentParams() = default;
-    AttachmentParams(vk::Image i, vk::ImageView v) : image(i), view(v) {}
-    AttachmentParams(const Image &img) : image(img.get()), view(img.getView({})) {}
+    AttachmentParams(vk::Image i, vk::ImageView v, bool clear = true)
+      : image(i), view(v), loadOp(clear ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad) {}
+    AttachmentParams(const Image &img, bool clear = true) : AttachmentParams(img.get(), img.getView({}), clear) {}
   };
     
   RenderTargetState(VkCommandBuffer cmd_buff, vk::Rect2D rect,
