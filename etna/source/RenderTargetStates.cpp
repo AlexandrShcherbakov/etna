@@ -13,7 +13,7 @@ bool RenderTargetState::inScope = false;
 
 RenderTargetState::RenderTargetState(
   VkCommandBuffer cmd_buff,
-  vk::Extent2D extend,
+  vk::Rect2D rect,
   const std::vector<AttachmentParams> &color_attachments,
   AttachmentParams depth_attachment,
   AttachmentParams stencil_attachment)
