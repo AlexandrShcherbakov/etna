@@ -90,7 +90,7 @@ std::byte* Buffer::map()
   // is acceptable and recoverable from.
   auto retcode = vmaMapMemory(allocator, allocation, &result);
   ETNA_ASSERTF(retcode == VK_SUCCESS,
-    "Error %s occurred while trying to map an etna::Buffer!",
+    "Error {} occurred while trying to map an etna::Buffer!",
     vk::to_string(static_cast<vk::Result>(retcode)));
 
   return mapped = static_cast<std::byte*>(result);

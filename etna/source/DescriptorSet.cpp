@@ -99,7 +99,7 @@ namespace etna
       break;
     }
 
-    ETNA_PANIC("Descriptor write error : unsupported resource ", vk::to_string(dsType));
+    ETNA_PANIC("Descriptor write error : unsupported resource {}", vk::to_string(dsType));
     return false;
   }
 
@@ -137,7 +137,7 @@ namespace etna
     for (uint32_t binding = 0; binding < MAX_DESCRIPTOR_BINDINGS; binding++)
     {
       if (unboundResources[binding])
-        ETNA_PANIC("Descriptor write error: slot ", binding, " has ", unboundResources[binding], " unbound resources");
+        ETNA_PANIC("Descriptor write error: slot {} has {} unbound resources", binding, unboundResources[binding]);
     }
   }
 
