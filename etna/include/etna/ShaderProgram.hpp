@@ -90,7 +90,7 @@ namespace etna
     {
       auto &prog = *programs.at(id);
       if (set >= MAX_PROGRAM_DESCRIPTORS || !prog.usedDescriptors.test(set))
-        ETNA_PANIC("ShaderProgram ", prog.name, " invalid descriptor set #", set);
+        ETNA_PANIC("ShaderProgram {} invalid descriptor set #{}", prog.name, set);
       return prog.descriptorIds[set];
     }
 

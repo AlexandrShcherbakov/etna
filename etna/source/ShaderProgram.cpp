@@ -51,7 +51,7 @@ namespace etna
     info.setCodeSize(code.size());
 
     if (code.size() % 4 != 0)
-      ETNA_PANIC("SPIRV ", path, " broken");
+      ETNA_PANIC("SPIRV {} broken", path);
 
     vkModule = device.createShaderModuleUnique(info).value;
 
@@ -85,7 +85,7 @@ namespace etna
     {
       auto &blk = spvModule->push_constant_blocks[0];
       if (blk.offset != 0) {
-        ETNA_PANIC("SPIRV ", path, " parse error: PushConst offset is not zero");
+        ETNA_PANIC("SPIRV {} parse error: PushConst offset is not zero", path);
       }
       pushConst.stageFlags = stage;
       pushConst.offset = 0u;
@@ -93,7 +93,7 @@ namespace etna
     }
     else if (spvModule->push_constant_block_count > 1)
     {
-      ETNA_PANIC("SPIRV ", path, " parse error: only 1 push_const block per shader supported");
+      ETNA_PANIC("SPIRV {} parse error: only 1 push_const block per shader supported", path);
     }
     else
     {
@@ -130,11 +130,11 @@ namespace etna
 
     for (auto stage : stages) {
       if (!(stage & supportedShaders)) {
-        ETNA_PANIC("Shader program ", name, " creating error, unsupported shader stage ", vk::to_string(stage));
+        ETNA_PANIC("Shader program {} creating error, unsupported shader stage {}", name, vk::to_string(stage));
       }
 
       if (stage & usageMask) {
-        ETNA_PANIC("Shader program ", name, " creating error, multiple usage of", vk::to_string(stage), " shader stage");
+        ETNA_PANIC("Shader program {} creating error, multiple usage of {} shader stage", name, vk::to_string(stage));
       }
 
       isComputePipeline |= (stage == vk::ShaderStageFlagBits::eCompute);
@@ -142,14 +142,14 @@ namespace etna
     }
 
     if (isComputePipeline && stages.size() != 1) {
-      ETNA_PANIC("Shader program ", name, " creating error, usage of compute shader with other stages");
+      ETNA_PANIC("Shader program {} creating error, usage of compute shader with other stages", name);
     }
   }
 
   ShaderProgramId ShaderProgramManager::loadProgram(const std::string &name, const std::vector<std::string> &shaders_path)
   {
     if (programNames.find(name) != programNames.end())
-      ETNA_PANIC("Shader program ", name, " redefenition");
+      ETNA_PANIC("Shader program {} redefenition", name);
     
     std::vector<uint32_t> moduleIds;
     std::vector<vk::ShaderStageFlagBits> stages;
@@ -175,7 +175,7 @@ namespace etna
   {
     auto it = programNames.find(name);
     if (it == programNames.end())
-      ETNA_PANIC("Shader program ", name, " not found");
+      ETNA_PANIC("Shader program {} not found", name);
     return it->second;
   }
 
