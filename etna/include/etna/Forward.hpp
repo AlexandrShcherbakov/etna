@@ -16,7 +16,7 @@ struct ShaderProgramManager;
 using ShaderProgramId = std::uint32_t;
 inline constexpr ShaderProgramId INVALID_SHADER_PROGRAM_ID = static_cast<PipelineId>(-1);
 
-}
+} // namespace etna
 
 
 #endif // ETNA_FORWARD_HPP_INCLUDED

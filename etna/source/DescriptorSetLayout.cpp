@@ -3,21 +3,30 @@
 #include <spirv_reflect.h>
 
 #include <etna/Assert.hpp>
+#include <vulkan/vulkan_enums.hpp>
 
 
 namespace etna
 {
 
-void DescriptorSetInfo::addResource(const vk::DescriptorSetLayoutBinding &binding)
+static bool is_dynamic_descriptor(vk::DescriptorType type)
+{
+  return type == vk::DescriptorType::eUniformBufferDynamic ||
+    type == vk::DescriptorType::eStorageBufferDynamic;
+}
+
+void DescriptorSetInfo::addResource(const vk::DescriptorSetLayoutBinding& binding)
 {
   if (binding.binding > MAX_DESCRIPTOR_BINDINGS)
-    ETNA_PANIC("DescriptorSetInfo: Binding {} out of MAX_DESCRIPTOR_BINDINGS range", binding.binding);
+    ETNA_PANIC(
+      "DescriptorSetInfo: Binding {} out of MAX_DESCRIPTOR_BINDINGS range", binding.binding);
 
   if (usedBindings.test(binding.binding))
   {
-    auto &src = bindings[binding.binding];
-    if (src.descriptorType != binding.descriptorType
-      || src.descriptorCount != binding.descriptorCount)
+    auto& src = bindings[binding.binding];
+    if (
+      src.descriptorType != binding.descriptorType ||
+      src.descriptorCount != binding.descriptorCount)
     {
       ETNA_PANIC("DescriptorSetInfo: incompatible bindings at index {}", binding.binding);
     }
@@ -31,7 +40,8 @@ void DescriptorSetInfo::addResource(const vk::DescriptorSetLayoutBinding &bindin
 
   if (binding.binding + 1 > maxUsedBinding)
     maxUsedBinding = binding.binding + 1;
-  if (binding.descriptorType == vk::DescriptorType::eUniformBufferDynamic || binding.descriptorType == vk::DescriptorType::eStorageBufferDynamic)
+
+  if (is_dynamic_descriptor(binding.descriptorType))
     dynOffsets++;
 }
 
@@ -40,20 +50,22 @@ void DescriptorSetInfo::clear()
   maxUsedBinding = 0;
   dynOffsets = 0;
   usedBindings.reset();
-  for (auto &binding : bindings)
-    binding = vk::DescriptorSetLayoutBinding {};
+  for (auto& binding : bindings)
+    binding = vk::DescriptorSetLayoutBinding{};
 }
 
-void DescriptorSetInfo::parseShader(vk::ShaderStageFlagBits stage, const SpvReflectDescriptorSet &spv)
+void DescriptorSetInfo::parseShader(
+  vk::ShaderStageFlagBits stage, const SpvReflectDescriptorSet& spv)
 {
   for (uint32_t i = 0u; i < spv.binding_count; i++)
   {
-    const auto &spvBinding = *spv.bindings[i];
+    const auto& spvBinding = *spv.bindings[i];
 
-    vk::DescriptorSetLayoutBinding apiBinding {};
+    vk::DescriptorSetLayoutBinding apiBinding{};
     apiBinding.descriptorCount = 1;
 
-    for (uint32_t i = 0; i < spvBinding.array.dims_count; i++) {
+    for (uint32_t i = 0; i < spvBinding.array.dims_count; i++)
+    {
       apiBinding.descriptorCount *= spvBinding.array.dims[i];
     }
 
@@ -65,7 +77,7 @@ void DescriptorSetInfo::parseShader(vk::ShaderStageFlagBits stage, const SpvRefl
   }
 }
 
-void DescriptorSetInfo::merge(const DescriptorSetInfo &info)
+void DescriptorSetInfo::merge(const DescriptorSetInfo& info)
 {
   for (uint32_t binding = 0; binding < info.maxUsedBinding; binding++)
   {
@@ -75,7 +87,7 @@ void DescriptorSetInfo::merge(const DescriptorSetInfo &info)
   }
 }
 
-bool DescriptorSetInfo::operator==(const DescriptorSetInfo &rhs) const
+bool DescriptorSetInfo::operator==(const DescriptorSetInfo& rhs) const
 {
   if (maxUsedBinding != rhs.maxUsedBinding)
     return false;
@@ -101,20 +113,20 @@ vk::DescriptorSetLayout DescriptorSetInfo::createVkLayout(vk::Device device) con
     apiBindings.push_back(bindings[i]);
   }
 
-  vk::DescriptorSetLayoutCreateInfo info {};
+  vk::DescriptorSetLayoutCreateInfo info{};
   info.setBindings(apiBindings);
 
   return device.createDescriptorSetLayout(info).value;
 }
 
 template <typename T>
-inline void hash_combine(std::size_t &s, const T &v)
+inline void hash_combine(std::size_t& s, const T& v)
 {
   std::hash<T> h;
   s ^= h(v) + 0x9e3779b9 + (s << 6) + (s >> 2);
 }
 
-std::size_t DescriptorSetLayoutHash::operator()(const DescriptorSetInfo &res) const
+std::size_t DescriptorSetLayoutHash::operator()(const DescriptorSetInfo& res) const
 {
   size_t hash = 0;
 
@@ -132,12 +144,14 @@ std::size_t DescriptorSetLayoutHash::operator()(const DescriptorSetInfo &res) co
   return hash;
 }
 
-DescriptorLayoutId DescriptorSetLayoutCache::registerLayout(vk::Device device, const DescriptorSetInfo &info)
+DescriptorLayoutId DescriptorSetLayoutCache::registerLayout(
+  vk::Device device, const DescriptorSetInfo& info)
 {
   return get(device, info).first;
 }
 
-std::pair<DescriptorLayoutId, vk::DescriptorSetLayout> DescriptorSetLayoutCache::get(vk::Device device, const DescriptorSetInfo &info)
+std::pair<DescriptorLayoutId, vk::DescriptorSetLayout> DescriptorSetLayoutCache::get(
+  vk::Device device, const DescriptorSetInfo& info)
 {
   auto it = map.find(info);
   if (it != map.end())
@@ -152,7 +166,8 @@ std::pair<DescriptorLayoutId, vk::DescriptorSetLayout> DescriptorSetLayoutCache:
 
 void DescriptorSetLayoutCache::clear(vk::Device device)
 {
-  for (auto layout : vkLayouts) {
+  for (auto layout : vkLayouts)
+  {
     device.destroyDescriptorSetLayout(layout);
   }
 
@@ -161,4 +176,4 @@ void DescriptorSetLayoutCache::clear(vk::Device device)
   vkLayouts.clear();
 }
 
-}
+} // namespace etna

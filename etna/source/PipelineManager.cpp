@@ -12,14 +12,9 @@ namespace etna
 {
 
 static vk::UniquePipeline createComputePipelineInternal(
-  vk::Device device,
-  vk::PipelineLayout layout,
-  const vk::PipelineShaderStageCreateInfo stage)
+  vk::Device device, vk::PipelineLayout layout, const vk::PipelineShaderStageCreateInfo stage)
 {
-  vk::ComputePipelineCreateInfo pipelineInfo
-    {
-      .layout = layout
-    };
+  vk::ComputePipelineCreateInfo pipelineInfo{.layout = layout};
   pipelineInfo.setStage(stage);
 
   return device.createComputePipelineUnique(nullptr, pipelineInfo).value;
@@ -41,72 +36,64 @@ vk::UniquePipeline createGraphicsPipelineInternal(
     if (!bindingDesc.has_value())
       continue;
 
-    vertexBindings.emplace_back() =
-      vk::VertexInputBindingDescription
-      {
-        .binding = i,
-        .stride = bindingDesc->byteStreamDescription.stride,
-        .inputRate = bindingDesc->inputRate
-      };
+    vertexBindings.emplace_back() = vk::VertexInputBindingDescription{
+      .binding = i,
+      .stride = bindingDesc->byteStreamDescription.stride,
+      .inputRate = bindingDesc->inputRate,
+    };
 
     for (uint32_t j = 0; j < bindingDesc->attributeMapping.size(); ++j)
     {
-      const auto& attr = bindingDesc->byteStreamDescription
-        .attributes[bindingDesc->attributeMapping[j]];
-      vertexAttribures.emplace_back() =
-        vk::VertexInputAttributeDescription
-        {
-          .location = j,
-          .binding = i,
-          .format = attr.format,
-          .offset = attr.offset
-        };
+      const auto& attr =
+        bindingDesc->byteStreamDescription.attributes[bindingDesc->attributeMapping[j]];
+      vertexAttribures.emplace_back() = vk::VertexInputAttributeDescription{
+        .location = j,
+        .binding = i,
+        .format = attr.format,
+        .offset = attr.offset,
+      };
     }
   }
 
-  vk::PipelineVertexInputStateCreateInfo vertexInput {};
+  vk::PipelineVertexInputStateCreateInfo vertexInput{};
   vertexInput.setVertexAttributeDescriptions(vertexAttribures);
   vertexInput.setVertexBindingDescriptions(vertexBindings);
 
 
-  vk::PipelineViewportStateCreateInfo viewportState
-  {
+  vk::PipelineViewportStateCreateInfo viewportState{
     .viewportCount = 1,
     .scissorCount = 1,
   };
 
-  vk::PipelineColorBlendStateCreateInfo blendState
-    {
-      .logicOpEnable = info.blendingConfig.logicOpEnable,
-      .logicOp = info.blendingConfig.logicOp,
-    };
+  vk::PipelineColorBlendStateCreateInfo blendState{
+    .logicOpEnable = info.blendingConfig.logicOpEnable,
+    .logicOp = info.blendingConfig.logicOp,
+  };
   blendState.setAttachments(info.blendingConfig.attachments);
   blendState.blendConstants = info.blendingConfig.blendConstants;
 
-  vk::PipelineDynamicStateCreateInfo dynamicState {};
+  vk::PipelineDynamicStateCreateInfo dynamicState{};
   dynamicState.setDynamicStates(info.dynamicStates);
 
-  vk::PipelineRenderingCreateInfo rendering
-    {
-      .depthAttachmentFormat = info.fragmentShaderOutput.depthAttachmentFormat,
-      .stencilAttachmentFormat = info.fragmentShaderOutput.stencilAttachmentFormat
-    };
+  vk::PipelineRenderingCreateInfo rendering{
+    .depthAttachmentFormat = info.fragmentShaderOutput.depthAttachmentFormat,
+    .stencilAttachmentFormat = info.fragmentShaderOutput.stencilAttachmentFormat,
+  };
   rendering.setColorAttachmentFormats(info.fragmentShaderOutput.colorAttachmentFormats);
 
-  vk::GraphicsPipelineCreateInfo pipelineInfo
-    {
-      .pNext = &rendering,
-      .pVertexInputState = &vertexInput,
-      .pInputAssemblyState = &info.inputAssemblyConfig,
-      .pTessellationState = &info.tessellationConfig,
-      .pViewportState = &viewportState,
-      .pRasterizationState = &info.rasterizationConfig,
-      .pMultisampleState = &info.multisampleConfig,
-      .pDepthStencilState = &info.depthConfig,
-      .pColorBlendState = &blendState,
-      .pDynamicState = &dynamicState,
-      .layout = layout
-    };
+  vk::GraphicsPipelineCreateInfo pipelineInfo{
+    .pNext = &rendering,
+    .pVertexInputState = &vertexInput,
+    .pInputAssemblyState = &info.inputAssemblyConfig,
+    .pTessellationState = &info.tessellationConfig,
+    .pViewportState = &viewportState,
+    .pRasterizationState = &info.rasterizationConfig,
+    .pMultisampleState = &info.multisampleConfig,
+    .pDepthStencilState = &info.depthConfig,
+    .pColorBlendState = &blendState,
+    .pDynamicState = &dynamicState,
+    .layout = layout,
+  };
   pipelineInfo.setStages(stages);
 
   return device.createGraphicsPipelineUnique(nullptr, pipelineInfo).value;
@@ -116,29 +103,30 @@ PipelineManager::PipelineManager(vk::Device dev, ShaderProgramManager& shader_ma
   : device{dev}
   , shaderManager{shader_manager}
 {
-
 }
 
-ComputePipeline PipelineManager::createComputePipeline(std::string shader_program_name, ComputePipeline::CreateInfo info)
+ComputePipeline PipelineManager::createComputePipeline(
+  std::string shader_program_name, ComputePipeline::CreateInfo info)
 {
   const PipelineId pipelineId = pipelineIdCounter++;
   const ShaderProgramId progId = shaderManager.getProgram(shader_program_name);
-  const std::vector<vk::PipelineShaderStageCreateInfo> shaderStages = shaderManager.getShaderStages(progId);
+  const std::vector<vk::PipelineShaderStageCreateInfo> shaderStages =
+    shaderManager.getShaderStages(progId);
 
-  ETNA_ASSERTF(shaderStages.size() == 1,
+  ETNA_ASSERTF(
+    shaderStages.size() == 1,
     "Incorrect shader program, expected 1 stage for ComputePipeline, but got {}!",
     shaderStages.size());
 
-  pipelines.emplace(pipelineId,
-    createComputePipelineInternal(device,
-      shaderManager.getProgramLayout(progId),
-      shaderStages[0]));
+  pipelines.emplace(
+    pipelineId,
+    createComputePipelineInternal(device, shaderManager.getProgramLayout(progId), shaderStages[0]));
   computePipelineParameters.emplace(pipelineId, ComputeParameters{progId, std::move(info)});
 
   return ComputePipeline(this, pipelineId, progId);
 };
 
-static void print_prog_info(const etna::ShaderProgramInfo &info, const std::string &name)
+static void print_prog_info(const etna::ShaderProgramInfo& info, const std::string& name)
 {
   std::cout << "Program Info " << name << "\n";
 
@@ -151,9 +139,10 @@ static void print_prog_info(const etna::ShaderProgramInfo &info, const std::stri
     {
       if (!setInfo.isBindingUsed(binding))
         continue;
-      auto &vkBinding = setInfo.getBinding(binding);
+      auto& vkBinding = setInfo.getBinding(binding);
 
-      std::cout << "Binding " << binding << " " << vk::to_string(vkBinding.descriptorType) << ", count = " << vkBinding.descriptorCount << " ";
+      std::cout << "Binding " << binding << " " << vk::to_string(vkBinding.descriptorType)
+                << ", count = " << vkBinding.descriptorCount << " ";
       std::cout << " " << vk::to_string(vkBinding.stageFlags) << "\n";
     }
   }
@@ -161,19 +150,21 @@ static void print_prog_info(const etna::ShaderProgramInfo &info, const std::stri
   auto pc = info.getPushConst();
   if (pc.size)
   {
-    std::cout << "PushConst " << " size = " << pc.size << " stages = " << vk::to_string(pc.stageFlags) << "\n";
+    std::cout << "PushConst "
+              << " size = " << pc.size << " stages = " << vk::to_string(pc.stageFlags) << "\n";
   }
 }
 
-GraphicsPipeline PipelineManager::createGraphicsPipeline(std::string shader_program_name, GraphicsPipeline::CreateInfo info)
+GraphicsPipeline PipelineManager::createGraphicsPipeline(
+  std::string shader_program_name, GraphicsPipeline::CreateInfo info)
 {
   const PipelineId pipelineId = pipelineIdCounter++;
   const ShaderProgramId progId = shaderManager.getProgram(shader_program_name);
 
-  pipelines.emplace(pipelineId,
-    createGraphicsPipelineInternal(device,
-      shaderManager.getProgramLayout(progId),
-      shaderManager.getShaderStages(progId), info));
+  pipelines.emplace(
+    pipelineId,
+    createGraphicsPipelineInternal(
+      device, shaderManager.getProgramLayout(progId), shaderManager.getShaderStages(progId), info));
   graphicsPipelineParameters.emplace(pipelineId, PipelineParameters{progId, std::move(info)});
 
   GraphicsPipeline pipeline(this, pipelineId, progId);
@@ -184,14 +175,19 @@ GraphicsPipeline PipelineManager::createGraphicsPipeline(std::string shader_prog
 void PipelineManager::recreate()
 {
   pipelines.clear();
-  for (const auto&[id, params] : graphicsPipelineParameters)
-    pipelines.emplace(id,
-      createGraphicsPipelineInternal(device,
+  for (const auto& [id, params] : graphicsPipelineParameters)
+    pipelines.emplace(
+      id,
+      createGraphicsPipelineInternal(
+        device,
         shaderManager.getProgramLayout(params.shaderProgram),
-        shaderManager.getShaderStages(params.shaderProgram), params.info));
-  for (const auto&[id, params] : computePipelineParameters)
-    pipelines.emplace(id,
-      createComputePipelineInternal(device,
+        shaderManager.getShaderStages(params.shaderProgram),
+        params.info));
+  for (const auto& [id, params] : computePipelineParameters)
+    pipelines.emplace(
+      id,
+      createComputePipelineInternal(
+        device,
         shaderManager.getProgramLayout(params.shaderProgram),
         shaderManager.getShaderStages(params.shaderProgram)[0]));
 }
@@ -217,4 +213,4 @@ vk::PipelineLayout PipelineManager::getVkPipelineLayout(ShaderProgramId id) cons
   return shaderManager.getProgramLayout(id);
 }
 
-}
+} // namespace etna

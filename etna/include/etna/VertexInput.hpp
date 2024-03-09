@@ -24,7 +24,7 @@ struct VertexByteStreamFormatDescription
   {
     // The byte format of this attribute. As an example, R8G8B8A8_UNORM
     // would mean a 4 component vector which is encoded using 8-bit unsigned
-    // fixed precision numbers (i.e. each byte is interpreted as an unsigned 
+    // fixed precision numbers (i.e. each byte is interpreted as an unsigned
     // integer from 0 to 255, converted to float and divided by 255).
     // For most purposes you should use R32G32B32A32_SFLOAT -- 32-bit signed
     // floating point numbers.
@@ -70,13 +70,13 @@ struct VertexShaderInputDescription
     // Default is identity i -> i mapping.
     std::vector<uint32_t> attributeMapping = byteStreamDescription.identityAttributeMapping();
   };
-  
+
   // Note that the `binding` annotation value that you specified in GLSL
   // will be used to index this array. For most use cases, a single element
   // will be enough.
   std::vector<std::optional<Binding>> bindings;
 };
 
-}
+} // namespace etna
 
 #endif // ETNA_VERTEX_INPUT_HPP_INCLUDED

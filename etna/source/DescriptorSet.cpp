@@ -24,14 +24,13 @@ static constexpr uint32_t NUM_BUFFERS = 2048;
 static constexpr uint32_t NUM_RW_BUFFERS = 512;
 static constexpr uint32_t NUM_SAMPLERS = 128;
 
-static constexpr std::array<vk::DescriptorPoolSize, 6> g_default_pool_size {
-  vk::DescriptorPoolSize {vk::DescriptorType::eUniformBuffer, NUM_BUFFERS},
-  vk::DescriptorPoolSize {vk::DescriptorType::eStorageBuffer, NUM_RW_BUFFERS},
-  vk::DescriptorPoolSize {vk::DescriptorType::eSampler, NUM_SAMPLERS},
-  vk::DescriptorPoolSize {vk::DescriptorType::eSampledImage, NUM_RW_TEXTURES},
-  vk::DescriptorPoolSize {vk::DescriptorType::eStorageImage, NUM_RW_TEXTURES},
-  vk::DescriptorPoolSize {vk::DescriptorType::eCombinedImageSampler, NUM_TEXTURES}
-};
+static constexpr std::array<vk::DescriptorPoolSize, 6> g_default_pool_size{
+  vk::DescriptorPoolSize{vk::DescriptorType::eUniformBuffer, NUM_BUFFERS},
+  vk::DescriptorPoolSize{vk::DescriptorType::eStorageBuffer, NUM_RW_BUFFERS},
+  vk::DescriptorPoolSize{vk::DescriptorType::eSampler, NUM_SAMPLERS},
+  vk::DescriptorPoolSize{vk::DescriptorType::eSampledImage, NUM_RW_TEXTURES},
+  vk::DescriptorPoolSize{vk::DescriptorType::eStorageImage, NUM_RW_TEXTURES},
+  vk::DescriptorPoolSize{vk::DescriptorType::eCombinedImageSampler, NUM_TEXTURES}};
 
 DynamicDescriptorPool::DynamicDescriptorPool(vk::Device dev, uint32_t frames_in_flight)
   : vkDevice{dev}
@@ -40,7 +39,7 @@ DynamicDescriptorPool::DynamicDescriptorPool(vk::Device dev, uint32_t frames_in_
   frameIndex = 0;
   flipsCount = 0;
 
-  vk::DescriptorPoolCreateInfo info {};
+  vk::DescriptorPoolCreateInfo info{};
   info.setMaxSets(NUM_DESCRIPORS);
   info.setPoolSizes(g_default_pool_size);
 
@@ -69,18 +68,19 @@ void DynamicDescriptorPool::destroyAllocatedSets()
     flip();
 }
 
-DescriptorSet DynamicDescriptorPool::allocateSet(DescriptorLayoutId layoutId, std::vector<Binding> bindings, vk::CommandBuffer command_buffer)
+DescriptorSet DynamicDescriptorPool::allocateSet(
+  DescriptorLayoutId layoutId, std::vector<Binding> bindings, vk::CommandBuffer command_buffer)
 {
-  auto &dslCache = get_context().getDescriptorSetLayouts();
+  auto& dslCache = get_context().getDescriptorSetLayouts();
   auto setLayouts = {dslCache.getVkLayout(layoutId)};
 
-  vk::DescriptorSetAllocateInfo info {};
+  vk::DescriptorSetAllocateInfo info{};
   info.setDescriptorPool(pools[frameIndex]);
   info.setSetLayouts(setLayouts);
 
-  vk::DescriptorSet vkSet {};
+  vk::DescriptorSet vkSet{};
   ETNA_ASSERT(vkDevice.allocateDescriptorSets(&info, &vkSet) == vk::Result::eSuccess);
-  return DescriptorSet {flipsCount, layoutId, vkSet, std::move(bindings), command_buffer};
+  return DescriptorSet{flipsCount, layoutId, vkSet, std::move(bindings), command_buffer};
 }
 
 static bool is_image_resource(vk::DescriptorType dsType)
@@ -105,32 +105,34 @@ static bool is_image_resource(vk::DescriptorType dsType)
   return false;
 }
 
-static void validate_descriptor_write(const DescriptorSet &dst)
+static void validate_descriptor_write(const DescriptorSet& dst)
 {
-  auto &layoutInfo = get_context().getDescriptorSetLayouts().getLayoutInfo(dst.getLayoutId());
-  const auto &bindings = dst.getBindings();
+  const auto& layoutInfo = get_context().getDescriptorSetLayouts().getLayoutInfo(dst.getLayoutId());
+  const auto& bindings = dst.getBindings();
 
-  std::array<uint32_t, MAX_DESCRIPTOR_BINDINGS> unboundResources {};
+  std::array<uint32_t, MAX_DESCRIPTOR_BINDINGS> unboundResources{};
 
   for (uint32_t binding = 0; binding < MAX_DESCRIPTOR_BINDINGS; binding++)
   {
-    unboundResources[binding] = 
-      layoutInfo.isBindingUsed(binding)? layoutInfo.getBinding(binding).descriptorCount : 0u;
+    unboundResources[binding] =
+      layoutInfo.isBindingUsed(binding) ? layoutInfo.getBinding(binding).descriptorCount : 0u;
   }
 
-  for (auto &binding : bindings)
+  for (const auto& binding : bindings)
   {
     if (!layoutInfo.isBindingUsed(binding.binding))
       ETNA_PANIC("Descriptor write error: descriptor set doesn't have {} slot", binding.binding);
 
-    auto &bindingInfo = layoutInfo.getBinding(binding.binding);
-    bool isImageRequired = is_image_resource(bindingInfo.descriptorType); 
+    const auto& bindingInfo = layoutInfo.getBinding(binding.binding);
+    bool isImageRequired = is_image_resource(bindingInfo.descriptorType);
     bool isImageBinding = std::get_if<ImageBinding>(&binding.resources) != nullptr;
     if (isImageRequired != isImageBinding)
     {
-      ETNA_PANIC("Descriptor write error: slot {} {} required but {} bound", binding.binding,
-          (isImageRequired ? "image" : "buffer"),
-          (isImageBinding  ? "imaged" : "buffer"));
+      ETNA_PANIC(
+        "Descriptor write error: slot {} {} required but {} bound",
+        binding.binding,
+        (isImageRequired ? "image" : "buffer"),
+        (isImageBinding ? "imaged" : "buffer"));
     }
 
     unboundResources[binding.binding] -= 1;
@@ -139,11 +141,14 @@ static void validate_descriptor_write(const DescriptorSet &dst)
   for (uint32_t binding = 0; binding < MAX_DESCRIPTOR_BINDINGS; binding++)
   {
     if (unboundResources[binding])
-      ETNA_PANIC("Descriptor write error: slot {} has {} unbound resources", binding, unboundResources[binding]);
+      ETNA_PANIC(
+        "Descriptor write error: slot {} has {} unbound resources",
+        binding,
+        unboundResources[binding]);
   }
 }
 
-void write_set(const DescriptorSet &dst)
+void write_set(const DescriptorSet& dst)
 {
   ETNA_ASSERT(dst.isValid());
   validate_descriptor_write(dst);
@@ -154,11 +159,11 @@ void write_set(const DescriptorSet &dst)
   uint32_t numBufferInfo = 0;
   uint32_t numImageInfo = 0;
 
-  auto &layoutInfo = get_context().getDescriptorSetLayouts().getLayoutInfo(dst.getLayoutId());
+  const auto& layoutInfo = get_context().getDescriptorSetLayouts().getLayoutInfo(dst.getLayoutId());
 
-  for (auto &binding : dst.getBindings())
+  for (auto& binding : dst.getBindings())
   {
-    auto &bindingInfo = layoutInfo.getBinding(binding.binding);
+    const auto& bindingInfo = layoutInfo.getBinding(binding.binding);
     if (is_image_resource(bindingInfo.descriptorType))
       numImageInfo++;
     else
@@ -172,12 +177,11 @@ void write_set(const DescriptorSet &dst)
   numImageInfo = 0;
   numBufferInfo = 0;
 
-  for (auto &binding : dst.getBindings())
+  for (const auto& binding : dst.getBindings())
   {
-    auto &bindingInfo = layoutInfo.getBinding(binding.binding);
-    vk::WriteDescriptorSet write {};
-    write
-      .setDstSet(dst.getVkSet())
+    const auto& bindingInfo = layoutInfo.getBinding(binding.binding);
+    vk::WriteDescriptorSet write{};
+    write.setDstSet(dst.getVkSet())
       .setDescriptorCount(1)
       .setDstBinding(binding.binding)
       .setDstArrayElement(binding.arrayElem)
@@ -185,14 +189,14 @@ void write_set(const DescriptorSet &dst)
 
     if (is_image_resource(bindingInfo.descriptorType))
     {
-      auto img = std::get<ImageBinding>(binding.resources).descriptor_info;
+      const auto img = std::get<ImageBinding>(binding.resources).descriptor_info;
       imageInfos[numImageInfo] = img;
       write.setPImageInfo(imageInfos.data() + numImageInfo);
       numImageInfo++;
     }
     else
     {
-      auto buf = std::get<BufferBinding>(binding.resources).descriptor_info;
+      const auto buf = std::get<BufferBinding>(binding.resources).descriptor_info;
       bufferInfos[numBufferInfo] = buf;
       write.setPBufferInfo(bufferInfos.data() + numBufferInfo);
       numBufferInfo++;
@@ -240,15 +244,17 @@ static vk::AccessFlagBits2 descriptor_type_to_access_flag(vk::DescriptorType dec
 
 void DescriptorSet::processBarriers() const
 {
-  auto &layoutInfo = get_context().getDescriptorSetLayouts().getLayoutInfo(layoutId);
-  for (auto &binding : bindings)
+  auto& layoutInfo = get_context().getDescriptorSetLayouts().getLayoutInfo(layoutId);
+  for (auto& binding : bindings)
   {
     if (std::get_if<ImageBinding>(&binding.resources) == nullptr)
       continue; // Add processing for buffer here if you need.
 
-    auto &bindingInfo = layoutInfo.getBinding(binding.binding);
-    const ImageBinding &imgData = std::get<ImageBinding>(binding.resources);
-    etna::set_state(command_buffer, imgData.image.get(),
+    auto& bindingInfo = layoutInfo.getBinding(binding.binding);
+    const ImageBinding& imgData = std::get<ImageBinding>(binding.resources);
+    etna::set_state(
+      command_buffer,
+      imgData.image.get(),
       shader_stage_to_pipeline_stage(bindingInfo.stageFlags),
       descriptor_type_to_access_flag(bindingInfo.descriptorType),
       imgData.descriptor_info.imageLayout,
@@ -256,4 +262,4 @@ void DescriptorSet::processBarriers() const
   }
 }
 
-}
+} // namespace etna

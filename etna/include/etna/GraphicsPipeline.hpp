@@ -21,6 +21,7 @@ class GraphicsPipeline : public PipelineBase
     : PipelineBase(inOwner, inId, inShaderProgramId)
   {
   }
+
 public:
   // Use PipelineManager to create pipelines
   GraphicsPipeline() = default;
@@ -34,41 +35,37 @@ public:
     // Specifies what type of primitives you want to draw:
     // triangles, lines, etc. Also specifies additional tricky
     // stuff that is mostly not needed for basic applications.
-    vk::PipelineInputAssemblyStateCreateInfo inputAssemblyConfig =
-      {
-        .topology = vk::PrimitiveTopology::eTriangleList
-      };
+    vk::PipelineInputAssemblyStateCreateInfo inputAssemblyConfig = {
+      .topology = vk::PrimitiveTopology::eTriangleList};
 
     // Tessellation stage configuration
-    vk::PipelineTessellationStateCreateInfo tessellationConfig =
-      {
-        // Number of control points per tessellation patch
-        .patchControlPoints = 3,
-      };
+    vk::PipelineTessellationStateCreateInfo tessellationConfig = {
+      // Number of control points per tessellation patch
+      .patchControlPoints = 3,
+    };
 
     // Configuration for the rasterizer
-    vk::PipelineRasterizationStateCreateInfo rasterizationConfig =
-      {
-        // How polygons should be drawn (filled, outline, only corner points?)
-        .polygonMode = vk::PolygonMode::eFill,
-        // Whether we need to skip drawing back/front faces of polygons
-        .cullMode = vk::CullModeFlagBits::eNone,
-        // Which face we consider to be the front of the polygon
-        .frontFace = vk::FrontFace::eClockwise,
-        // Width of lines when drawing lines/outlines
-        .lineWidth = 1.f,
-      };
+    vk::PipelineRasterizationStateCreateInfo rasterizationConfig = {
+      // How polygons should be drawn (filled, outline, only corner points?)
+      .polygonMode = vk::PolygonMode::eFill,
+      // Whether we need to skip drawing back/front faces of polygons
+      .cullMode = vk::CullModeFlagBits::eNone,
+      // Which face we consider to be the front of the polygon
+      .frontFace = vk::FrontFace::eClockwise,
+      // Width of lines when drawing lines/outlines
+      .lineWidth = 1.f,
+    };
 
     // Configuration for multisample state
-    vk::PipelineMultisampleStateCreateInfo multisampleConfig =
-      {
-        // Number of samples per pixel
-        .rasterizationSamples = vk::SampleCountFlagBits::e1,
-        // Invoke the fragment shader at least max(1, ceil(rasterizationSamples * minSampleShading)) times per fragment?
-        .sampleShadingEnable = false,
-        // Value in range [0.0f, 1.0f]. Ignore if sample shading is disabled
-        .minSampleShading = 0.f,
-      };
+    vk::PipelineMultisampleStateCreateInfo multisampleConfig = {
+      // Number of samples per pixel
+      .rasterizationSamples = vk::SampleCountFlagBits::e1,
+      // Invoke the fragment shader at least max(1, ceil(rasterizationSamples * minSampleShading))
+      // times per fragment?
+      .sampleShadingEnable = false,
+      // Value in range [0.0f, 1.0f]. Ignore if sample shading is disabled
+      .minSampleShading = 0.f,
+    };
 
     // Configuration for alpha blending.
     // Disabled and configured to a single color attachment by default.
@@ -78,34 +75,27 @@ public:
     {
       // Should contain an element for every color attachment that
       // your pixel shader will output to, i.e. for every output variable.
-      std::vector<vk::PipelineColorBlendAttachmentState> attachments = 
-        {
-          vk::PipelineColorBlendAttachmentState
-          {
-            .blendEnable = false,
-            // Which color channels should we write to?
-            .colorWriteMask = vk::ColorComponentFlagBits::eR
-              | vk::ColorComponentFlagBits::eG
-              | vk::ColorComponentFlagBits::eB
-              | vk::ColorComponentFlagBits::eA
-          }
-        };
+      std::vector<vk::PipelineColorBlendAttachmentState> attachments = {
+        vk::PipelineColorBlendAttachmentState{
+          .blendEnable = false,
+          // Which color channels should we write to?
+          .colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
+            vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA}};
       bool logicOpEnable = false;
       vk::LogicOp logicOp;
-      std::array<float, 4> blendConstants {0, 0, 0, 0};
+      std::array<float, 4> blendConstants{0, 0, 0, 0};
     } blendingConfig = {};
 
-    vk::PipelineDepthStencilStateCreateInfo depthConfig = 
-      {
-        // Discard fragments that are covered by other fragments?
-        .depthTestEnable = true,
-        // Write fragments' depth into the buffer after they have been drawn?
-        .depthWriteEnable = true,
-        // How should we decide whether one fragment covers another one?
-        .depthCompareOp = vk::CompareOp::eLessOrEqual,
-        // Max allowed depth, usually changed for tricky hacks
-        .maxDepthBounds = 1.f,
-      };
+    vk::PipelineDepthStencilStateCreateInfo depthConfig = {
+      // Discard fragments that are covered by other fragments?
+      .depthTestEnable = true,
+      // Write fragments' depth into the buffer after they have been drawn?
+      .depthWriteEnable = true,
+      // How should we decide whether one fragment covers another one?
+      .depthCompareOp = vk::CompareOp::eLessOrEqual,
+      // Max allowed depth, usually changed for tricky hacks
+      .maxDepthBounds = 1.f,
+    };
 
     // For the GPU driver to compile a SPIR-V shader into native GPU bytecode,
     // on almost all platforms it needs to know at least a little bit of info
@@ -119,15 +109,12 @@ public:
       vk::Format stencilAttachmentFormat = vk::Format::eUndefined;
     } fragmentShaderOutput;
 
-    std::vector<vk::DynamicState> dynamicStates =
-      {
-        vk::DynamicState::eViewport,
-        vk::DynamicState::eScissor
-      };
+    std::vector<vk::DynamicState> dynamicStates = {
+      vk::DynamicState::eViewport, vk::DynamicState::eScissor};
   };
 };
 
-}
+} // namespace etna
 
 
 #endif // ETNA_GRAPHICS_PIPELINE_HPP_INCLUDED

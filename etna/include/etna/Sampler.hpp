@@ -30,6 +30,6 @@ private:
   vk::UniqueSampler sampler{};
 };
 
-}
+} // namespace etna
 
 #endif // ETNA_SAMPLER_HPP_INCLUDED

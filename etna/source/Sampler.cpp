@@ -8,7 +8,7 @@ namespace etna
 
 Sampler::Sampler(CreateInfo info)
 {
-  vk::SamplerCreateInfo createInfo {
+  vk::SamplerCreateInfo createInfo{
     .magFilter = info.filter,
     .minFilter = info.filter,
     .mipmapMode = vk::SamplerMipmapMode::eLinear,
@@ -19,10 +19,10 @@ Sampler::Sampler(CreateInfo info)
     .maxAnisotropy = 1.0f,
     .minLod = info.minLod,
     .maxLod = info.maxLod,
-    .borderColor = vk::BorderColor::eFloatOpaqueWhite
+    .borderColor = vk::BorderColor::eFloatOpaqueWhite,
   };
   sampler = etna::get_context().getDevice().createSamplerUnique(createInfo).value;
   etna::set_debug_name(sampler.get(), info.name.data());
 }
 
-}
+} // namespace etna

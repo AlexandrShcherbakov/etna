@@ -11,11 +11,11 @@
 // be evaluated with NDEBUG but etna's assertion macros do
 // evaluate them and discard results.
 #if !defined(NDEBUG)
-  #define VULKAN_HPP_ASSERT ETNA_ASSERT
-  #define VULKAN_HPP_ASSERT_ON_RESULT ETNA_VULKAN_HPP_ASSERT_ON_RESULT
+#define VULKAN_HPP_ASSERT ETNA_ASSERT
+#define VULKAN_HPP_ASSERT_ON_RESULT ETNA_VULKAN_HPP_ASSERT_ON_RESULT
 #else
-  #define VULKAN_HPP_ASSERT(EXPR)
-  #define VULKAN_HPP_ASSERT_ON_RESULT(EXPR)
+#define VULKAN_HPP_ASSERT(EXPR)
+#define VULKAN_HPP_ASSERT_ON_RESULT(EXPR)
 #endif
 
 // vulkan.hpp somehow includes windows.h :(

@@ -7,20 +7,20 @@
 
 namespace etna
 {
-  class Buffer;
-  class Image;
+class Buffer;
+class Image;
 
-  struct BufferBinding
-  {
-    const Buffer &buffer;
-    vk::DescriptorBufferInfo descriptor_info;
-  };
+struct BufferBinding
+{
+  const Buffer& buffer;
+  vk::DescriptorBufferInfo descriptor_info;
+};
 
-  struct ImageBinding
-  {
-    const Image &image;
-    vk::DescriptorImageInfo descriptor_info;
-  };
-}
+struct ImageBinding
+{
+  const Image& image;
+  vk::DescriptorImageInfo descriptor_info;
+};
+} // namespace etna
 
 #endif // ETNA_BINDING_ITENS_HPP_INCLUDED

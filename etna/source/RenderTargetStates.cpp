@@ -12,7 +12,7 @@ bool RenderTargetState::inScope = false;
 RenderTargetState::RenderTargetState(
   VkCommandBuffer cmd_buff,
   vk::Rect2D rect,
-  const std::vector<AttachmentParams> &color_attachments,
+  const std::vector<AttachmentParams>& color_attachments,
   AttachmentParams depth_attachment,
   AttachmentParams stencil_attachment)
 {
@@ -20,14 +20,13 @@ RenderTargetState::RenderTargetState(
   inScope = true;
   // TODO: add resource state tracking
   commandBuffer = cmd_buff;
-  vk::Viewport viewport
-  {
+  vk::Viewport viewport{
     .x = static_cast<float>(rect.offset.x),
     .y = static_cast<float>(rect.offset.y),
-    .width  = static_cast<float>(rect.extent.width),
+    .width = static_cast<float>(rect.extent.width),
     .height = static_cast<float>(rect.extent.height),
     .minDepth = 0.0f,
-    .maxDepth = 1.0f
+    .maxDepth = 1.0f,
   };
 
   VkViewport vp = (VkViewport)viewport;
@@ -43,41 +42,47 @@ RenderTargetState::RenderTargetState(
     attachmentInfos[i].loadOp = color_attachments[i].loadOp;
     attachmentInfos[i].storeOp = color_attachments[i].storeOp;
     attachmentInfos[i].clearValue = color_attachments[i].clearColorValue;
-    etna::get_context().getResourceTracker().setColorTarget(commandBuffer, color_attachments[i].image);
+    etna::get_context().getResourceTracker().setColorTarget(
+      commandBuffer, color_attachments[i].image);
   }
 
-  vk::RenderingAttachmentInfo depthAttInfo {
+  vk::RenderingAttachmentInfo depthAttInfo{
     .imageView = depth_attachment.view,
     .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
     .loadOp = depth_attachment.loadOp,
     .storeOp = depth_attachment.storeOp,
-    .clearValue = depth_attachment.clearDepthStencilValue
+    .clearValue = depth_attachment.clearDepthStencilValue,
   };
 
-  vk::RenderingAttachmentInfo stencilAttInfo {
+  vk::RenderingAttachmentInfo stencilAttInfo{
     .imageView = stencil_attachment.view,
     .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
     .loadOp = stencil_attachment.loadOp,
     .storeOp = stencil_attachment.storeOp,
-    .clearValue = stencil_attachment.clearDepthStencilValue
+    .clearValue = stencil_attachment.clearDepthStencilValue,
   };
 
   if (depth_attachment.image && stencil_attachment.image)
   {
-    ETNA_ASSERTF(depth_attachment.view == stencil_attachment.view, "depth and stencil attachments must be created from the same image");
-    etna::get_context().getResourceTracker().setDepthStencilTarget(commandBuffer, depth_attachment.image);
+    ETNA_ASSERTF(
+      depth_attachment.view == stencil_attachment.view,
+      "depth and stencil attachments must be created from the same image");
+    etna::get_context().getResourceTracker().setDepthStencilTarget(
+      commandBuffer, depth_attachment.image);
   }
   else
   {
     if (depth_attachment.image)
-      etna::get_context().getResourceTracker().setDepthTarget(commandBuffer, depth_attachment.image);
+      etna::get_context().getResourceTracker().setDepthTarget(
+        commandBuffer, depth_attachment.image);
     if (stencil_attachment.image)
-      etna::get_context().getResourceTracker().setStencilTarget(commandBuffer, stencil_attachment.image);
+      etna::get_context().getResourceTracker().setStencilTarget(
+        commandBuffer, stencil_attachment.image);
   }
 
   etna::get_context().getResourceTracker().flushBarriers(commandBuffer);
 
-  vk::RenderingInfo renderInfo {
+  vk::RenderingInfo renderInfo{
     .renderArea = rect,
     .layerCount = 1,
     .colorAttachmentCount = static_cast<uint32_t>(attachmentInfos.size()),
@@ -95,4 +100,4 @@ RenderTargetState::~RenderTargetState()
   inScope = false;
 }
 
-}
+} // namespace etna

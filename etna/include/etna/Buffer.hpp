@@ -52,6 +52,6 @@ private:
   std::byte* mapped{};
 };
 
-}
+} // namespace etna
 
 #endif // ETNA_BUFFER_HPP_INCLUDED

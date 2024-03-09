@@ -9,7 +9,8 @@
 namespace etna
 {
 
-PipelineBase::PipelineBase(PipelineManager* inOwner, PipelineId inId, ShaderProgramId inShaderProgramId)
+PipelineBase::PipelineBase(
+  PipelineManager* inOwner, PipelineId inId, ShaderProgramId inShaderProgramId)
   : owner{inOwner}
   , id{inId}
   , shaderProgramId{inShaderProgramId}
@@ -53,4 +54,4 @@ vk::PipelineLayout PipelineBase::getVkPipelineLayout() const
   return owner->getVkPipelineLayout(shaderProgramId);
 }
 
-}
+} // namespace etna

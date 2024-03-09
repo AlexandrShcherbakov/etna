@@ -8,8 +8,8 @@ namespace etna
 {
 
 Image::Image(VmaAllocator alloc, CreateInfo info)
-  : allocator{alloc},
-  format{info.format}
+  : allocator{alloc}
+  , format{info.format}
 {
   vk::ImageCreateInfo image_info{
     .imageType = vk::ImageType::e2D,
@@ -21,7 +21,7 @@ Image::Image(VmaAllocator alloc, CreateInfo info)
     .tiling = info.tiling,
     .usage = info.imageUsage,
     .sharingMode = vk::SharingMode::eExclusive,
-    .initialLayout = vk::ImageLayout::eUndefined
+    .initialLayout = vk::ImageLayout::eUndefined,
   };
   VmaAllocationCreateInfo alloc_info{
     .flags = 0,
@@ -31,15 +31,21 @@ Image::Image(VmaAllocator alloc, CreateInfo info)
     .memoryTypeBits = 0,
     .pool = nullptr,
     .pUserData = nullptr,
-    .priority = 0.f
+    .priority = 0.f,
   };
   VkImage img;
 
-  auto retcode = vmaCreateImage(allocator, &static_cast<const VkImageCreateInfo&>(image_info), &alloc_info,
-      &img, &allocation, nullptr);
+  auto retcode = vmaCreateImage(
+    allocator,
+    &static_cast<const VkImageCreateInfo&>(image_info),
+    &alloc_info,
+    &img,
+    &allocation,
+    nullptr);
   // Note that usually vulkan.hpp handles doing the assertion
   // and a pretty message, but VMA cannot do that.
-  ETNA_ASSERTF(retcode == VK_SUCCESS,
+  ETNA_ASSERTF(
+    retcode == VK_SUCCESS,
     "Error {} occurred while trying to allocate an etna::Image!",
     vk::to_string(static_cast<vk::Result>(retcode)));
   image = vk::Image(img);
@@ -59,7 +65,7 @@ Image::Image(Image&& other) noexcept
   swap(other);
 }
 
-Image& Image::operator =(Image&& other) noexcept
+Image& Image::operator=(Image&& other) noexcept
 {
   if (this == &other)
     return *this;
@@ -116,21 +122,20 @@ vk::ImageView Image::getView(Image::ViewParams params) const
 
   if (it == views.end())
   {
-    vk::ImageViewCreateInfo viewInfo
-    {
+    vk::ImageViewCreateInfo viewInfo{
       .image = image,
       .viewType = vk::ImageViewType::e2D, // TODO: support other types
-      .format = format, // TODO: Maybe support anothe type view
-      .subresourceRange = vk::ImageSubresourceRange
-      {
+      .format = format,                   // TODO: Maybe support anothe type view
+      .subresourceRange = vk::ImageSubresourceRange{
         .aspectMask = params.aspectMask ? params.aspectMask.value() : get_aspeck_mask(format),
         .baseMipLevel = params.baseMip,
         .levelCount = params.levelCount,
         .baseArrayLayer = 0,
-        .layerCount = 1
-      }
-    };
-    it = views.emplace(params, etna::get_context().getDevice().createImageViewUnique(viewInfo).value).first;
+        .layerCount = 1,
+      }};
+    it =
+      views.emplace(params, etna::get_context().getDevice().createImageViewUnique(viewInfo).value)
+        .first;
   }
 
   return views[params].get();
@@ -138,7 +143,7 @@ vk::ImageView Image::getView(Image::ViewParams params) const
 
 ImageBinding Image::genBinding(vk::Sampler sampler, vk::ImageLayout layout, ViewParams params) const
 {
-  return ImageBinding{*this, vk::DescriptorImageInfo {sampler, getView(params), layout}};
+  return ImageBinding{*this, vk::DescriptorImageInfo{sampler, getView(params), layout}};
 }
 
-}
+} // namespace etna

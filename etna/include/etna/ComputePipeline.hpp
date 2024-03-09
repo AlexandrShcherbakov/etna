@@ -13,19 +13,21 @@ namespace etna
 
 class PipelineManager;
 
-class ComputePipeline: public PipelineBase
+class ComputePipeline : public PipelineBase
 {
   friend class PipelineManager;
-  ComputePipeline(PipelineManager *inOwner, PipelineId inId, ShaderProgramId inShaderProgramId)
+  ComputePipeline(PipelineManager* inOwner, PipelineId inId, ShaderProgramId inShaderProgramId)
     : PipelineBase(inOwner, inId, inShaderProgramId)
   {
   }
+
 public:
   // Use PipelineManager to create pipelines
   ComputePipeline() = default;
-  struct CreateInfo{};
-
+  struct CreateInfo
+  {
+  };
 };
-}
+} // namespace etna
 
 #endif // ETNA_COMPUTE_PIPELINE_HPP_INCLUDED

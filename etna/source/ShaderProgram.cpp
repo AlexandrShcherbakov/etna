@@ -9,20 +9,22 @@
 namespace etna
 {
 
-ShaderModule::ShaderModule(vk::Device device, const std::string &shader_path)
-  : path {shader_path}
+ShaderModule::ShaderModule(vk::Device device, const std::string& shader_path)
+  : path{shader_path}
 {
   reload(device);
 }
 
-static std::vector<char> read_file(const std::string& filename) {
+static std::vector<char> read_file(const std::string& filename)
+{
   std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
-  if (!file.is_open()) {
+  if (!file.is_open())
+  {
     ETNA_PANIC("Failed to open file {}", filename);
   }
 
-  size_t fileSize = (size_t) file.tellg();
+  size_t fileSize = (size_t)file.tellg();
   std::vector<char> buffer(fileSize);
 
   file.seekg(0);
@@ -34,20 +36,22 @@ static std::vector<char> read_file(const std::string& filename) {
 struct SpvModDeleter
 {
   SpvModDeleter() {}
-  void operator()(SpvReflectShaderModule *mod) const
-  {
-    spvReflectDestroyShaderModule(mod);
-  }
+  void operator()(SpvReflectShaderModule* mod) const { spvReflectDestroyShaderModule(mod); }
 };
 
-#define SPRV_ASSERT(res, ...) if ((res) != SPV_REFLECT_RESULT_SUCCESS) ETNA_PANIC("SPIRV parse error", __VA_ARGS__)
+#define SPRV_ASSERT(res, ...)                                                                      \
+  do                                                                                               \
+  {                                                                                                \
+    if ((res) != SPV_REFLECT_RESULT_SUCCESS)                                                       \
+      ETNA_PANIC("SPIRV parse error", __VA_ARGS__);                                                \
+  } while (0)
 
 void ShaderModule::reload(vk::Device device)
 {
   vkModule = {};
 
   auto code = read_file(path);
-  vk::ShaderModuleCreateInfo info {};
+  vk::ShaderModuleCreateInfo info{};
   info.setPCode(reinterpret_cast<const uint32_t*>(code.data()));
   info.setCodeSize(code.size());
 
@@ -57,7 +61,7 @@ void ShaderModule::reload(vk::Device device)
   vkModule = device.createShaderModuleUnique(info).value;
 
   std::unique_ptr<SpvReflectShaderModule, SpvModDeleter> spvModule;
-  spvModule.reset(new SpvReflectShaderModule {});
+  spvModule.reset(new SpvReflectShaderModule{});
 
   SPRV_ASSERT(spvReflectCreateShaderModule(code.size(), code.data(), spvModule.get()), path);
 
@@ -84,8 +88,9 @@ void ShaderModule::reload(vk::Device device)
 
   if (spvModule->push_constant_block_count == 1)
   {
-    auto &blk = spvModule->push_constant_blocks[0];
-    if (blk.offset != 0) {
+    auto& blk = spvModule->push_constant_blocks[0];
+    if (blk.offset != 0)
+    {
       ETNA_PANIC("SPIRV {} parse error: PushConst offset is not zero", path);
     }
     pushConst.stageFlags = stage;
@@ -104,7 +109,7 @@ void ShaderModule::reload(vk::Device device)
   }
 }
 
-uint32_t ShaderProgramManager::registerModule(const std::string &path)
+uint32_t ShaderProgramManager::registerModule(const std::string& path)
 {
   auto it = shaderModuleNames.find(path);
   if (it != shaderModuleNames.end())
@@ -112,49 +117,59 @@ uint32_t ShaderProgramManager::registerModule(const std::string &path)
 
   uint32_t modId = static_cast<uint32_t>(shaderModules.size());
   std::unique_ptr<ShaderModule> newMod;
-  newMod.reset(new ShaderModule {get_context().getDevice(), path}); 
+  newMod.reset(new ShaderModule{get_context().getDevice(), path});
   shaderModules.push_back(std::move(newMod));
   return modId;
 }
 
-static void validate_program_shaders(const std::string &name, const std::vector<vk::ShaderStageFlagBits> &stages) {
-  auto supportedShaders = 
-    vk::ShaderStageFlagBits::eVertex|
-    vk::ShaderStageFlagBits::eTessellationControl|
-    vk::ShaderStageFlagBits::eTessellationEvaluation|
-    vk::ShaderStageFlagBits::eGeometry|
-    vk::ShaderStageFlagBits::eFragment|
-    vk::ShaderStageFlagBits::eCompute;
+static void validate_program_shaders(
+  const std::string& name, const std::vector<vk::ShaderStageFlagBits>& stages)
+{
+  auto supportedShaders = vk::ShaderStageFlagBits::eVertex |
+    vk::ShaderStageFlagBits::eTessellationControl |
+    vk::ShaderStageFlagBits::eTessellationEvaluation | vk::ShaderStageFlagBits::eGeometry |
+    vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eCompute;
 
   bool isComputePipeline = false;
   vk::ShaderStageFlags usageMask = static_cast<vk::ShaderStageFlags>(0);
 
-  for (auto stage : stages) {
-    if (!(stage & supportedShaders)) {
-      ETNA_PANIC("Shader program {} creating error, unsupported shader stage {}", name, vk::to_string(stage));
+  for (auto stage : stages)
+  {
+    if (!(stage & supportedShaders))
+    {
+      ETNA_PANIC(
+        "Shader program {} creating error, unsupported shader stage {}",
+        name,
+        vk::to_string(stage));
     }
 
-    if (stage & usageMask) {
-      ETNA_PANIC("Shader program {} creating error, multiple usage of {} shader stage", name, vk::to_string(stage));
+    if (stage & usageMask)
+    {
+      ETNA_PANIC(
+        "Shader program {} creating error, multiple usage of {} shader stage",
+        name,
+        vk::to_string(stage));
     }
 
     isComputePipeline |= (stage == vk::ShaderStageFlagBits::eCompute);
     usageMask |= stage;
   }
 
-  if (isComputePipeline && stages.size() != 1) {
+  if (isComputePipeline && stages.size() != 1)
+  {
     ETNA_PANIC("Shader program {} creating error, usage of compute shader with other stages", name);
   }
 }
 
-ShaderProgramId ShaderProgramManager::loadProgram(const std::string &name, const std::vector<std::string> &shaders_path)
+ShaderProgramId ShaderProgramManager::loadProgram(
+  const std::string& name, const std::vector<std::string>& shaders_path)
 {
   if (programNames.find(name) != programNames.end())
     ETNA_PANIC("Shader program {} redefenition", name);
-  
+
   std::vector<uint32_t> moduleIds;
   std::vector<vk::ShaderStageFlagBits> stages;
-  for (const auto &path : shaders_path)
+  for (const auto& path : shaders_path)
   {
     auto id = registerModule(path);
     auto stage = getModule(id).getStage();
@@ -166,13 +181,13 @@ ShaderProgramId ShaderProgramManager::loadProgram(const std::string &name, const
   validate_program_shaders(name, stages);
 
   ShaderProgramId progId = static_cast<ShaderProgramId>(programs.size());
-  programs.emplace_back(new ShaderProgramInternal {name, std::move(moduleIds)});
+  programs.emplace_back(new ShaderProgramInternal{name, std::move(moduleIds)});
   programs[progId]->reload(*this);
   programNames[name] = progId;
   return progId;
 }
 
-ShaderProgramId ShaderProgramManager::getProgram(const std::string &name) const
+ShaderProgramId ShaderProgramManager::getProgram(const std::string& name) const
 {
   auto it = programNames.find(name);
   if (it == programNames.end())
@@ -180,38 +195,43 @@ ShaderProgramId ShaderProgramManager::getProgram(const std::string &name) const
   return it->second;
 }
 
-void ShaderProgramManager::ShaderProgramInternal::reload(ShaderProgramManager &manager)
+void ShaderProgramManager::ShaderProgramInternal::reload(ShaderProgramManager& manager)
 {
   progLayout = {};
   usedDescriptors = {};
-  pushConst = vk::PushConstantRange {};
+  pushConst = vk::PushConstantRange{};
 
   std::array<DescriptorSetInfo, MAX_PROGRAM_DESCRIPTORS> dstDescriptors;
-  auto &descriptorLayoutCache = get_context().getDescriptorSetLayouts();
+  auto& descriptorLayoutCache = get_context().getDescriptorSetLayouts();
 
   for (auto id : moduleIds)
   {
-    auto &shaderMod = manager.getModule(id);
+    auto& shaderMod = manager.getModule(id);
 
-    if (shaderMod.getPushConst().size) //merge push constants
+    if (shaderMod.getPushConst().size) // merge push constants
     {
       auto modPushConst = shaderMod.getPushConst();
       if (pushConst.size == 0u)
       {
         pushConst = modPushConst;
       }
-      else {
+      else
+      {
         if (pushConst.size != modPushConst.size)
           ETNA_PANIC("ShaderProgram {} : not compatible push constant blocks", name);
         pushConst.stageFlags |= modPushConst.stageFlags;
       }
     }
 
-    const auto &resources = shaderMod.getResources(); //merge descriptors
-    for (auto &desc : resources)
+    const auto& resources = shaderMod.getResources(); // merge descriptors
+    for (auto& desc : resources)
     {
       if (desc.first >= MAX_PROGRAM_DESCRIPTORS)
-        ETNA_PANIC("ShaderProgram {} : set {} out of max sets ({})", name, desc.first, MAX_PROGRAM_DESCRIPTORS);
+        ETNA_PANIC(
+          "ShaderProgram {} : set {} out of max sets ({})",
+          name,
+          desc.first,
+          MAX_PROGRAM_DESCRIPTORS);
 
       usedDescriptors.set(desc.first);
       dstDescriptors[desc.first].merge(desc.second);
@@ -229,7 +249,7 @@ void ShaderProgramManager::ShaderProgramInternal::reload(ShaderProgramManager &m
     vkLayouts.push_back(res.second);
   }
 
-  vk::PipelineLayoutCreateInfo info {};
+  vk::PipelineLayoutCreateInfo info{};
   info.setSetLayouts(vkLayouts);
 
   if (pushConst.size)
@@ -243,12 +263,12 @@ void ShaderProgramManager::ShaderProgramInternal::reload(ShaderProgramManager &m
 
 void ShaderProgramManager::reloadPrograms()
 {
-  for (auto &mod : shaderModules)
+  for (auto& mod : shaderModules)
   {
     mod->reload(get_context().getDevice());
   }
 
-  for (auto &progPtr : programs)
+  for (auto& progPtr : programs)
   {
     progPtr->reload(*this);
   }
@@ -262,17 +282,18 @@ void ShaderProgramManager::clear()
   shaderModules.clear();
 }
 
-std::vector<vk::PipelineShaderStageCreateInfo> ShaderProgramManager::getShaderStages(ShaderProgramId id) const
+std::vector<vk::PipelineShaderStageCreateInfo> ShaderProgramManager::getShaderStages(
+  ShaderProgramId id) const
 {
-  auto &prog = *programs.at(id);
+  auto& prog = *programs.at(id);
 
   std::vector<vk::PipelineShaderStageCreateInfo> stages;
   stages.reserve(prog.moduleIds.size());
 
   for (auto id : prog.moduleIds)
   {
-    const auto &shaderMod = getModule(id);
-    vk::PipelineShaderStageCreateInfo info {};
+    const auto& shaderMod = getModule(id);
+    vk::PipelineShaderStageCreateInfo info{};
     info.setModule(shaderMod.getVkModule());
     info.setStage(shaderMod.getStage());
     info.setPName(shaderMod.getName().c_str());
@@ -281,7 +302,8 @@ std::vector<vk::PipelineShaderStageCreateInfo> ShaderProgramManager::getShaderSt
   return stages;
 }
 
-vk::DescriptorSetLayout ShaderProgramManager::getDescriptorLayout(ShaderProgramId id, uint32_t set) const
+vk::DescriptorSetLayout ShaderProgramManager::getDescriptorLayout(
+  ShaderProgramId id, uint32_t set) const
 {
   auto layoutId = getDescriptorLayoutId(id, set);
   return get_context().getDescriptorSetLayouts().getVkLayout(layoutId);
@@ -289,19 +311,19 @@ vk::DescriptorSetLayout ShaderProgramManager::getDescriptorLayout(ShaderProgramI
 
 vk::PushConstantRange ShaderProgramInfo::getPushConst() const
 {
-  auto &prog = mgr.getProgInternal(id);
+  auto& prog = mgr.getProgInternal(id);
   return prog.pushConst;
 }
 
 vk::PipelineLayout ShaderProgramInfo::getPipelineLayout() const
 {
-  auto &prog = mgr.getProgInternal(id);
+  auto& prog = mgr.getProgInternal(id);
   return prog.progLayout.get();
 }
 
 bool ShaderProgramInfo::isDescriptorSetUsed(uint32_t set) const
 {
-  auto &prog = mgr.getProgInternal(id);
+  auto& prog = mgr.getProgInternal(id);
   return set < MAX_PROGRAM_DESCRIPTORS && prog.usedDescriptors.test(set);
 }
 
@@ -313,12 +335,12 @@ DescriptorLayoutId ShaderProgramInfo::getDescriptorLayoutId(uint32_t set) const
 
 vk::DescriptorSetLayout ShaderProgramInfo::getDescriptorSetLayout(uint32_t set) const
 {
-  return  get_context().getDescriptorSetLayouts().getVkLayout(getDescriptorLayoutId(set));
+  return get_context().getDescriptorSetLayouts().getVkLayout(getDescriptorLayoutId(set));
 }
 
-const DescriptorSetInfo &ShaderProgramInfo::getDescriptorSetInfo(uint32_t set) const
+const DescriptorSetInfo& ShaderProgramInfo::getDescriptorSetInfo(uint32_t set) const
 {
   return get_context().getDescriptorSetLayouts().getLayoutInfo(getDescriptorLayoutId(set));
 }
 
-}
+} // namespace etna

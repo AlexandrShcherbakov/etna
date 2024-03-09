@@ -32,6 +32,6 @@ private:
   ShaderProgramId shaderProgramId{INVALID_SHADER_PROGRAM_ID};
 };
 
-}
+} // namespace etna
 
 #endif // ETNA_PIPELINE_BASE_HPP_INCLUDED

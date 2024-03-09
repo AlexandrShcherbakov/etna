@@ -21,9 +21,10 @@ public:
     vk::Extent3D extent;
     std::string_view name;
     vk::Format format = vk::Format::eR8G8B8A8Srgb;
-    vk::ImageUsageFlags imageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled;
+    vk::ImageUsageFlags imageUsage =
+      vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled;
     VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY;
-      vk::ImageTiling tiling = vk::ImageTiling::eOptimal;
+    vk::ImageTiling tiling = vk::ImageTiling::eOptimal;
     std::size_t layers = 1;
     std::size_t mipLevels = 1;
     vk::SampleCountFlagBits samples = vk::SampleCountFlagBits::e1;
@@ -47,13 +48,14 @@ public:
   {
     uint32_t baseMip = 0;
     uint32_t levelCount = 1;
-    std::optional<vk::ImageAspectFlagBits> aspectMask {};
+    std::optional<vk::ImageAspectFlagBits> aspectMask{};
 
     bool operator==(const ViewParams& b) const = default;
   };
   vk::ImageView getView(ViewParams params) const;
 
-  ImageBinding genBinding(vk::Sampler sampler, vk::ImageLayout layout, ViewParams params = {0, 1, {}}) const;
+  ImageBinding genBinding(
+    vk::Sampler sampler, vk::ImageLayout layout, ViewParams params = {0, 1, {}}) const;
 
   vk::ImageAspectFlags getAspectMaskByFormat() const;
 
@@ -66,8 +68,9 @@ private:
       hashPack(hash, params.baseMip, params.levelCount);
       return hash;
     }
+
   private:
-    template<typename HashT, typename... HashTs>
+    template <typename HashT, typename... HashTs>
     inline void hashPack(uint32_t& hash, const HashT& first, HashTs&&... other) const
     {
       auto hasher = std::hash<uint32_t>();
@@ -83,6 +86,6 @@ private:
   vk::Format format;
 };
 
-}
+} // namespace etna
 
 #endif // ETNA_IMAGE_HPP_INCLUDED

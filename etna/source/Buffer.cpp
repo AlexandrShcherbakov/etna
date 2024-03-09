@@ -8,13 +8,10 @@ namespace etna
 {
 
 Buffer::Buffer(VmaAllocator alloc, CreateInfo info)
-  : allocator{alloc}
+    : allocator{alloc}
 {
   vk::BufferCreateInfo buf_info{
-    .size = info.size,
-    .usage = info.bufferUsage,
-    .sharingMode = vk::SharingMode::eExclusive
-  };
+    .size = info.size, .usage = info.bufferUsage, .sharingMode = vk::SharingMode::eExclusive};
 
   VmaAllocationCreateInfo alloc_info{
     .flags = 0,
@@ -24,15 +21,20 @@ Buffer::Buffer(VmaAllocator alloc, CreateInfo info)
     .memoryTypeBits = 0,
     .pool = nullptr,
     .pUserData = nullptr,
-    .priority = 0.f
-  };
+    .priority = 0.f};
 
   VkBuffer buf;
-  auto retcode = vmaCreateBuffer(allocator, &static_cast<const VkBufferCreateInfo&>(buf_info), &alloc_info,
-    &buf, &allocation, nullptr);
+  auto retcode = vmaCreateBuffer(
+    allocator,
+    &static_cast<const VkBufferCreateInfo&>(buf_info),
+    &alloc_info,
+    &buf,
+    &allocation,
+    nullptr);
   // Note that usually vulkan.hpp handles doing the assertion
   // and a pretty message, but VMA cannot do that.
-  ETNA_ASSERTF(retcode == VK_SUCCESS,
+  ETNA_ASSERTF(
+    retcode == VK_SUCCESS,
     "Error {} occurred while trying to allocate an etna::Buffer!",
     vk::to_string(static_cast<vk::Result>(retcode)));
   buffer = vk::Buffer(buf);
@@ -89,7 +91,8 @@ std::byte* Buffer::map()
   // I can't think of a use case where failing to do a mapping
   // is acceptable and recoverable from.
   auto retcode = vmaMapMemory(allocator, allocation, &result);
-  ETNA_ASSERTF(retcode == VK_SUCCESS,
+  ETNA_ASSERTF(
+    retcode == VK_SUCCESS,
     "Error {} occurred while trying to map an etna::Buffer!",
     vk::to_string(static_cast<vk::Result>(retcode)));
 
@@ -105,7 +108,7 @@ void Buffer::unmap()
 
 BufferBinding Buffer::genBinding(vk::DeviceSize offset, vk::DeviceSize range) const
 {
-  return BufferBinding{*this, vk::DescriptorBufferInfo {get(), offset, range}};
+  return BufferBinding{*this, vk::DescriptorBufferInfo{get(), offset, range}};
 }
 
-}
+} // namespace etna

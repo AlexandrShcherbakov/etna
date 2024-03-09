@@ -18,12 +18,15 @@ struct ShaderProgramManager;
 class PipelineManager
 {
   friend class PipelineBase;
+
 public:
   PipelineManager(vk::Device dev, ShaderProgramManager& shader_manager);
 
-  GraphicsPipeline createGraphicsPipeline(std::string shaderProgramName, GraphicsPipeline::CreateInfo info);
+  GraphicsPipeline createGraphicsPipeline(
+    std::string shaderProgramName, GraphicsPipeline::CreateInfo info);
 
-  ComputePipeline createComputePipeline(std::string shaderProgramName, ComputePipeline::CreateInfo info);
+  ComputePipeline createComputePipeline(
+    std::string shaderProgramName, ComputePipeline::CreateInfo info);
   // TODO: createRaytracePipeline, createMeshletPipeline
 
   void recreate();
@@ -55,6 +58,6 @@ private:
   std::unordered_multimap<PipelineId, PipelineParameters> graphicsPipelineParameters;
 };
 
-}
+} // namespace etna
 
 #endif // ETNA_PIPELINE_MANAGER_HPP_INCLUDED
