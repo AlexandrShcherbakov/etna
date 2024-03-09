@@ -116,7 +116,7 @@ void ResourceStates::setResolveTarget(
     image,
     vk::PipelineStageFlagBits2::eResolve,
     vk::AccessFlagBits2::eTransferWrite,
-    vk::ImageLayout::eTransferDstOptimal,
+    vk::ImageLayout::eGeneral,
     aspect_flags);
 }
 

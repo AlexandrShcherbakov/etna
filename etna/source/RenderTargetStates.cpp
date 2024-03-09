@@ -51,7 +51,7 @@ RenderTargetState::RenderTargetState(
       etna::get_context().getResourceTracker().setResolveTarget(
         commandBuffer, color_attachments[i].resolveImage, vk::ImageAspectFlagBits::eColor);
 
-      attachmentInfos[i].resolveImageLayout = vk::ImageLayout::eTransferDstOptimal;
+      attachmentInfos[i].resolveImageLayout = vk::ImageLayout::eGeneral;
       attachmentInfos[i].resolveImageView = color_attachments[i].resolveImageView;
       attachmentInfos[i].resolveMode = color_attachments[i].resolveMode;
     }
@@ -62,7 +62,7 @@ RenderTargetState::RenderTargetState(
     .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
     .resolveMode = depth_attachment.resolveMode,
     .resolveImageView = depth_attachment.resolveImageView,
-    .resolveImageLayout = vk::ImageLayout::eTransferDstOptimal,
+    .resolveImageLayout = vk::ImageLayout::eGeneral,
     .loadOp = depth_attachment.loadOp,
     .storeOp = depth_attachment.storeOp,
     .clearValue = depth_attachment.clearDepthStencilValue,
@@ -73,7 +73,7 @@ RenderTargetState::RenderTargetState(
     .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
     .resolveMode = stencil_attachment.resolveMode,
     .resolveImageView = stencil_attachment.resolveImageView,
-    .resolveImageLayout = vk::ImageLayout::eTransferDstOptimal,
+    .resolveImageLayout = vk::ImageLayout::eGeneral,
     .loadOp = stencil_attachment.loadOp,
     .storeOp = stencil_attachment.storeOp,
     .clearValue = stencil_attachment.clearDepthStencilValue,
