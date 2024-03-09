@@ -208,7 +208,8 @@ void write_set(const DescriptorSet& dst)
   get_context().getDevice().updateDescriptorSets(writes, {});
 }
 
-constexpr static vk::PipelineStageFlagBits2 shader_stage_to_pipeline_stage(vk::ShaderStageFlags shader_stages)
+constexpr static vk::PipelineStageFlagBits2 shader_stage_to_pipeline_stage(
+  vk::ShaderStageFlags shader_stages)
 {
   constexpr uint32_t MAPPING_LENGTH = 1;
   constexpr std::array<vk::ShaderStageFlagBits, MAPPING_LENGTH> shaderStages = {
@@ -225,7 +226,8 @@ constexpr static vk::PipelineStageFlagBits2 shader_stage_to_pipeline_stage(vk::S
   return vk::PipelineStageFlagBits2::eNone;
 }
 
-constexpr static vk::AccessFlagBits2 descriptor_type_to_access_flag(vk::DescriptorType decriptor_type)
+constexpr static vk::AccessFlagBits2 descriptor_type_to_access_flag(
+  vk::DescriptorType decriptor_type)
 {
   constexpr uint32_t MAPPING_LENGTH = 1;
   constexpr std::array<vk::DescriptorType, MAPPING_LENGTH> descritorTypes = {

@@ -8,7 +8,7 @@ namespace etna
 {
 
 Buffer::Buffer(VmaAllocator alloc, CreateInfo info)
-    : allocator{alloc}
+  : allocator{alloc}
 {
   vk::BufferCreateInfo buf_info{
     .size = info.size, .usage = info.bufferUsage, .sharingMode = vk::SharingMode::eExclusive};
