@@ -1,6 +1,6 @@
-#include <etna/BindingItems.hpp>
 #include <etna/Buffer.hpp>
-#include <vulkan/vulkan_enums.hpp>
+
+#include <etna/BindingItems.hpp>
 #include "DebugUtils.hpp"
 
 

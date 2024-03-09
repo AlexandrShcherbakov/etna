@@ -1,10 +1,8 @@
-#include "etna/RenderTargetStates.hpp"
+#include <etna/RenderTargetStates.hpp>
 
-#include "etna/GlobalContext.hpp"
+#include <etna/GlobalContext.hpp>
 #include "StateTracking.hpp"
 
-#include <unordered_map>
-#include <variant>
 
 namespace etna
 {
@@ -55,7 +53,7 @@ RenderTargetState::RenderTargetState(
     .storeOp = depth_attachment.storeOp,
     .clearValue = depth_attachment.clearDepthStencilValue
   };
-  
+
   vk::RenderingAttachmentInfo stencilAttInfo {
     .imageView = stencil_attachment.view,
     .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
@@ -96,4 +94,5 @@ RenderTargetState::~RenderTargetState()
   vkCmdEndRendering(commandBuffer);
   inScope = false;
 }
+
 }

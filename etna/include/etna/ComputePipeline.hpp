@@ -7,6 +7,7 @@
 #include <etna/PipelineBase.hpp>
 #include <variant>
 
+
 namespace etna
 {
 

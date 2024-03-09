@@ -1,14 +1,15 @@
-#include "etna/ShaderProgram.hpp"
-#include "StateTracking.hpp"
 #include <etna/GlobalContext.hpp>
+
+#include <unordered_set>
+#include <spdlog/fmt/ranges.h>
+#include <vulkan/vulkan_structs.hpp>
+
+#include <etna/ShaderProgram.hpp>
 #include <etna/Etna.hpp>
 #include <etna/Assert.hpp>
 #include <etna/EtnaConfig.hpp>
+#include "StateTracking.hpp"
 
-#include <spdlog/fmt/ranges.h>
-
-#include <unordered_set>
-#include <vulkan/vulkan_structs.hpp>
 
 
 namespace etna

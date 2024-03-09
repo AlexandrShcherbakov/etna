@@ -2,15 +2,15 @@
 #ifndef ETNA_SHADER_PROGRAM_HPP_INCLUDED
 #define ETNA_SHADER_PROGRAM_HPP_INCLUDED
 
-#include <etna/Vulkan.hpp>
-#include <etna/Forward.hpp>
-#include <etna/DescriptorSetLayout.hpp>
-
 #include <array>
 #include <bitset>
 #include <vector>
 #include <unordered_map>
 #include <memory>
+
+#include <etna/Vulkan.hpp>
+#include <etna/Forward.hpp>
+#include <etna/DescriptorSetLayout.hpp>
 
 
 namespace etna
@@ -28,7 +28,7 @@ namespace etna
     vk::PushConstantRange getPushConst() const { return pushConst; }
 
     ShaderModule(const ShaderModule &mod) = delete;
-    ShaderModule &operator=(const ShaderModule &mod) = delete;  
+    ShaderModule &operator=(const ShaderModule &mod) = delete;
   private:
     std::string path {};
     std::string entryPoint {};
@@ -80,7 +80,7 @@ namespace etna
       return getProgramInfo(getProgram(name));
     }
 
-    void reloadPrograms(); 
+    void reloadPrograms();
     void clear();
 
     vk::PipelineLayout getProgramLayout(ShaderProgramId id) const { return programs.at(id)->progLayout.get(); } 
@@ -115,7 +115,7 @@ namespace etna
 
       std::bitset<MAX_PROGRAM_DESCRIPTORS> usedDescriptors;
       std::array<DescriptorLayoutId, MAX_PROGRAM_DESCRIPTORS> descriptorIds;
-    
+
       vk::PushConstantRange pushConst {};
       vk::UniquePipelineLayout progLayout;
 

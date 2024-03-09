@@ -1,6 +1,8 @@
 #include <etna/Image.hpp>
+
 #include <etna/GlobalContext.hpp>
 #include "DebugUtils.hpp"
+
 
 namespace etna
 {
@@ -72,7 +74,7 @@ void Image::reset()
 {
   if (!image)
     return;
-  
+
   views.clear();
   vmaDestroyImage(allocator, VkImage(image), allocation);
   allocator = {};
@@ -111,7 +113,7 @@ vk::ImageAspectFlags Image::getAspectMaskByFormat() const
 vk::ImageView Image::getView(Image::ViewParams params) const
 {
   auto it = views.find(params);
-  
+
   if (it == views.end())
   {
     vk::ImageViewCreateInfo viewInfo

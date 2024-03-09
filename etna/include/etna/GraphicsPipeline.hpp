@@ -2,10 +2,12 @@
 #ifndef ETNA_GRAPHICS_PIPELINE_HPP_INCLUDED
 #define ETNA_GRAPHICS_PIPELINE_HPP_INCLUDED
 
+#include <variant>
+
 #include <etna/Vulkan.hpp>
 #include <etna/VertexInput.hpp>
 #include <etna/PipelineBase.hpp>
-#include <variant>
+
 
 namespace etna
 {
@@ -28,7 +30,7 @@ public:
     // Specifies the format in which vertices are fed to this
     // pipeline's vertex shader
     VertexShaderInputDescription vertexShaderInput;
-    
+
     // Specifies what type of primitives you want to draw:
     // triangles, lines, etc. Also specifies additional tricky
     // stuff that is mostly not needed for basic applications.
@@ -56,7 +58,7 @@ public:
         // Width of lines when drawing lines/outlines
         .lineWidth = 1.f,
       };
-    
+
     // Configuration for multisample state
     vk::PipelineMultisampleStateCreateInfo multisampleConfig =
       {
@@ -117,7 +119,7 @@ public:
       vk::Format stencilAttachmentFormat = vk::Format::eUndefined;
     } fragmentShaderOutput;
 
-    std::vector<vk::DynamicState> dynamicStates = 
+    std::vector<vk::DynamicState> dynamicStates =
       {
         vk::DynamicState::eViewport,
         vk::DynamicState::eScissor

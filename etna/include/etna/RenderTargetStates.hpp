@@ -2,11 +2,11 @@
 #ifndef ETNA_STATES_HPP_INCLUDED
 #define ETNA_STATES_HPP_INCLUDED
 
+#include <vector>
+
+#include <etna/Vulkan.hpp>
 #include <etna/Image.hpp>
 
-#include <vulkan/vulkan.hpp>
-
-#include <vector>
 
 namespace etna
 {
@@ -30,15 +30,15 @@ public:
       : image(i), view(v), loadOp(clear ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad) {}
     AttachmentParams(const Image &img, bool clear = true) : AttachmentParams(img.get(), img.getView({}), clear) {}
   };
-    
+
   RenderTargetState(VkCommandBuffer cmd_buff, vk::Rect2D rect,
     const std::vector<AttachmentParams> &color_attachments, AttachmentParams depth_attachment,
     AttachmentParams stencil_attachment);
 
   // We can't use the default argument for stencil_attachment due to gcc bug 88165
   // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88165
-  RenderTargetState(VkCommandBuffer cmd_buff, vk::Rect2D rect, 
-    const std::vector<AttachmentParams> &color_attachments, AttachmentParams depth_attachment) 
+  RenderTargetState(VkCommandBuffer cmd_buff, vk::Rect2D rect,
+    const std::vector<AttachmentParams> &color_attachments, AttachmentParams depth_attachment)
     : RenderTargetState(cmd_buff, rect, color_attachments, depth_attachment, {}) {};
 
   ~RenderTargetState();

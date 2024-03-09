@@ -2,6 +2,7 @@
 
 #include "etna/GlobalContext.hpp"
 
+
 namespace etna
 {
 
@@ -14,7 +15,7 @@ namespace etna
     };
     #ifdef DEBUG_NAMES
     etna::get_context().getDevice().debugMarkerSetObjectNameEXT(&debugNameInfo);
-    #endif  
+    #endif
   }
 
   void set_debug_name(vk::Image image, const char *name)

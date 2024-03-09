@@ -1,8 +1,9 @@
 #include <etna/PipelineBase.hpp>
-#include <etna/PipelineManager.hpp>
-#include <etna/ShaderProgram.hpp>
 
 #include <utility>
+
+#include <etna/PipelineManager.hpp>
+#include <etna/ShaderProgram.hpp>
 
 
 namespace etna

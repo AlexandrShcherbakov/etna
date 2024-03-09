@@ -1,11 +1,11 @@
-#include "etna/Sampler.hpp"
+#include <etna/Sampler.hpp>
 
-#include "etna/GlobalContext.hpp"
-
+#include <etna/GlobalContext.hpp>
 #include "DebugUtils.hpp"
 
 namespace etna
 {
+
 Sampler::Sampler(CreateInfo info)
 {
   vk::SamplerCreateInfo createInfo {

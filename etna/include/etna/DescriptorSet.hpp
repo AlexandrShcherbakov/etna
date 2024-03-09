@@ -3,9 +3,11 @@
 #define ETNA_DESCRIPTOR_SET_HPP_INCLUDED
 
 #include <variant>
+
 #include <etna/Vulkan.hpp>
-#include "DescriptorSetLayout.hpp"
-#include "BindingItems.hpp"
+#include <etna/DescriptorSetLayout.hpp>
+#include <etna/BindingItems.hpp>
+
 
 namespace etna
 {
@@ -16,7 +18,7 @@ namespace etna
       : binding {rbinding}, arrayElem {array_index}, resources {image_info} {}
     Binding(uint32_t rbinding, const BufferBinding &buffer_info, uint32_t array_index = 0)
       : binding {rbinding}, arrayElem {array_index}, resources {buffer_info} {}
-  
+
     uint32_t binding;
     uint32_t arrayElem;
     std::variant<ImageBinding, BufferBinding> resources;
@@ -34,7 +36,7 @@ namespace etna
     }
 
     bool isValid() const;
-    
+
     vk::DescriptorSet getVkSet() const
     {
       return set;
@@ -72,7 +74,7 @@ namespace etna
   {
     DynamicDescriptorPool(vk::Device dev, uint32_t framesInFlight);
     ~DynamicDescriptorPool();
-    
+
     void flip();
     void destroyAllocatedSets();
     void reset(uint32_t frames_in_flight);
@@ -83,7 +85,7 @@ namespace etna
     {
       return pools[frameIndex];
     }
-    
+
     uint64_t getNumFlips() const
     {
       return flipsCount;

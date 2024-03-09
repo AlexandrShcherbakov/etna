@@ -2,14 +2,14 @@
 #ifndef ETNA_ETNA_HPP_INCLUDED
 #define ETNA_ETNA_HPP_INCLUDED
 
+#include <optional>
+#include <vector>
+#include <span>
+
 #include <etna/Vulkan.hpp>
 #include <etna/ShaderProgram.hpp>
 #include <etna/DescriptorSet.hpp>
 #include <etna/Image.hpp>
-
-#include <optional>
-#include <vector>
-#include <span>
 
 
 namespace etna
@@ -37,11 +37,11 @@ namespace etna
   bool is_initilized();
   void initialize(const InitParams &params);
   void shutdown();
-  
+
   void submit();
 
   ShaderProgramId create_program(const std::string &name, const std::vector<std::string> &shaders_path);
-  
+
   /*
     Reload shader files. Warning:
     1) This function must be called from gpu idle state
@@ -52,7 +52,7 @@ namespace etna
   ShaderProgramInfo get_shader_program(ShaderProgramId id);
   ShaderProgramInfo get_shader_program(const std::string &name);
 
-  
+
   DescriptorSet create_descriptor_set(DescriptorLayoutId layout, vk::CommandBuffer command_buffer, std::vector<Binding> bindings);
   Image create_image_from_bytes(Image::CreateInfo info, vk::CommandBuffer command_buffer, const void *data);
 

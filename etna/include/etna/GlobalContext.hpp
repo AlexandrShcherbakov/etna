@@ -2,6 +2,8 @@
 #ifndef ETNA_GLOBAL_CONTEXT_HPP_INCLUDED
 #define ETNA_GLOBAL_CONTEXT_HPP_INCLUDED
 
+#include <optional>
+
 #include <etna/Vulkan.hpp>
 #include <etna/DescriptorSetLayout.hpp>
 #include <etna/ShaderProgram.hpp>
@@ -11,7 +13,6 @@
 #include <etna/Buffer.hpp>
 
 #include <vk_mem_alloc.h>
-#include <optional>
 
 
 namespace etna

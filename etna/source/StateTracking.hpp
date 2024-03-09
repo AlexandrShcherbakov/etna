@@ -2,7 +2,7 @@
 #ifndef ETNA_STATETRACKING_HPP_INCLUDED
 #define ETNA_STATETRACKING_HPP_INCLUDED
 
-#include <vulkan/vulkan.hpp>
+#include "etna/Vulkan.hpp"
 
 #include <variant>
 #include <unordered_map>
@@ -33,7 +33,7 @@ public:
   void setDepthStencilTarget(vk::CommandBuffer com_buffer, vk::Image image);
   void setDepthTarget(vk::CommandBuffer com_buffer, vk::Image image);
   void setStencilTarget(vk::CommandBuffer com_buffer, vk::Image image);
-  
+
   void flushBarriers(vk::CommandBuffer com_buf);
 };
 

@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.20)
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
   add_definitions(-DDEBUG_NAMES)
 endif()
-message(${CMAKE_BUILD_TYPE})
 
 add_library(etna
   "source/Image.cpp"

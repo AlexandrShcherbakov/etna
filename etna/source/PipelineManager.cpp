@@ -1,9 +1,10 @@
-#include "etna/Assert.hpp"
 #include <etna/PipelineManager.hpp>
 
 #include <iostream>
 #include <span>
 #include <vector>
+
+#include <etna/Assert.hpp>
 #include <etna/ShaderProgram.hpp>
 
 
@@ -15,7 +16,6 @@ static vk::UniquePipeline createComputePipelineInternal(
   vk::PipelineLayout layout,
   const vk::PipelineShaderStageCreateInfo stage)
 {
-  
   vk::ComputePipelineCreateInfo pipelineInfo
     {
       .layout = layout
@@ -40,7 +40,7 @@ vk::UniquePipeline createGraphicsPipelineInternal(
     const auto& bindingDesc = info.vertexShaderInput.bindings[i];
     if (!bindingDesc.has_value())
       continue;
-    
+
     vertexBindings.emplace_back() =
       vk::VertexInputBindingDescription
       {
@@ -86,13 +86,13 @@ vk::UniquePipeline createGraphicsPipelineInternal(
   vk::PipelineDynamicStateCreateInfo dynamicState {};
   dynamicState.setDynamicStates(info.dynamicStates);
 
-  vk::PipelineRenderingCreateInfo rendering 
+  vk::PipelineRenderingCreateInfo rendering
     {
       .depthAttachmentFormat = info.fragmentShaderOutput.depthAttachmentFormat,
       .stencilAttachmentFormat = info.fragmentShaderOutput.stencilAttachmentFormat
     };
   rendering.setColorAttachmentFormats(info.fragmentShaderOutput.colorAttachmentFormats);
-  
+
   vk::GraphicsPipelineCreateInfo pipelineInfo
     {
       .pNext = &rendering,
@@ -121,7 +121,7 @@ PipelineManager::PipelineManager(vk::Device dev, ShaderProgramManager& shader_ma
 
 ComputePipeline PipelineManager::createComputePipeline(std::string shader_program_name, ComputePipeline::CreateInfo info)
 {
-  const PipelineId pipelineId = pipelineIdCounter++;  
+  const PipelineId pipelineId = pipelineIdCounter++;
   const ShaderProgramId progId = shaderManager.getProgram(shader_program_name);
   const std::vector<vk::PipelineShaderStageCreateInfo> shaderStages = shaderManager.getShaderStages(progId);
 
@@ -134,7 +134,7 @@ ComputePipeline PipelineManager::createComputePipeline(std::string shader_progra
       shaderManager.getProgramLayout(progId),
       shaderStages[0]));
   computePipelineParameters.emplace(pipelineId, ComputeParameters{progId, std::move(info)});
-  
+
   return ComputePipeline(this, pipelineId, progId);
 };
 
@@ -154,7 +154,7 @@ static void print_prog_info(const etna::ShaderProgramInfo &info, const std::stri
       auto &vkBinding = setInfo.getBinding(binding);
 
       std::cout << "Binding " << binding << " " << vk::to_string(vkBinding.descriptorType) << ", count = " << vkBinding.descriptorCount << " ";
-      std::cout << " " << vk::to_string(vkBinding.stageFlags) << "\n"; 
+      std::cout << " " << vk::to_string(vkBinding.stageFlags) << "\n";
     }
   }
 
@@ -167,7 +167,7 @@ static void print_prog_info(const etna::ShaderProgramInfo &info, const std::stri
 
 GraphicsPipeline PipelineManager::createGraphicsPipeline(std::string shader_program_name, GraphicsPipeline::CreateInfo info)
 {
-  const PipelineId pipelineId = pipelineIdCounter++;  
+  const PipelineId pipelineId = pipelineIdCounter++;
   const ShaderProgramId progId = shaderManager.getProgram(shader_program_name);
 
   pipelines.emplace(pipelineId,
@@ -175,7 +175,7 @@ GraphicsPipeline PipelineManager::createGraphicsPipeline(std::string shader_prog
       shaderManager.getProgramLayout(progId),
       shaderManager.getShaderStages(progId), info));
   graphicsPipelineParameters.emplace(pipelineId, PipelineParameters{progId, std::move(info)});
-  
+
   GraphicsPipeline pipeline(this, pipelineId, progId);
   print_prog_info(shaderManager.getProgramInfo(shader_program_name), shader_program_name);
   return pipeline;
@@ -185,7 +185,7 @@ void PipelineManager::recreate()
 {
   pipelines.clear();
   for (const auto&[id, params] : graphicsPipelineParameters)
-    pipelines.emplace(id, 
+    pipelines.emplace(id,
       createGraphicsPipelineInternal(device,
         shaderManager.getProgramLayout(params.shaderProgram),
         shaderManager.getShaderStages(params.shaderProgram), params.info));
@@ -200,7 +200,7 @@ void PipelineManager::destroyPipeline(PipelineId id)
 {
   if (id == INVALID_PIPELINE_ID)
     return;
-  
+
   pipelines.erase(id);
   graphicsPipelineParameters.erase(id);
 }
