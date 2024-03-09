@@ -26,6 +26,12 @@ public:
     vk::AttachmentStoreOp storeOp = vk::AttachmentStoreOp::eStore;
     vk::ClearColorValue clearColorValue = std::array<float, 4>({0.0f, 0.0f, 0.0f, 1.0f});
     vk::ClearDepthStencilValue clearDepthStencilValue = {1.0f, 0};
+    
+    // resolve part
+    vk::Image resolveImage = VK_NULL_HANDLE;
+    vk::ImageView resolveImageView = VK_NULL_HANDLE;
+    vk::ResolveModeFlagBits resolveMode = vk::ResolveModeFlagBits::eNone;
+
     AttachmentParams() = default;
     AttachmentParams(vk::Image i, vk::ImageView v, bool clear = true)
       : image(i)
@@ -35,6 +41,20 @@ public:
     }
     explicit AttachmentParams(const Image& img, bool clear = true)
       : AttachmentParams(img.get(), img.getView({}), clear)
+    {
+    }
+    AttachmentParams(vk::Image i, vk::ImageView v, vk::Image ri, vk::ImageView rv, bool clear = true, bool store = false)
+      : image(i)
+      , view(v)
+      , loadOp(clear ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad)
+      , storeOp(store ? vk::AttachmentStoreOp::eStore : vk::AttachmentStoreOp::eDontCare)
+      , resolveImage(ri)
+      , resolveImageView(rv)
+      , resolveMode(vk::ResolveModeFlagBits::eAverage) 
+    {
+    }
+    AttachmentParams(const Image &img, const Image &res_img, bool clear = true, bool store = false) 
+      : AttachmentParams(img.get(), img.getView({}), res_img.get(), res_img.getView({}), clear, store)
     {
     }
   };

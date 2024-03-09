@@ -106,4 +106,18 @@ void ResourceStates::setStencilTarget(vk::CommandBuffer com_buffer, vk::Image im
     vk::ImageAspectFlagBits::eStencil);
 }
 
+void ResourceStates::setResolveTarget(
+  vk::CommandBuffer com_buffer,
+  vk::Image image,
+  vk::ImageAspectFlags aspect_flags)
+{
+  setTextureState(
+    com_buffer,
+    image,
+    vk::PipelineStageFlagBits2::eResolve,
+    vk::AccessFlagBits2::eTransferWrite,
+    vk::ImageLayout::eTransferDstOptimal,
+    aspect_flags);
+}
+
 } // namespace etna
