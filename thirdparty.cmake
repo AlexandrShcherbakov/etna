@@ -40,13 +40,12 @@ CPMAddPackage(
     "SPIRV_REFLECT_STATIC_LIB ON"
 )
 
-# Fmt is a dependency of spdlog, but the version
-# included by default has a small but annoying
-# bug with latests MSVC versions (19.32+)
+# Fmt is a dependency of spdlog, but to be
+# safe we explicitly specify our version
 CPMAddPackage(
   NAME fmt
   GITHUB_REPOSITORY fmtlib/fmt
-  GIT_TAG 9.1.0
+  GIT_TAG 10.2.1
   OPTIONS
     "FMT_SYSTEM_HEADERS"
     "FMT_DOC OFF"
@@ -58,7 +57,7 @@ CPMAddPackage(
 CPMAddPackage(
   NAME spdlog
   GITHUB_REPOSITORY gabime/spdlog
-  VERSION 1.10.0
+  VERSION 1.13.0
   OPTIONS
     SPDLOG_FMT_EXTERNAL
 )
