@@ -161,15 +161,18 @@ static vk::UniqueDevice createDevice(
   vk::PhysicalDeviceDynamicRenderingFeatures dynamic_rendering_feature{
     // Evil const cast due to C not having const
     .pNext = const_cast<vk::PhysicalDeviceFeatures2*>(&params.features),
-    .dynamicRendering = VK_TRUE};
+    .dynamicRendering = VK_TRUE,
+  };
 
   vk::PhysicalDeviceSynchronization2Features sync2_feature{
-    .pNext = &dynamic_rendering_feature, .synchronization2 = VK_TRUE};
+    .pNext = &dynamic_rendering_feature,
+    .synchronization2 = VK_TRUE,
+  };
 
   std::vector<char const*> deviceExtensions(
     params.deviceExtensions.begin(), params.deviceExtensions.end());
   deviceExtensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
-#ifdef DEBUG_NAMES
+#ifdef ETNA_SET_VULKAN_DEBUG_NAMES
   deviceExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
 #endif
 

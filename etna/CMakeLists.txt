@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  add_definitions(-DDEBUG_NAMES)
+  add_definitions(-DETNA_SET_VULKAN_DEBUG_NAMES)
 endif()
 
 add_library(etna

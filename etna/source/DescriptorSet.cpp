@@ -208,16 +208,16 @@ void write_set(const DescriptorSet& dst)
   get_context().getDevice().updateDescriptorSets(writes, {});
 }
 
-static vk::PipelineStageFlagBits2 shader_stage_to_pipeline_stage(vk::ShaderStageFlags shader_stages)
+constexpr static vk::PipelineStageFlagBits2 shader_stage_to_pipeline_stage(vk::ShaderStageFlags shader_stages)
 {
-  const uint32_t MAPPING_LENGTH = 1;
-  const std::array<vk::ShaderStageFlagBits, MAPPING_LENGTH> shaderStages = {
+  constexpr uint32_t MAPPING_LENGTH = 1;
+  constexpr std::array<vk::ShaderStageFlagBits, MAPPING_LENGTH> shaderStages = {
     vk::ShaderStageFlagBits::eFragment,
   };
-  const std::array<vk::PipelineStageFlagBits2, MAPPING_LENGTH> pipelineStages = {
+  constexpr std::array<vk::PipelineStageFlagBits2, MAPPING_LENGTH> pipelineStages = {
     vk::PipelineStageFlagBits2::eFragmentShader,
   };
-  for (int i = 0; i < MAPPING_LENGTH; ++i)
+  for (uint32_t i = 0; i < MAPPING_LENGTH; ++i)
   {
     if (shaderStages[i] & shader_stages)
       return pipelineStages[i];
@@ -225,16 +225,16 @@ static vk::PipelineStageFlagBits2 shader_stage_to_pipeline_stage(vk::ShaderStage
   return vk::PipelineStageFlagBits2::eNone;
 }
 
-static vk::AccessFlagBits2 descriptor_type_to_access_flag(vk::DescriptorType decriptor_type)
+constexpr static vk::AccessFlagBits2 descriptor_type_to_access_flag(vk::DescriptorType decriptor_type)
 {
-  const uint32_t MAPPING_LENGTH = 1;
-  const std::array<vk::DescriptorType, MAPPING_LENGTH> descritorTypes = {
+  constexpr uint32_t MAPPING_LENGTH = 1;
+  constexpr std::array<vk::DescriptorType, MAPPING_LENGTH> descritorTypes = {
     vk::DescriptorType::eSampledImage,
   };
-  const std::array<vk::AccessFlagBits2, MAPPING_LENGTH> accessFlags = {
+  constexpr std::array<vk::AccessFlagBits2, MAPPING_LENGTH> accessFlags = {
     vk::AccessFlagBits2::eShaderRead,
   };
-  for (int i = 0; i < MAPPING_LENGTH; ++i)
+  for (uint32_t i = 0; i < MAPPING_LENGTH; ++i)
   {
     if (descritorTypes[i] == decriptor_type)
       return accessFlags[i];
