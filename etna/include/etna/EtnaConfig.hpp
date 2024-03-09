@@ -13,7 +13,9 @@ namespace etna
 inline constexpr std::array<const char*, 0> VALIDATION_LAYERS = {};
 #else
 inline constexpr std::array VALIDATION_LAYERS = {
-  "VK_LAYER_KHRONOS_validation", "VK_LAYER_LUNARG_monitor"};
+  "VK_LAYER_KHRONOS_validation",
+  "VK_LAYER_LUNARG_monitor",
+};
 #endif
 
 inline constexpr uint32_t VULKAN_API_VERSION = VK_API_VERSION_1_3;

@@ -12,7 +12,7 @@ CPMAddPackage(
 )
 if (VulkanMemoryAllocator_ADDED)
   add_library(VulkanMemoryAllocator INTERFACE)
-  target_include_directories(VulkanMemoryAllocator INTERFACE ${VulkanMemoryAllocator_SOURCE_DIR}/include/)
+  target_include_directories(VulkanMemoryAllocator SYSTEM INTERFACE ${VulkanMemoryAllocator_SOURCE_DIR}/include/)
 endif ()
 
 # Collection of libraries for loading various image formats

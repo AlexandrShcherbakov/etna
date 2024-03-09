@@ -2,8 +2,6 @@
 #ifndef ETNA_GRAPHICS_PIPELINE_HPP_INCLUDED
 #define ETNA_GRAPHICS_PIPELINE_HPP_INCLUDED
 
-#include <variant>
-
 #include <etna/Vulkan.hpp>
 #include <etna/VertexInput.hpp>
 #include <etna/PipelineBase.hpp>
@@ -36,7 +34,8 @@ public:
     // triangles, lines, etc. Also specifies additional tricky
     // stuff that is mostly not needed for basic applications.
     vk::PipelineInputAssemblyStateCreateInfo inputAssemblyConfig = {
-      .topology = vk::PrimitiveTopology::eTriangleList};
+      .topology = vk::PrimitiveTopology::eTriangleList,
+    };
 
     // Tessellation stage configuration
     vk::PipelineTessellationStateCreateInfo tessellationConfig = {
@@ -80,7 +79,9 @@ public:
           .blendEnable = false,
           // Which color channels should we write to?
           .colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
-            vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA}};
+            vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA,
+        },
+      };
       bool logicOpEnable = false;
       vk::LogicOp logicOp;
       std::array<float, 4> blendConstants{0, 0, 0, 0};
@@ -110,7 +111,9 @@ public:
     } fragmentShaderOutput;
 
     std::vector<vk::DynamicState> dynamicStates = {
-      vk::DynamicState::eViewport, vk::DynamicState::eScissor};
+      vk::DynamicState::eViewport,
+      vk::DynamicState::eScissor,
+    };
   };
 };
 

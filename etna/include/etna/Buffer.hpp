@@ -2,6 +2,8 @@
 #ifndef ETNA_BUFFER_HPP_INCLUDED
 #define ETNA_BUFFER_HPP_INCLUDED
 
+#include <string_view>
+
 #include <etna/Vulkan.hpp>
 #include <vk_mem_alloc.h>
 

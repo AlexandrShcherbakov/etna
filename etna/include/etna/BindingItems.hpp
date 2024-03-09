@@ -7,6 +7,7 @@
 
 namespace etna
 {
+
 class Buffer;
 class Image;
 
@@ -21,6 +22,7 @@ struct ImageBinding
   const Image& image;
   vk::DescriptorImageInfo descriptor_info;
 };
+
 } // namespace etna
 
 #endif // ETNA_BINDING_ITENS_HPP_INCLUDED

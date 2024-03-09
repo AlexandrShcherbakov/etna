@@ -3,6 +3,7 @@
 #define ETNA_GLOBAL_CONTEXT_HPP_INCLUDED
 
 #include <optional>
+#include <memory>
 
 #include <etna/Vulkan.hpp>
 #include <etna/DescriptorSetLayout.hpp>

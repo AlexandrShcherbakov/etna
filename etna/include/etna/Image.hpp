@@ -2,6 +2,8 @@
 #ifndef ETNA_IMAGE_HPP_INCLUDED
 #define ETNA_IMAGE_HPP_INCLUDED
 
+#include <optional>
+
 #include <etna/Vulkan.hpp>
 #include <vk_mem_alloc.h>
 

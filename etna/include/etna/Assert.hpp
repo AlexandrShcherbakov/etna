@@ -2,7 +2,7 @@
 #ifndef ETNA_ASSERT_HPP_INCLUDED
 #define ETNA_ASSERT_HPP_INCLUDED
 
-#include <stdexcept>
+#include <string_view>
 #include <spdlog/spdlog.h>
 
 

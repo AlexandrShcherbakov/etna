@@ -3,6 +3,7 @@
 #define ETNA_DESCRIPTOR_SET_HPP_INCLUDED
 
 #include <variant>
+#include <vector>
 
 #include <etna/Vulkan.hpp>
 #include <etna/DescriptorSetLayout.hpp>
