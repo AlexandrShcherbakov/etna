@@ -27,16 +27,4 @@
 #endif
 #include <vulkan/vulkan.hpp>
 
-// it also includes X11.h and doesn't fix these insane
-// macros until the most recent SDK version, so we fix
-// these ourselves
-#if defined(True)
-#undef True
-inline constexpr int True = 1;
-#endif
-#if defined(False)
-#undef False
-inline constexpr int False = 0;
-#endif
-
 #endif // ETNA_VULKAN_HPP
