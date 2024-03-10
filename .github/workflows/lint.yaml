@@ -9,10 +9,7 @@ on:
       - '**.clang-tidy'
   push:
     paths:
-      - '**.hpp'
-      - '**.cpp'
-      - '**.clang-format'
-      - '**.clang-tidy'
+      - '**'
 
 permissions:
   contents: read
