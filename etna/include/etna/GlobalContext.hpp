@@ -24,7 +24,7 @@ class GlobalContext
 {
   friend void initialize(const struct InitParams&);
 
-  GlobalContext(const struct InitParams& params);
+  explicit GlobalContext(const struct InitParams& params);
 
 public:
   Image createImage(Image::CreateInfo info);

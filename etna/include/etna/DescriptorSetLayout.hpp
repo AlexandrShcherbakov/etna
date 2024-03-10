@@ -14,6 +14,7 @@ struct SpvReflectDescriptorSet;
 
 namespace etna
 {
+
 constexpr uint32_t MAX_PROGRAM_DESCRIPTORS = 4u;
 constexpr uint32_t MAX_DESCRIPTOR_BINDINGS =
   32u; /*If you are out of bindings, try using arrays of images/samplers*/
@@ -85,6 +86,7 @@ private:
   std::vector<DescriptorSetInfo> descriptors;
   std::vector<vk::DescriptorSetLayout> vkLayouts;
 };
+
 } // namespace etna
 
 #endif // ETNA_DESCRIPTOR_SET_LAYOUT_HPP_INCLUDED

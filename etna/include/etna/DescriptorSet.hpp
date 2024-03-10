@@ -12,6 +12,7 @@
 
 namespace etna
 {
+
 struct Binding
 {
   /*Todo: add resource wrappers*/
@@ -78,7 +79,7 @@ destroyed automaticaly. Resource allocation tracking shoud be added. For long-li
 destructor*/
 struct DynamicDescriptorPool
 {
-  DynamicDescriptorPool(vk::Device dev, uint32_t framesInFlight);
+  DynamicDescriptorPool(vk::Device dev, uint32_t frames_in_flight);
   ~DynamicDescriptorPool();
 
   void flip();
@@ -86,7 +87,7 @@ struct DynamicDescriptorPool
   void reset(uint32_t frames_in_flight);
 
   DescriptorSet allocateSet(
-    DescriptorLayoutId layoutId, std::vector<Binding> bindings, vk::CommandBuffer command_buffer);
+    DescriptorLayoutId layout_id, std::vector<Binding> bindings, vk::CommandBuffer command_buffer);
 
   vk::DescriptorPool getCurrentPool() const { return pools[frameIndex]; }
 
@@ -107,6 +108,7 @@ private:
 };
 
 void write_set(const DescriptorSet& dst);
+
 } // namespace etna
 
 #endif // ETNA_DESCRIPTOR_SET_HPP_INCLUDED

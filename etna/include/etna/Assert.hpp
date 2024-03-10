@@ -8,6 +8,7 @@
 
 namespace etna
 {
+
 struct SourceLocation
 {
   std::string_view file;
@@ -19,6 +20,7 @@ struct SourceLocation
   spdlog::critical("Panicked at {}:{}, {}", loc.file, loc.line, message);
   std::terminate();
 }
+
 } // namespace etna
 
 #define ETNA_CURRENT_LOCATION                                                                      \

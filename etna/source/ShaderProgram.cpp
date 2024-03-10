@@ -208,7 +208,7 @@ void ShaderProgramManager::ShaderProgramInternal::reload(ShaderProgramManager& m
   {
     auto& shaderMod = manager.getModule(id);
 
-    if (shaderMod.getPushConst().size) // merge push constants
+    if (shaderMod.getPushConst().size > 0) // merge push constants
     {
       auto modPushConst = shaderMod.getPushConst();
       if (pushConst.size == 0u)
@@ -252,7 +252,7 @@ void ShaderProgramManager::ShaderProgramInternal::reload(ShaderProgramManager& m
   vk::PipelineLayoutCreateInfo info{};
   info.setSetLayouts(vkLayouts);
 
-  if (pushConst.size)
+  if (pushConst.size > 0)
   {
     info.setPPushConstantRanges(&pushConst);
     info.setPushConstantRangeCount(1u);

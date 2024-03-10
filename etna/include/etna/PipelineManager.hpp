@@ -23,10 +23,10 @@ public:
   PipelineManager(vk::Device dev, ShaderProgramManager& shader_manager);
 
   GraphicsPipeline createGraphicsPipeline(
-    std::string shaderProgramName, GraphicsPipeline::CreateInfo info);
+    std::string shader_program_name, GraphicsPipeline::CreateInfo info);
 
   ComputePipeline createComputePipeline(
-    std::string shaderProgramName, ComputePipeline::CreateInfo info);
+    std::string shader_program_name, ComputePipeline::CreateInfo info);
   // TODO: createRaytracePipeline, createMeshletPipeline
 
   void recreate();

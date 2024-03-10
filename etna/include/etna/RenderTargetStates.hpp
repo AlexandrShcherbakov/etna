@@ -33,7 +33,7 @@ public:
       , loadOp(clear ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad)
     {
     }
-    AttachmentParams(const Image& img, bool clear = true)
+    explicit AttachmentParams(const Image& img, bool clear = true)
       : AttachmentParams(img.get(), img.getView({}), clear)
     {
     }

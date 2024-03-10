@@ -10,10 +10,13 @@ namespace etna
 Buffer::Buffer(VmaAllocator alloc, CreateInfo info)
   : allocator{alloc}
 {
-  vk::BufferCreateInfo buf_info{
-    .size = info.size, .usage = info.bufferUsage, .sharingMode = vk::SharingMode::eExclusive};
+  vk::BufferCreateInfo bufInfo{
+    .size = info.size,
+    .usage = info.bufferUsage,
+    .sharingMode = vk::SharingMode::eExclusive,
+  };
 
-  VmaAllocationCreateInfo alloc_info{
+  VmaAllocationCreateInfo allocInfo{
     .flags = 0,
     .usage = info.memoryUsage,
     .requiredFlags = 0,
@@ -21,13 +24,14 @@ Buffer::Buffer(VmaAllocator alloc, CreateInfo info)
     .memoryTypeBits = 0,
     .pool = nullptr,
     .pUserData = nullptr,
-    .priority = 0.f};
+    .priority = 0.f,
+  };
 
   VkBuffer buf;
   auto retcode = vmaCreateBuffer(
     allocator,
-    &static_cast<const VkBufferCreateInfo&>(buf_info),
-    &alloc_info,
+    &static_cast<const VkBufferCreateInfo&>(bufInfo),
+    &allocInfo,
     &buf,
     &allocation,
     nullptr);

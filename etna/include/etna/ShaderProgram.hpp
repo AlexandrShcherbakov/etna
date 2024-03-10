@@ -117,8 +117,8 @@ private:
 
   struct ShaderProgramInternal
   {
-    ShaderProgramInternal(std::string name_, std::vector<uint32_t>&& mod)
-      : name(std::move(name_))
+    ShaderProgramInternal(std::string in_name, std::vector<uint32_t>&& mod)
+      : name(std::move(in_name))
       , moduleIds{std::move(mod)}
     {
     }

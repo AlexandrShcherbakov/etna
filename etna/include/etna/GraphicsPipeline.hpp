@@ -15,8 +15,8 @@ class PipelineManager;
 class GraphicsPipeline : public PipelineBase
 {
   friend class PipelineManager;
-  GraphicsPipeline(PipelineManager* inOwner, PipelineId inId, ShaderProgramId inShaderProgramId)
-    : PipelineBase(inOwner, inId, inShaderProgramId)
+  GraphicsPipeline(PipelineManager* in_owner, PipelineId in_id, ShaderProgramId in_shader_program_id)
+    : PipelineBase(in_owner, in_id, in_shader_program_id)
   {
   }
 
@@ -61,7 +61,7 @@ public:
       .rasterizationSamples = vk::SampleCountFlagBits::e1,
       // Invoke the fragment shader at least max(1, ceil(rasterizationSamples * minSampleShading))
       // times per fragment?
-      .sampleShadingEnable = false,
+      .sampleShadingEnable = vk::False,
       // Value in range [0.0f, 1.0f]. Ignore if sample shading is disabled
       .minSampleShading = 0.f,
     };
@@ -76,7 +76,7 @@ public:
       // your pixel shader will output to, i.e. for every output variable.
       std::vector<vk::PipelineColorBlendAttachmentState> attachments = {
         vk::PipelineColorBlendAttachmentState{
-          .blendEnable = false,
+          .blendEnable = vk::False,
           // Which color channels should we write to?
           .colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
             vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA,
@@ -89,9 +89,9 @@ public:
 
     vk::PipelineDepthStencilStateCreateInfo depthConfig = {
       // Discard fragments that are covered by other fragments?
-      .depthTestEnable = true,
+      .depthTestEnable = vk::True,
       // Write fragments' depth into the buffer after they have been drawn?
-      .depthWriteEnable = true,
+      .depthWriteEnable = vk::True,
       // How should we decide whether one fragment covers another one?
       .depthCompareOp = vk::CompareOp::eLessOrEqual,
       // Max allowed depth, usually changed for tricky hacks

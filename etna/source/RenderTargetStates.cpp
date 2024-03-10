@@ -86,7 +86,7 @@ RenderTargetState::RenderTargetState(
     .renderArea = rect,
     .layerCount = 1,
     .colorAttachmentCount = static_cast<uint32_t>(attachmentInfos.size()),
-    .pColorAttachments = attachmentInfos.size() ? attachmentInfos.data() : nullptr,
+    .pColorAttachments = attachmentInfos.empty() ? attachmentInfos.data() : nullptr,
     .pDepthAttachment = depth_attachment.view ? &depthAttInfo : nullptr,
     .pStencilAttachment = stencil_attachment.view ? &stencilAttInfo : nullptr,
   };

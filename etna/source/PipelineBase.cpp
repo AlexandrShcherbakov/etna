@@ -10,10 +10,10 @@ namespace etna
 {
 
 PipelineBase::PipelineBase(
-  PipelineManager* inOwner, PipelineId inId, ShaderProgramId inShaderProgramId)
-  : owner{inOwner}
-  , id{inId}
-  , shaderProgramId{inShaderProgramId}
+  PipelineManager* in_owner, PipelineId in_id, ShaderProgramId in_shader_program_id)
+  : owner{in_owner}
+  , id{in_id}
+  , shaderProgramId{in_shader_program_id}
 {
 }
 

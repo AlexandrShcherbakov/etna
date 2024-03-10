@@ -13,6 +13,7 @@
 
 namespace etna
 {
+
 static vk::UniqueInstance createInstance(const InitParams& params)
 {
   vk::ApplicationInfo appInfo{
@@ -73,7 +74,7 @@ static bool deviceTypeIsBetter(vk::PhysicalDeviceType first, vk::PhysicalDeviceT
   return score(first) > score(second);
 }
 
-vk::PhysicalDevice pickPhysicalDevice(vk::Instance instance, const InitParams& params)
+vk::PhysicalDevice pick_physical_device(vk::Instance instance, const InitParams& params)
 {
   std::vector pdevices = instance.enumeratePhysicalDevices().value;
 
@@ -127,7 +128,7 @@ vk::PhysicalDevice pickPhysicalDevice(vk::Instance instance, const InitParams& p
   return bestDevice;
 }
 
-uint32_t getQueueFamilyIndex(vk::PhysicalDevice pdevice, vk::QueueFlags flags)
+static uint32_t get_queue_family_index(vk::PhysicalDevice pdevice, vk::QueueFlags flags)
 {
   std::vector queueFamilies = pdevice.getQueueFamilyProperties();
 
@@ -143,7 +144,7 @@ uint32_t getQueueFamilyIndex(vk::PhysicalDevice pdevice, vk::QueueFlags flags)
 }
 
 static vk::UniqueDevice createDevice(
-  vk::PhysicalDevice pdevice, uint32_t universalQueueFamily, const InitParams& params)
+  vk::PhysicalDevice pdevice, uint32_t universal_queue_family, const InitParams& params)
 {
   const float defaultQueuePriority{0.0f};
 
@@ -152,20 +153,20 @@ static vk::UniqueDevice createDevice(
 
   const std::array queueInfos{
     vk::DeviceQueueCreateInfo{
-      .queueFamilyIndex = universalQueueFamily,
+      .queueFamilyIndex = universal_queue_family,
       .queueCount = 1,
       .pQueuePriorities = &defaultQueuePriority,
     },
   };
 
-  vk::PhysicalDeviceDynamicRenderingFeatures dynamic_rendering_feature{
+  vk::PhysicalDeviceDynamicRenderingFeatures dynamicRenderingFeature{
     // Evil const cast due to C not having const
-    .pNext = const_cast<vk::PhysicalDeviceFeatures2*>(&params.features),
+    .pNext = const_cast<vk::PhysicalDeviceFeatures2*>(&params.features), // NOLINT
     .dynamicRendering = VK_TRUE,
   };
 
-  vk::PhysicalDeviceSynchronization2Features sync2_feature{
-    .pNext = &dynamic_rendering_feature,
+  vk::PhysicalDeviceSynchronization2Features sync2Feature{
+    .pNext = &dynamicRenderingFeature,
     .synchronization2 = VK_TRUE,
   };
 
@@ -184,7 +185,7 @@ static vk::UniqueDevice createDevice(
   // pEnabledFeatures has to be nullptr.
   return pdevice
     .createDeviceUnique(vk::DeviceCreateInfo{
-      .pNext = &sync2_feature,
+      .pNext = &sync2Feature,
       .queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size()),
       .pQueueCreateInfos = queueInfos.data(),
       .enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size()),
@@ -195,26 +196,26 @@ static vk::UniqueDevice createDevice(
 
 #ifndef NDEBUG
 static VkBool32 debugCallback(
-  VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+  VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
   VkDebugUtilsMessageTypeFlagsEXT /*messageType*/,
-  const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+  const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
   void* /*pUserData*/)
 {
-  if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+  if ((message_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) != 0)
   {
-    spdlog::error(pCallbackData->pMessage);
+    spdlog::error(callback_data->pMessage);
   }
-  else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+  else if ((message_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) != 0)
   {
-    spdlog::warn(pCallbackData->pMessage);
+    spdlog::warn(callback_data->pMessage);
   }
-  else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
+  else if ((message_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) != 0)
   {
-    spdlog::info(pCallbackData->pMessage);
+    spdlog::info(callback_data->pMessage);
   }
   else
   {
-    spdlog::trace(pCallbackData->pMessage);
+    spdlog::trace(callback_data->pMessage);
   }
 
   return VK_FALSE;
@@ -258,23 +259,19 @@ GlobalContext::GlobalContext(const InitParams& params)
   }
 #endif
 
-  vkPhysDevice = pickPhysicalDevice(vkInstance.get(), params);
+  vkPhysDevice = pick_physical_device(vkInstance.get(), params);
 
 
   constexpr auto UNIVERSAL_QUEUE_FLAGS =
     vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute | vk::QueueFlagBits::eTransfer;
-  universalQueueFamilyIdx = getQueueFamilyIndex(vkPhysDevice, UNIVERSAL_QUEUE_FLAGS);
+  universalQueueFamilyIdx = get_queue_family_index(vkPhysDevice, UNIVERSAL_QUEUE_FLAGS);
   vkDevice = createDevice(vkPhysDevice, universalQueueFamilyIdx, params);
   VULKAN_HPP_DEFAULT_DISPATCHER.init(vkDevice.get());
 
   universalQueue = vkDevice->getQueue(universalQueueFamilyIdx, 0);
 
   {
-    // VmaVulkanFunctions vulkanFunctions {};
-    // vulkanFunctions.vkGetInstanceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr;
-    // vulkanFunctions.vkGetDeviceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceProcAddr;
-
-    VmaAllocatorCreateInfo alloc_info{
+    VmaAllocatorCreateInfo allocInfo{
       .flags = {},
       .physicalDevice = vkPhysDevice,
       .device = vkDevice.get(),
@@ -291,7 +288,7 @@ GlobalContext::GlobalContext(const InitParams& params)
     };
 
     VmaAllocator allocator;
-    ::vmaCreateAllocator(&alloc_info, &allocator);
+    ::vmaCreateAllocator(&allocInfo, &allocator);
 
     vmaAllocator = {allocator, &::vmaDestroyAllocator};
   }
@@ -318,4 +315,5 @@ ResourceStates& GlobalContext::getResourceTracker()
 }
 
 GlobalContext::~GlobalContext() = default;
+
 } // namespace etna

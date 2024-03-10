@@ -2,7 +2,6 @@
 #ifndef ETNA_ETNA_CONFIG_HPP_INCLUDED
 #define ETNA_ETNA_CONFIG_HPP_INCLUDED
 
-#include <span>
 #include <etna/Vulkan.hpp>
 
 

@@ -15,8 +15,8 @@ class PipelineManager;
 class ComputePipeline : public PipelineBase
 {
   friend class PipelineManager;
-  ComputePipeline(PipelineManager* inOwner, PipelineId inId, ShaderProgramId inShaderProgramId)
-    : PipelineBase(inOwner, inId, inShaderProgramId)
+  ComputePipeline(PipelineManager* in_owner, PipelineId in_id, ShaderProgramId in_shader_program_id)
+    : PipelineBase(in_owner, in_id, in_shader_program_id)
   {
   }
 
@@ -27,6 +27,7 @@ public:
   {
   };
 };
+
 } // namespace etna
 
 #endif // ETNA_COMPUTE_PIPELINE_HPP_INCLUDED

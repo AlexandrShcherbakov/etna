@@ -11,7 +11,7 @@ Image::Image(VmaAllocator alloc, CreateInfo info)
   : allocator{alloc}
   , format{info.format}
 {
-  vk::ImageCreateInfo image_info{
+  vk::ImageCreateInfo imageInfo{
     .imageType = vk::ImageType::e2D,
     .format = format,
     .extent = info.extent,
@@ -23,7 +23,7 @@ Image::Image(VmaAllocator alloc, CreateInfo info)
     .sharingMode = vk::SharingMode::eExclusive,
     .initialLayout = vk::ImageLayout::eUndefined,
   };
-  VmaAllocationCreateInfo alloc_info{
+  VmaAllocationCreateInfo allocInfo{
     .flags = 0,
     .usage = info.memoryUsage,
     .requiredFlags = 0,
@@ -37,8 +37,8 @@ Image::Image(VmaAllocator alloc, CreateInfo info)
 
   auto retcode = vmaCreateImage(
     allocator,
-    &static_cast<const VkImageCreateInfo&>(image_info),
-    &alloc_info,
+    &static_cast<const VkImageCreateInfo&>(imageInfo),
+    &allocInfo,
     &img,
     &allocation,
     nullptr);
@@ -93,7 +93,7 @@ Image::~Image()
   reset();
 }
 
-static vk::ImageAspectFlags get_aspeck_mask(vk::Format format)
+static vk::ImageAspectFlags get_aspect_mask(vk::Format format)
 {
   switch (format)
   {
@@ -113,7 +113,7 @@ static vk::ImageAspectFlags get_aspeck_mask(vk::Format format)
 
 vk::ImageAspectFlags Image::getAspectMaskByFormat() const
 {
-  return get_aspeck_mask(format);
+  return get_aspect_mask(format);
 }
 
 vk::ImageView Image::getView(Image::ViewParams params) const
@@ -125,9 +125,9 @@ vk::ImageView Image::getView(Image::ViewParams params) const
     vk::ImageViewCreateInfo viewInfo{
       .image = image,
       .viewType = vk::ImageViewType::e2D, // TODO: support other types
-      .format = format,                   // TODO: Maybe support anothe type view
+      .format = format,                   // TODO: Maybe support another type view
       .subresourceRange = vk::ImageSubresourceRange{
-        .aspectMask = params.aspectMask ? params.aspectMask.value() : get_aspeck_mask(format),
+        .aspectMask = params.aspectMask ? params.aspectMask.value() : get_aspect_mask(format),
         .baseMipLevel = params.baseMip,
         .levelCount = params.levelCount,
         .baseArrayLayer = 0,

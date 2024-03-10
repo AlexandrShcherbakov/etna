@@ -22,7 +22,7 @@ public:
     float maxLod = 1.0f;
   };
 
-  Sampler(CreateInfo info);
+  explicit Sampler(CreateInfo info);
 
   [[nodiscard]] vk::Sampler get() const { return sampler.get(); }
 

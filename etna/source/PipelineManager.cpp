@@ -21,7 +21,7 @@ static vk::UniquePipeline createComputePipelineInternal(
 }
 
 
-vk::UniquePipeline createGraphicsPipelineInternal(
+static vk::UniquePipeline create_graphics_pipeline_internal(
   vk::Device device,
   vk::PipelineLayout layout,
   std::span<const vk::PipelineShaderStageCreateInfo> stages,
@@ -66,7 +66,7 @@ vk::UniquePipeline createGraphicsPipelineInternal(
   };
 
   vk::PipelineColorBlendStateCreateInfo blendState{
-    .logicOpEnable = info.blendingConfig.logicOpEnable,
+    .logicOpEnable = static_cast<vk::Bool32>(info.blendingConfig.logicOpEnable),
     .logicOp = info.blendingConfig.logicOp,
   };
   blendState.setAttachments(info.blendingConfig.attachments);
@@ -148,7 +148,7 @@ static void print_prog_info(const etna::ShaderProgramInfo& info, const std::stri
   }
 
   auto pc = info.getPushConst();
-  if (pc.size)
+  if (pc.size > 0)
   {
     std::cout << "PushConst "
               << " size = " << pc.size << " stages = " << vk::to_string(pc.stageFlags) << "\n";
@@ -163,7 +163,7 @@ GraphicsPipeline PipelineManager::createGraphicsPipeline(
 
   pipelines.emplace(
     pipelineId,
-    createGraphicsPipelineInternal(
+    create_graphics_pipeline_internal(
       device, shaderManager.getProgramLayout(progId), shaderManager.getShaderStages(progId), info));
   graphicsPipelineParameters.emplace(pipelineId, PipelineParameters{progId, std::move(info)});
 
@@ -178,7 +178,7 @@ void PipelineManager::recreate()
   for (const auto& [id, params] : graphicsPipelineParameters)
     pipelines.emplace(
       id,
-      createGraphicsPipelineInternal(
+      create_graphics_pipeline_internal(
         device,
         shaderManager.getProgramLayout(params.shaderProgram),
         shaderManager.getShaderStages(params.shaderProgram),

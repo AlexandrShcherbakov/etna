@@ -16,7 +16,7 @@ bool DescriptorSet::isValid() const
 }
 
 /*Todo: Add struct with parameters*/
-static constexpr uint32_t NUM_DESCRIPORS = 2048;
+static constexpr uint32_t NUM_DESCRIPTORS = 2048;
 
 static constexpr uint32_t NUM_TEXTURES = 2048;
 static constexpr uint32_t NUM_RW_TEXTURES = 512;
@@ -24,7 +24,7 @@ static constexpr uint32_t NUM_BUFFERS = 2048;
 static constexpr uint32_t NUM_RW_BUFFERS = 512;
 static constexpr uint32_t NUM_SAMPLERS = 128;
 
-static constexpr std::array<vk::DescriptorPoolSize, 6> g_default_pool_size{
+static constexpr std::array<vk::DescriptorPoolSize, 6> DEFAULT_POOL_SIZE{
   vk::DescriptorPoolSize{vk::DescriptorType::eUniformBuffer, NUM_BUFFERS},
   vk::DescriptorPoolSize{vk::DescriptorType::eStorageBuffer, NUM_RW_BUFFERS},
   vk::DescriptorPoolSize{vk::DescriptorType::eSampler, NUM_SAMPLERS},
@@ -40,8 +40,8 @@ DynamicDescriptorPool::DynamicDescriptorPool(vk::Device dev, uint32_t frames_in_
   flipsCount = 0;
 
   vk::DescriptorPoolCreateInfo info{};
-  info.setMaxSets(NUM_DESCRIPORS);
-  info.setPoolSizes(g_default_pool_size);
+  info.setMaxSets(NUM_DESCRIPTORS);
+  info.setPoolSizes(DEFAULT_POOL_SIZE);
 
   for (uint32_t i = 0; i < numFrames; i++)
   {
@@ -69,10 +69,10 @@ void DynamicDescriptorPool::destroyAllocatedSets()
 }
 
 DescriptorSet DynamicDescriptorPool::allocateSet(
-  DescriptorLayoutId layoutId, std::vector<Binding> bindings, vk::CommandBuffer command_buffer)
+  DescriptorLayoutId layout_id, std::vector<Binding> bindings, vk::CommandBuffer command_buffer)
 {
   auto& dslCache = get_context().getDescriptorSetLayouts();
-  auto setLayouts = {dslCache.getVkLayout(layoutId)};
+  auto setLayouts = {dslCache.getVkLayout(layout_id)};
 
   vk::DescriptorSetAllocateInfo info{};
   info.setDescriptorPool(pools[frameIndex]);
@@ -80,12 +80,12 @@ DescriptorSet DynamicDescriptorPool::allocateSet(
 
   vk::DescriptorSet vkSet{};
   ETNA_ASSERT(vkDevice.allocateDescriptorSets(&info, &vkSet) == vk::Result::eSuccess);
-  return DescriptorSet{flipsCount, layoutId, vkSet, std::move(bindings), command_buffer};
+  return DescriptorSet{flipsCount, layout_id, vkSet, std::move(bindings), command_buffer};
 }
 
-static bool is_image_resource(vk::DescriptorType dsType)
+static bool is_image_resource(vk::DescriptorType ds_type)
 {
-  switch (dsType)
+  switch (ds_type)
   {
   case vk::DescriptorType::eUniformBuffer:
   case vk::DescriptorType::eStorageBuffer:
@@ -101,7 +101,7 @@ static bool is_image_resource(vk::DescriptorType dsType)
     break;
   }
 
-  ETNA_PANIC("Descriptor write error : unsupported resource {}", vk::to_string(dsType));
+  ETNA_PANIC("Descriptor write error : unsupported resource {}", vk::to_string(ds_type));
   return false;
 }
 
@@ -140,7 +140,7 @@ static void validate_descriptor_write(const DescriptorSet& dst)
 
   for (uint32_t binding = 0; binding < MAX_DESCRIPTOR_BINDINGS; binding++)
   {
-    if (unboundResources[binding])
+    if (unboundResources[binding] > 0)
       ETNA_PANIC(
         "Descriptor write error: slot {} has {} unbound resources",
         binding,
@@ -212,34 +212,34 @@ constexpr static vk::PipelineStageFlagBits2 shader_stage_to_pipeline_stage(
   vk::ShaderStageFlags shader_stages)
 {
   constexpr uint32_t MAPPING_LENGTH = 1;
-  constexpr std::array<vk::ShaderStageFlagBits, MAPPING_LENGTH> shaderStages = {
+  constexpr std::array<vk::ShaderStageFlagBits, MAPPING_LENGTH> SHADER_STAGES = {
     vk::ShaderStageFlagBits::eFragment,
   };
-  constexpr std::array<vk::PipelineStageFlagBits2, MAPPING_LENGTH> pipelineStages = {
+  constexpr std::array<vk::PipelineStageFlagBits2, MAPPING_LENGTH> PIPELINE_STAGES = {
     vk::PipelineStageFlagBits2::eFragmentShader,
   };
   for (uint32_t i = 0; i < MAPPING_LENGTH; ++i)
   {
-    if (shaderStages[i] & shader_stages)
-      return pipelineStages[i];
+    if (SHADER_STAGES[i] & shader_stages)
+      return PIPELINE_STAGES[i];
   }
   return vk::PipelineStageFlagBits2::eNone;
 }
 
 constexpr static vk::AccessFlagBits2 descriptor_type_to_access_flag(
-  vk::DescriptorType decriptor_type)
+  vk::DescriptorType descriptor_type)
 {
   constexpr uint32_t MAPPING_LENGTH = 1;
-  constexpr std::array<vk::DescriptorType, MAPPING_LENGTH> descritorTypes = {
+  constexpr std::array<vk::DescriptorType, MAPPING_LENGTH> DESCRIPTOR_TYPES = {
     vk::DescriptorType::eSampledImage,
   };
-  constexpr std::array<vk::AccessFlagBits2, MAPPING_LENGTH> accessFlags = {
+  constexpr std::array<vk::AccessFlagBits2, MAPPING_LENGTH> ACCESS_FLAGS = {
     vk::AccessFlagBits2::eShaderRead,
   };
   for (uint32_t i = 0; i < MAPPING_LENGTH; ++i)
   {
-    if (descritorTypes[i] == decriptor_type)
-      return accessFlags[i];
+    if (DESCRIPTOR_TYPES[i] == descriptor_type)
+      return ACCESS_FLAGS[i];
   }
   return vk::AccessFlagBits2::eNone;
 }

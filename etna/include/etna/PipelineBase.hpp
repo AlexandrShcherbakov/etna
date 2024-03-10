@@ -22,7 +22,7 @@ public:
   PipelineBase& operator=(PipelineBase&&) noexcept;
 
 protected:
-  PipelineBase(PipelineManager* owner, PipelineId inId, ShaderProgramId inShaderProgramId);
+  PipelineBase(PipelineManager* owner, PipelineId in_id, ShaderProgramId in_shader_program_id);
   PipelineBase() = default;
   ~PipelineBase();
 
