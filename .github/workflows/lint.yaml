@@ -27,7 +27,8 @@ jobs:
       id: review
       with:
         apt_packages: libvulkan-dev
-        cmake_command: cmake . -DCMAKE_EXPORT_COMPILE_COMMANDS=on
+        build_dir: build
+        cmake_command: cmake -Bbuild -S. -DCMAKE_EXPORT_COMPILE_COMMANDS=on
 
     - uses: ZedThree/clang-tidy-review/upload@v0.14.0
       id: upload-review
