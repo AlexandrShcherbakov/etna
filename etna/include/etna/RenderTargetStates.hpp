@@ -25,8 +25,8 @@ public:
     vk::AttachmentStoreOp storeOp = vk::AttachmentStoreOp::eStore;
     vk::ClearColorValue clearColorValue = std::array<float, 4>({0.0f, 0.0f, 0.0f, 1.0f});
     vk::ClearDepthStencilValue clearDepthStencilValue = {1.0f, 0};
-    
-    // By default, the render target can work with multisample images and pipelines, 
+
+    // By default, the render target can work with multisample images and pipelines,
     // but not produce a final single-sample result.
     // These fields below are for the final MSAA image.
     // Ignore unless you know what MSAA is and aren't sure you need it.
