@@ -18,7 +18,7 @@
 #define VULKAN_HPP_ASSERT_ON_RESULT(EXPR)
 #endif
 
-// vulkan.hpp somehow includes windows.h :(
+// vulkan.hpp includes windows.h :(
 #if defined(_WIN32) || defined(_WIN64)
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -26,5 +26,17 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <vulkan/vulkan.hpp>
+
+// it also includes X11.h and doesn't fix these insane
+// macros until the most recent SDK version, so we fix
+// these ourselves
+#if defined(True)
+#undef True
+inline constexpr int True = 1;
+#endif
+#if defined(False)
+#undef False
+inline constexpr int False = 0;
+#endif
 
 #endif // ETNA_VULKAN_HPP
