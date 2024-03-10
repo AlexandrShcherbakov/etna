@@ -35,7 +35,7 @@ jobs:
             https://packages.lunarg.com/vulkan/1.3.275/lunarg-vulkan-1.3.275-jammy.list && \
           apt update && \
           apt-get -y install libvulkan-dev && \
-          cmake -Bbuild -S. -DCMAKE_EXPORT_COMPILE_COMMANDS=on
+          cmake  --trace-source=FindVulkan.cmake  -Bbuild -S. -DCMAKE_EXPORT_COMPILE_COMMANDS=on
         clang_tidy_checks: '' # Use closest .clang-tidy config, not some weird default
 
     - uses: ZedThree/clang-tidy-review/upload@v0.14.0
