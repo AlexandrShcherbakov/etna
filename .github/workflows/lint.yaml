@@ -29,6 +29,7 @@ jobs:
         apt_packages: libvulkan-dev
         build_dir: build
         cmake_command: cmake -Bbuild -S. -DCMAKE_EXPORT_COMPILE_COMMANDS=on
+        clang_tidy_checks: '' # Use closest .clang-tidy config, not some weird default
 
     - uses: ZedThree/clang-tidy-review/upload@v0.14.0
       id: upload-review
