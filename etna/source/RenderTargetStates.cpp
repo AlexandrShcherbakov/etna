@@ -42,10 +42,10 @@ RenderTargetState::RenderTargetState(
     attachmentInfos[i].loadOp = color_attachments[i].loadOp;
     attachmentInfos[i].storeOp = color_attachments[i].storeOp;
     attachmentInfos[i].clearValue = color_attachments[i].clearColorValue;
-    
+
     etna::get_context().getResourceTracker().setColorTarget(
       commandBuffer, color_attachments[i].image);
-    
+
     if (color_attachments[i].resolveImage)
     {
       etna::get_context().getResourceTracker().setResolveTarget(
@@ -86,7 +86,7 @@ RenderTargetState::RenderTargetState(
       "depth and stencil attachments must be created from the same image");
     etna::get_context().getResourceTracker().setDepthStencilTarget(
       commandBuffer, depth_attachment.image);
-    
+
     if (depth_attachment.resolveImage && stencil_attachment.resolveImage)
     {
       etna::get_context().getResourceTracker().setResolveTarget(
@@ -105,23 +105,19 @@ RenderTargetState::RenderTargetState(
       if (depth_attachment.resolveImage)
       {
         etna::get_context().getResourceTracker().setResolveTarget(
-          commandBuffer,
-          depth_attachment.resolveImage,
-          vk::ImageAspectFlagBits::eDepth);
+          commandBuffer, depth_attachment.resolveImage, vk::ImageAspectFlagBits::eDepth);
       }
     }
-    
+
     if (stencil_attachment.image)
     {
       etna::get_context().getResourceTracker().setStencilTarget(
         commandBuffer, stencil_attachment.image);
-      
+
       if (stencil_attachment.resolveImage)
       {
         etna::get_context().getResourceTracker().setResolveTarget(
-          commandBuffer,
-          stencil_attachment.resolveImage,
-          vk::ImageAspectFlagBits::eStencil);
+          commandBuffer, stencil_attachment.resolveImage, vk::ImageAspectFlagBits::eStencil);
       }
     }
   }
