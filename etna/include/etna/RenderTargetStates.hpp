@@ -19,7 +19,6 @@ class RenderTargetState
 public:
   struct AttachmentParams
   {
-    // TODO: Add new fields for clearing etc.
     vk::Image image = VK_NULL_HANDLE;
     vk::ImageView view = VK_NULL_HANDLE;
     vk::AttachmentLoadOp loadOp = vk::AttachmentLoadOp::eClear;
@@ -27,10 +26,14 @@ public:
     vk::ClearColorValue clearColorValue = std::array<float, 4>({0.0f, 0.0f, 0.0f, 1.0f});
     vk::ClearDepthStencilValue clearDepthStencilValue = {1.0f, 0};
     
-    // resolve part
+    // By default, the render target can work with multisample images and pipelines, 
+    // but not produce a final single-sample result.
+    // These fields below are for the final MSAA image.
+    // Ignore unless you know what MSAA is and aren't sure you need it.
     vk::Image resolveImage = VK_NULL_HANDLE;
     vk::ImageView resolveImageView = VK_NULL_HANDLE;
     vk::ResolveModeFlagBits resolveMode = vk::ResolveModeFlagBits::eNone;
+<<<<<<< HEAD
 
     AttachmentParams() = default;
     AttachmentParams(vk::Image i, vk::ImageView v, bool clear = true)
@@ -57,6 +60,8 @@ public:
       : AttachmentParams(img.get(), img.getView({}), res_img.get(), res_img.getView({}), clear, store)
     {
     }
+=======
+>>>>>>> f6dfa1f (constructors removed, msaa comment added)
   };
 
   RenderTargetState(
