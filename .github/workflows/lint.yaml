@@ -34,7 +34,7 @@ jobs:
           wget -qO /etc/apt/sources.list.d/lunarg-vulkan-1.3.275-jammy.list \
             https://packages.lunarg.com/vulkan/1.3.275/lunarg-vulkan-1.3.275-jammy.list && \
           apt update && \
-          apt-get -y install libvulkan-dev && \
+          apt-get -y install vulkan-headers && \
           ls /usr/include/vulkan && \
           cmake  --trace-source=FindVulkan.cmake  -Bbuild -S. -DCMAKE_FIND_DEBUG_MODE=TRUE -DCMAKE_EXPORT_COMPILE_COMMANDS=on
         clang_tidy_checks: '' # Use closest .clang-tidy config, not some weird default
