@@ -26,7 +26,7 @@ jobs:
     - uses: ZedThree/clang-tidy-review@v0.14.0
       id: review
       with:
-        apt_packages: ['libvulkan-dev', 'libx11-dev']
+        apt_packages: 'libvulkan-dev,libx11-dev'
         build_dir: build
         cmake_command: cmake -Bbuild -S. -DCMAKE_EXPORT_COMPILE_COMMANDS=on
         clang_tidy_checks: '' # Use closest .clang-tidy config, not some weird default
