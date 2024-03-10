@@ -107,9 +107,7 @@ void ResourceStates::setStencilTarget(vk::CommandBuffer com_buffer, vk::Image im
 }
 
 void ResourceStates::setResolveTarget(
-  vk::CommandBuffer com_buffer,
-  vk::Image image,
-  vk::ImageAspectFlags aspect_flags)
+  vk::CommandBuffer com_buffer, vk::Image image, vk::ImageAspectFlags aspect_flags)
 {
   setTextureState(
     com_buffer,
