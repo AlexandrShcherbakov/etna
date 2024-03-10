@@ -14,6 +14,7 @@
 
 namespace etna
 {
+
 struct InitParams
 {
   // Can be anything
