@@ -15,7 +15,8 @@ class PipelineManager;
 class GraphicsPipeline : public PipelineBase
 {
   friend class PipelineManager;
-  GraphicsPipeline(PipelineManager* in_owner, PipelineId in_id, ShaderProgramId in_shader_program_id)
+  GraphicsPipeline(
+    PipelineManager* in_owner, PipelineId in_id, ShaderProgramId in_shader_program_id)
     : PipelineBase(in_owner, in_id, in_shader_program_id)
   {
   }
