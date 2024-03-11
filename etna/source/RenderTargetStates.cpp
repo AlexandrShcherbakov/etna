@@ -42,13 +42,27 @@ RenderTargetState::RenderTargetState(
     attachmentInfos[i].loadOp = color_attachments[i].loadOp;
     attachmentInfos[i].storeOp = color_attachments[i].storeOp;
     attachmentInfos[i].clearValue = color_attachments[i].clearColorValue;
+
     etna::get_context().getResourceTracker().setColorTarget(
       commandBuffer, color_attachments[i].image);
+
+    if (color_attachments[i].resolveImage)
+    {
+      etna::get_context().getResourceTracker().setResolveTarget(
+        commandBuffer, color_attachments[i].resolveImage, vk::ImageAspectFlagBits::eColor);
+
+      attachmentInfos[i].resolveImageLayout = vk::ImageLayout::eGeneral;
+      attachmentInfos[i].resolveImageView = color_attachments[i].resolveImageView;
+      attachmentInfos[i].resolveMode = color_attachments[i].resolveMode;
+    }
   }
 
   vk::RenderingAttachmentInfo depthAttInfo{
     .imageView = depth_attachment.view,
     .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
+    .resolveMode = depth_attachment.resolveMode,
+    .resolveImageView = depth_attachment.resolveImageView,
+    .resolveImageLayout = vk::ImageLayout::eGeneral,
     .loadOp = depth_attachment.loadOp,
     .storeOp = depth_attachment.storeOp,
     .clearValue = depth_attachment.clearDepthStencilValue,
@@ -57,6 +71,9 @@ RenderTargetState::RenderTargetState(
   vk::RenderingAttachmentInfo stencilAttInfo{
     .imageView = stencil_attachment.view,
     .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
+    .resolveMode = stencil_attachment.resolveMode,
+    .resolveImageView = stencil_attachment.resolveImageView,
+    .resolveImageLayout = vk::ImageLayout::eGeneral,
     .loadOp = stencil_attachment.loadOp,
     .storeOp = stencil_attachment.storeOp,
     .clearValue = stencil_attachment.clearDepthStencilValue,
@@ -69,15 +86,40 @@ RenderTargetState::RenderTargetState(
       "depth and stencil attachments must be created from the same image");
     etna::get_context().getResourceTracker().setDepthStencilTarget(
       commandBuffer, depth_attachment.image);
+
+    if (depth_attachment.resolveImage && stencil_attachment.resolveImage)
+    {
+      etna::get_context().getResourceTracker().setResolveTarget(
+        commandBuffer,
+        depth_attachment.resolveImage,
+        vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil);
+    }
   }
   else
   {
     if (depth_attachment.image)
+    {
       etna::get_context().getResourceTracker().setDepthTarget(
         commandBuffer, depth_attachment.image);
+
+      if (depth_attachment.resolveImage)
+      {
+        etna::get_context().getResourceTracker().setResolveTarget(
+          commandBuffer, depth_attachment.resolveImage, vk::ImageAspectFlagBits::eDepth);
+      }
+    }
+
     if (stencil_attachment.image)
+    {
       etna::get_context().getResourceTracker().setStencilTarget(
         commandBuffer, stencil_attachment.image);
+
+      if (stencil_attachment.resolveImage)
+      {
+        etna::get_context().getResourceTracker().setResolveTarget(
+          commandBuffer, stencil_attachment.resolveImage, vk::ImageAspectFlagBits::eStencil);
+      }
+    }
   }
 
   etna::get_context().getResourceTracker().flushBarriers(commandBuffer);

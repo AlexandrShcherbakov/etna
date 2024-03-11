@@ -38,6 +38,8 @@ public:
   void setDepthStencilTarget(vk::CommandBuffer com_buffer, vk::Image image);
   void setDepthTarget(vk::CommandBuffer com_buffer, vk::Image image);
   void setStencilTarget(vk::CommandBuffer com_buffer, vk::Image image);
+  void setResolveTarget(
+    vk::CommandBuffer com_buffer, vk::Image image, vk::ImageAspectFlags aspect_flags);
 
   void flushBarriers(vk::CommandBuffer com_buf);
 };
