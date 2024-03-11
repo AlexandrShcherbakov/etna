@@ -18,5 +18,5 @@ jobs:
       - uses: ZedThree/clang-tidy-review/post@v0.14.0 # v0.17 is buggy
         with:
           lgtm_comment_body: 'А я всегда говорил, нормально делай — нормально будет! 👍'
-          annotations: true
+          annotations: false
           max_comments: 10
