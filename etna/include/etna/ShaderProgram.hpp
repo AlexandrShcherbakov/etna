@@ -15,6 +15,7 @@
 
 namespace etna
 {
+
 struct ShaderModule
 {
   ShaderModule(vk::Device device, const std::string& shader_path);
@@ -145,6 +146,7 @@ private:
 
   friend ShaderProgramInfo;
 };
+
 } // namespace etna
 
 #endif // ETNA_SHADER_PROGRAM_HPP_INCLUDED

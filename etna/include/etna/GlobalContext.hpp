@@ -18,6 +18,7 @@
 
 namespace etna
 {
+
 class ResourceStates;
 
 class GlobalContext
@@ -71,6 +72,7 @@ private:
 };
 
 GlobalContext& get_context();
+
 } // namespace etna
 
 #endif // ETNA_GLOBAL_CONTEXT_HPP_INCLUDED
