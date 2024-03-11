@@ -1,7 +1,7 @@
 name: comment-lint-results
 
 permissions:
-  contents: read
+  checks: write
   pull-requests: write
 
 on:
