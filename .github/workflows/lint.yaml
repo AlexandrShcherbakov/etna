@@ -10,7 +10,6 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
   check-format-and-tidy:
@@ -38,9 +37,8 @@ jobs:
           apt-get -y install libvulkan-dev vulkan-headers && \
           cmake -Bbuild -S. -DCMAKE_EXPORT_COMPILE_COMMANDS=on
         clang_tidy_checks: '' # Use closest .clang-tidy config, not some weird default
+        split_workflow: true # So that comments work with fork PRs
 
-    - uses: ZedThree/clang-tidy-review/upload@v0.14.0
-      id: upload-review
-
-    - if: steps.review.outputs.total_comments > 0
-      run: exit 1
+    # Upload review results as artifacts, a different workflow posts them
+    # as comments. This is required due to security stuff.
+    - uses: ZedThree/clang-tidy-review/upload@v0.17.1
