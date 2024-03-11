@@ -22,7 +22,6 @@ inline constexpr uint32_t VULKAN_API_VERSION = VK_API_VERSION_1_3;
 inline constexpr const char* ETNA_ENGINE_NAME = "etna";
 inline constexpr uint32_t ETNA_VERSION = VK_MAKE_VERSION(0, 1, 0);
 
-
 } // namespace etna
 
 #endif // ETNA_ETNA_CONFIG_HPP_INCLUDED

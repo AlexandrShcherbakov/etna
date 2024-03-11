@@ -70,6 +70,7 @@ void set_state(
 
 void finish_frame(vk::CommandBuffer com_buffer);
 void flush_barriers(vk::CommandBuffer com_buffer);
+
 } // namespace etna
 
 #endif // ETNA_ETNA_HPP_INCLUDED
