@@ -23,7 +23,7 @@ jobs:
         check-path: 'etna'
         fallback-style: 'none'
 
-    - uses: ZedThree/clang-tidy-review@v0.17.1
+    - uses: ZedThree/clang-tidy-review@9a32adc734e10e4d84baa60f2b7d7c021568c527 # v0.17.1 but with some bugfixes
       id: review
       with:
         apt_packages: 'wget,libx11-dev'
@@ -41,4 +41,4 @@ jobs:
 
     # Upload review results as artifacts, a different workflow posts them
     # as comments. This is required due to security stuff.
-    - uses: ZedThree/clang-tidy-review/upload@v0.17.1
+    - uses: ZedThree/clang-tidy-review/upload@9a32adc734e10e4d84baa60f2b7d7c021568c527 # v0.17.1 but with some bugfixes

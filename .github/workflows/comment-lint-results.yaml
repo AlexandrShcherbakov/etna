@@ -15,8 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # v0.17.1 of this action uses an out of date API, so we grab the revision where it's fixed
-      - uses: ZedThree/clang-tidy-review/post@9a32adc734e10e4d84baa60f2b7d7c021568c527
+      - uses: ZedThree/clang-tidy-review/post@9a32adc734e10e4d84baa60f2b7d7c021568c527 # v0.17.1 but with some bugfixes
         with:
           lgtm_comment_body: 'А я всегда говорил, нормально делай — нормально будет! 👍'
           annotations: true
