@@ -42,13 +42,13 @@ struct DescriptorSet
     uint64_t gen,
     DescriptorLayoutId id,
     vk::DescriptorSet vk_set,
-    std::vector<Binding> _bindings,
-    vk::CommandBuffer _command_buffer)
+    std::vector<Binding> resources,
+    vk::CommandBuffer cmd_buffer)
     : generation{gen}
     , layoutId{id}
     , set{vk_set}
-    , bindings{std::move(_bindings)}
-    , command_buffer{_command_buffer}
+    , bindings{std::move(resources)}
+    , command_buffer{cmd_buffer}
   {
     processBarriers();
   }
