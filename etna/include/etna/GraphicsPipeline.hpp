@@ -29,7 +29,7 @@ public:
   {
     // Specifies the format in which vertices are fed to this
     // pipeline's vertex shader
-    VertexShaderInputDescription vertexShaderInput {};
+    VertexShaderInputDescription vertexShaderInput{};
 
     // Specifies what type of primitives you want to draw:
     // triangles, lines, etc. Also specifies additional tricky
