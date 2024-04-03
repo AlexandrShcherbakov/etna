@@ -73,7 +73,8 @@ void ResourceStates::setColorTarget(vk::CommandBuffer com_buffer, vk::Image imag
     vk::ImageAspectFlagBits::eColor);
 }
 
-void ResourceStates::setDepthStencilTarget(vk::CommandBuffer com_buffer, vk::Image image)
+void ResourceStates::setDepthStencilTarget(
+  vk::CommandBuffer com_buffer, vk::Image image, vk::ImageAspectFlags aspect_flags)
 {
   setTextureState(
     com_buffer,
@@ -81,29 +82,7 @@ void ResourceStates::setDepthStencilTarget(vk::CommandBuffer com_buffer, vk::Ima
     vk::PipelineStageFlagBits2::eEarlyFragmentTests,
     vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
     vk::ImageLayout::eDepthStencilAttachmentOptimal,
-    vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil);
-}
-
-void ResourceStates::setDepthTarget(vk::CommandBuffer com_buffer, vk::Image image)
-{
-  setTextureState(
-    com_buffer,
-    image,
-    vk::PipelineStageFlagBits2::eEarlyFragmentTests,
-    vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
-    vk::ImageLayout::eDepthStencilAttachmentOptimal,
-    vk::ImageAspectFlagBits::eDepth);
-}
-
-void ResourceStates::setStencilTarget(vk::CommandBuffer com_buffer, vk::Image image)
-{
-  setTextureState(
-    com_buffer,
-    image,
-    vk::PipelineStageFlagBits2::eEarlyFragmentTests,
-    vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
-    vk::ImageLayout::eDepthStencilAttachmentOptimal,
-    vk::ImageAspectFlagBits::eStencil);
+    aspect_flags);
 }
 
 void ResourceStates::setResolveTarget(

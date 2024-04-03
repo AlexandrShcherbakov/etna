@@ -21,6 +21,7 @@ public:
   {
     vk::Image image = VK_NULL_HANDLE;
     vk::ImageView view = VK_NULL_HANDLE;
+    std::optional<vk::ImageAspectFlags> imageAspect{};
     vk::AttachmentLoadOp loadOp = vk::AttachmentLoadOp::eClear;
     vk::AttachmentStoreOp storeOp = vk::AttachmentStoreOp::eStore;
     vk::ClearColorValue clearColorValue = std::array<float, 4>({0.0f, 0.0f, 0.0f, 1.0f});
@@ -32,6 +33,7 @@ public:
     // Ignore unless you know what MSAA is and aren't sure you need it.
     vk::Image resolveImage = VK_NULL_HANDLE;
     vk::ImageView resolveImageView = VK_NULL_HANDLE;
+    std::optional<vk::ImageAspectFlags> resolveImageAspect{};
     vk::ResolveModeFlagBits resolveMode = vk::ResolveModeFlagBits::eNone;
   };
 
