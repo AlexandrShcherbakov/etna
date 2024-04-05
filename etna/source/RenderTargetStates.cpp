@@ -85,7 +85,9 @@ RenderTargetState::RenderTargetState(
       depth_attachment.view == stencil_attachment.view,
       "depth and stencil attachments must be created from the same image");
     etna::get_context().getResourceTracker().setDepthStencilTarget(
-      commandBuffer, depth_attachment.image);
+      commandBuffer,
+      depth_attachment.image,
+      vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil);
 
     if (depth_attachment.resolveImage && stencil_attachment.resolveImage)
     {
@@ -99,25 +101,33 @@ RenderTargetState::RenderTargetState(
   {
     if (depth_attachment.image)
     {
-      etna::get_context().getResourceTracker().setDepthTarget(
-        commandBuffer, depth_attachment.image);
+      etna::get_context().getResourceTracker().setDepthStencilTarget(
+        commandBuffer,
+        depth_attachment.image,
+        depth_attachment.imageAspect.value_or(vk::ImageAspectFlagBits::eDepth));
 
       if (depth_attachment.resolveImage)
       {
         etna::get_context().getResourceTracker().setResolveTarget(
-          commandBuffer, depth_attachment.resolveImage, vk::ImageAspectFlagBits::eDepth);
+          commandBuffer,
+          depth_attachment.resolveImage,
+          depth_attachment.resolveImageAspect.value_or(vk::ImageAspectFlagBits::eDepth));
       }
     }
 
     if (stencil_attachment.image)
     {
-      etna::get_context().getResourceTracker().setStencilTarget(
-        commandBuffer, stencil_attachment.image);
+      etna::get_context().getResourceTracker().setDepthStencilTarget(
+        commandBuffer,
+        stencil_attachment.image,
+        stencil_attachment.imageAspect.value_or(vk::ImageAspectFlagBits::eStencil));
 
       if (stencil_attachment.resolveImage)
       {
         etna::get_context().getResourceTracker().setResolveTarget(
-          commandBuffer, stencil_attachment.resolveImage, vk::ImageAspectFlagBits::eStencil);
+          commandBuffer,
+          stencil_attachment.resolveImage,
+          stencil_attachment.resolveImageAspect.value_or(vk::ImageAspectFlagBits::eStencil));
       }
     }
   }

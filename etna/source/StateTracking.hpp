@@ -35,9 +35,8 @@ public:
     vk::ImageAspectFlags aspect_flags);
 
   void setColorTarget(vk::CommandBuffer com_buffer, vk::Image image);
-  void setDepthStencilTarget(vk::CommandBuffer com_buffer, vk::Image image);
-  void setDepthTarget(vk::CommandBuffer com_buffer, vk::Image image);
-  void setStencilTarget(vk::CommandBuffer com_buffer, vk::Image image);
+  void setDepthStencilTarget(
+    vk::CommandBuffer com_buffer, vk::Image image, vk::ImageAspectFlags aspect_flags);
   void setResolveTarget(
     vk::CommandBuffer com_buffer, vk::Image image, vk::ImageAspectFlags aspect_flags);
 
