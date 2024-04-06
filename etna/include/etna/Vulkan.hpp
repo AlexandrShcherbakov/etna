@@ -27,4 +27,18 @@
 #endif
 #include <vulkan/vulkan.hpp>
 
+#define ETNA_CHECK_VK_RESULT(expr) ETNA_ASSERT((expr) == vk::Result::eSuccess)
+
+namespace etna
+{
+
+template <typename T>
+T unwrap_vk_result(vk::ResultValue<T>&& result_val)
+{
+  ETNA_CHECK_VK_RESULT(result_val.result);
+  return result_val.value;
+}
+
+} // namespace etna
+
 #endif // ETNA_VULKAN_HPP
