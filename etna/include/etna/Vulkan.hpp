@@ -33,12 +33,12 @@ namespace etna
 {
 
 template <typename T>
-T unwrap_vk_result(vk::ResultValue<T>&& resultVal)
+T unwrap_vk_result(vk::ResultValue<T>&& result_val)
 {
-  ETNA_CHECK_VK_RESULT(resultVal.result);
-  return resultVal.value;
+  ETNA_CHECK_VK_RESULT(result_val.result);
+  return result_val.value;
 }
 
-}
+} // namespace etna
 
 #endif // ETNA_VULKAN_HPP
