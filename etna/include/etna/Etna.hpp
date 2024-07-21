@@ -39,7 +39,8 @@ bool is_initilized();
 void initialize(const InitParams& params);
 void shutdown();
 
-void submit();
+void begin_frame();
+void end_frame();
 
 ShaderProgramId create_program(
   const std::string& name, const std::vector<std::string>& shaders_path);

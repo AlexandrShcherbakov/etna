@@ -4,63 +4,64 @@
 #include <vulkan/vulkan_format_traits.hpp>
 
 #include <etna/GlobalContext.hpp>
+#include <etna/PipelineManager.hpp>
 #include "StateTracking.hpp"
 
 
 namespace etna
 {
 
-static std::unique_ptr<GlobalContext> g_context{};
+static std::unique_ptr<GlobalContext> gContext{};
 
 GlobalContext& get_context()
 {
-  return *g_context;
+  return *gContext;
 }
 
 bool is_initilized()
 {
-  return static_cast<bool>(g_context);
+  return static_cast<bool>(gContext);
 }
 
 void initialize(const InitParams& params)
 {
-  g_context.reset(new GlobalContext(params));
+  gContext.reset(new GlobalContext(params));
 }
 
 void shutdown()
 {
-  g_context->getDescriptorSetLayouts().clear(g_context->getDevice());
-  g_context.reset(nullptr);
+  gContext->getDescriptorSetLayouts().clear(gContext->getDevice());
+  gContext.reset(nullptr);
 }
 
 ShaderProgramId create_program(
   const std::string& name, const std::vector<std::string>& shaders_path)
 {
-  return g_context->getShaderManager().loadProgram(name, shaders_path);
+  return gContext->getShaderManager().loadProgram(name, shaders_path);
 }
 
 void reload_shaders()
 {
-  g_context->getDescriptorSetLayouts().clear(g_context->getDevice());
-  g_context->getShaderManager().reloadPrograms();
-  g_context->getPipelineManager().recreate();
-  g_context->getDescriptorPool().destroyAllocatedSets();
+  gContext->getDescriptorSetLayouts().clear(gContext->getDevice());
+  gContext->getShaderManager().reloadPrograms();
+  gContext->getPipelineManager().recreate();
+  gContext->getDescriptorPool().destroyAllocatedSets();
 }
 
 ShaderProgramInfo get_shader_program(ShaderProgramId id)
 {
-  return g_context->getShaderManager().getProgramInfo(id);
+  return gContext->getShaderManager().getProgramInfo(id);
 }
 
 ShaderProgramInfo get_shader_program(const std::string& name)
 {
-  return g_context->getShaderManager().getProgramInfo(name);
+  return gContext->getShaderManager().getProgramInfo(name);
 }
 
 DescriptorSet create_descriptor_set(
   DescriptorLayoutId layout, vk::CommandBuffer command_buffer, std::vector<Binding> bindings)
 {
-  auto set = g_context->getDescriptorPool().allocateSet(layout, bindings, command_buffer);
+  auto set = gContext->getDescriptorPool().allocateSet(layout, bindings, command_buffer);
   write_set(set);
   return set;
 }
@@ -68,18 +69,18 @@ DescriptorSet create_descriptor_set(
 Image create_image_from_bytes(
   Image::CreateInfo info, vk::CommandBuffer command_buffer, const void* data)
 {
-  const auto block_size = vk::blockSize(info.format);
-  const auto image_size = block_size * info.extent.width * info.extent.height * info.extent.depth;
-  etna::Buffer staging_buf = g_context->createBuffer(etna::Buffer::CreateInfo{
-    .size = image_size,
+  const auto blockSize = vk::blockSize(info.format);
+  const auto imageSize = blockSize * info.extent.width * info.extent.height * info.extent.depth;
+  etna::Buffer stagingBuf = gContext->createBuffer(etna::Buffer::CreateInfo{
+    .size = imageSize,
     .bufferUsage = vk::BufferUsageFlagBits::eTransferSrc,
     .memoryUsage = VMA_MEMORY_USAGE_CPU_ONLY,
     .name = "tmp_staging_buf",
   });
 
-  auto* mapped_mem = staging_buf.map();
-  memcpy(mapped_mem, data, image_size);
-  staging_buf.unmap();
+  auto* mappedMem = stagingBuf.map();
+  memcpy(mappedMem, data, imageSize);
+  stagingBuf.unmap();
 
   VkCommandBufferBeginInfo beginInfo{};
   beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -88,7 +89,7 @@ Image create_image_from_bytes(
   vkBeginCommandBuffer(command_buffer, &beginInfo);
 
   info.imageUsage |= vk::ImageUsageFlagBits::eTransferDst;
-  auto image = g_context->createImage(info);
+  auto image = gContext->createImage(info);
   etna::set_state(
     command_buffer,
     image.get(),
@@ -113,7 +114,7 @@ Image create_image_from_bytes(
 
   vkCmdCopyBufferToImage(
     command_buffer,
-    staging_buf.get(),
+    stagingBuf.get(),
     image.get(),
     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
     1,
@@ -126,18 +127,23 @@ Image create_image_from_bytes(
   submitInfo.commandBufferCount = 1;
   submitInfo.pCommandBuffers = (VkCommandBuffer*)&command_buffer;
 
-  vkQueueSubmit(g_context->getQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-  vkQueueWaitIdle(g_context->getQueue());
+  vkQueueSubmit(gContext->getQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+  vkQueueWaitIdle(gContext->getQueue());
 
-  staging_buf.reset();
+  stagingBuf.reset();
 
   return image;
 }
 
-/*Todo: submit logic here*/
-void submit()
+void begin_frame()
 {
-  g_context->getDescriptorPool().flip();
+  // TODO: this is brittle. Maybe GpuWorkCount should have frame start calllbacks?
+  gContext->getDescriptorPool().beginFrame();
+}
+
+void end_frame()
+{
+  gContext->getMainWorkCount().submit();
 }
 
 void set_state(

@@ -2,14 +2,10 @@
 #ifndef ETNA_GLOBAL_CONTEXT_HPP_INCLUDED
 #define ETNA_GLOBAL_CONTEXT_HPP_INCLUDED
 
-#include <optional>
 #include <memory>
 
 #include <etna/Vulkan.hpp>
-#include <etna/DescriptorSetLayout.hpp>
-#include <etna/ShaderProgram.hpp>
-#include <etna/PipelineManager.hpp>
-#include <etna/DescriptorSet.hpp>
+#include <etna/GpuWorkCount.hpp>
 #include <etna/Image.hpp>
 #include <etna/Buffer.hpp>
 
@@ -19,6 +15,10 @@
 namespace etna
 {
 
+struct DescriptorSetLayoutCache;
+struct ShaderProgramManager;
+class PipelineManager;
+struct DynamicDescriptorPool;
 class ResourceStates;
 
 class GlobalContext
@@ -37,18 +37,23 @@ public:
   vk::Queue getQueue() const { return universalQueue; }
   uint32_t getQueueFamilyIdx() const { return universalQueueFamilyIdx; }
 
-  ShaderProgramManager& getShaderManager() { return shaderPrograms; }
-  PipelineManager& getPipelineManager() { return pipelineManager.value(); }
-  DescriptorSetLayoutCache& getDescriptorSetLayouts() { return descriptorSetLayouts; }
-  DynamicDescriptorPool& getDescriptorPool() { return *descriptorPool; }
+  ShaderProgramManager& getShaderManager();
+  PipelineManager& getPipelineManager();
+  DescriptorSetLayoutCache& getDescriptorSetLayouts();
+  DynamicDescriptorPool& getDescriptorPool();
+  ResourceStates& getResourceTracker();
+  GpuWorkCount& getMainWorkCount() { return mainWorkStream; }
+  const GpuWorkCount& getMainWorkCount() const { return mainWorkStream; }
 
   GlobalContext(const GlobalContext&) = delete;
   GlobalContext& operator=(const GlobalContext&) = delete;
+  GlobalContext(GlobalContext&&) = delete;
+  GlobalContext& operator=(GlobalContext&&) = delete;
   ~GlobalContext();
 
-  ResourceStates& getResourceTracker();
-
 private:
+  GpuWorkCount mainWorkStream;
+
   vk::UniqueInstance vkInstance{};
   vk::UniqueDebugUtilsMessengerEXT vkDebugCallback{};
   vk::PhysicalDevice vkPhysDevice{};
@@ -61,13 +66,10 @@ private:
 
   std::unique_ptr<VmaAllocator_T, void (*)(VmaAllocator)> vmaAllocator{nullptr, nullptr};
 
-  DescriptorSetLayoutCache descriptorSetLayouts{};
-  ShaderProgramManager shaderPrograms{};
-
-  // Optionals for late init
-  std::optional<PipelineManager> pipelineManager;
-  std::optional<DynamicDescriptorPool> descriptorPool;
-
+  std::unique_ptr<DescriptorSetLayoutCache> descriptorSetLayouts;
+  std::unique_ptr<ShaderProgramManager> shaderPrograms;
+  std::unique_ptr<PipelineManager> pipelineManager;
+  std::unique_ptr<DynamicDescriptorPool> descriptorPool;
   std::unique_ptr<ResourceStates> resourceTracking;
 };
 

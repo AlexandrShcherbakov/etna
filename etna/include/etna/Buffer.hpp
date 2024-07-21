@@ -5,13 +5,12 @@
 #include <string_view>
 
 #include <etna/Vulkan.hpp>
+#include <etna/BindingItems.hpp>
 #include <vk_mem_alloc.h>
 
 
 namespace etna
 {
-
-struct BufferBinding;
 
 class Buffer
 {
