@@ -4,10 +4,14 @@
 #include <spdlog/fmt/ranges.h>
 #include <vulkan/vulkan_structs.hpp>
 
-#include <etna/ShaderProgram.hpp>
 #include <etna/Etna.hpp>
+#include <etna/DescriptorSetLayout.hpp>
+#include <etna/ShaderProgram.hpp>
+#include <etna/PipelineManager.hpp>
+#include <etna/DescriptorSet.hpp>
 #include <etna/Assert.hpp>
 #include <etna/EtnaConfig.hpp>
+
 #include "StateTracking.hpp"
 
 
@@ -223,6 +227,7 @@ static VkBool32 debugCallback(
 #endif
 
 GlobalContext::GlobalContext(const InitParams& params)
+  : mainWorkStream{params.numFramesInFlight}
 {
   // Proper initialization of vulkan is tricky, as we need to
   // dynamically link vulkan-1.dll and load symbols for various
@@ -293,9 +298,10 @@ GlobalContext::GlobalContext(const InitParams& params)
     vmaAllocator = {allocator, &::vmaDestroyAllocator};
   }
 
-  pipelineManager.emplace(vkDevice.get(), shaderPrograms);
-  descriptorPool.emplace(vkDevice.get(), params.numFramesInFlight);
-
+  descriptorSetLayouts = std::make_unique<DescriptorSetLayoutCache>();
+  shaderPrograms = std::make_unique<ShaderProgramManager>();
+  pipelineManager = std::make_unique<PipelineManager>(vkDevice.get(), *shaderPrograms);
+  descriptorPool = std::make_unique<DynamicDescriptorPool>(vkDevice.get(), mainWorkStream);
   resourceTracking = std::make_unique<ResourceStates>();
 }
 
@@ -307,6 +313,26 @@ Image GlobalContext::createImage(Image::CreateInfo info)
 Buffer GlobalContext::createBuffer(Buffer::CreateInfo info)
 {
   return Buffer(vmaAllocator.get(), info);
+}
+
+ShaderProgramManager& GlobalContext::getShaderManager()
+{
+  return *shaderPrograms;
+}
+
+PipelineManager& GlobalContext::getPipelineManager()
+{
+  return *pipelineManager;
+}
+
+DescriptorSetLayoutCache& GlobalContext::getDescriptorSetLayouts()
+{
+  return *descriptorSetLayouts;
+}
+
+DynamicDescriptorPool& GlobalContext::getDescriptorPool()
+{
+  return *descriptorPool;
 }
 
 ResourceStates& GlobalContext::getResourceTracker()

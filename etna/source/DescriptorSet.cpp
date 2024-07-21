@@ -24,7 +24,7 @@ static constexpr uint32_t NUM_BUFFERS = 2048;
 static constexpr uint32_t NUM_RW_BUFFERS = 512;
 static constexpr uint32_t NUM_SAMPLERS = 128;
 
-static constexpr std::array<vk::DescriptorPoolSize, 6> DEFAULT_POOL_SIZE{
+static constexpr std::array<vk::DescriptorPoolSize, 6> DEFAULT_POOL_SIZES{
   vk::DescriptorPoolSize{vk::DescriptorType::eUniformBuffer, NUM_BUFFERS},
   vk::DescriptorPoolSize{vk::DescriptorType::eStorageBuffer, NUM_RW_BUFFERS},
   vk::DescriptorPoolSize{vk::DescriptorType::eSampler, NUM_SAMPLERS},
@@ -32,40 +32,27 @@ static constexpr std::array<vk::DescriptorPoolSize, 6> DEFAULT_POOL_SIZE{
   vk::DescriptorPoolSize{vk::DescriptorType::eStorageImage, NUM_RW_TEXTURES},
   vk::DescriptorPoolSize{vk::DescriptorType::eCombinedImageSampler, NUM_TEXTURES}};
 
-DynamicDescriptorPool::DynamicDescriptorPool(vk::Device dev, uint32_t frames_in_flight)
+DynamicDescriptorPool::DynamicDescriptorPool(vk::Device dev, const GpuWorkCount& work_count)
   : vkDevice{dev}
-  , numFrames{frames_in_flight}
+  , workCount{work_count}
+  , pools{work_count, [dev](std::size_t) {
+            vk::DescriptorPoolCreateInfo info{
+              .maxSets = NUM_DESCRIPTORS,
+              .poolSizeCount = DEFAULT_POOL_SIZES.size(),
+              .pPoolSizes = DEFAULT_POOL_SIZES.data()};
+            return unwrap_vk_result(dev.createDescriptorPoolUnique(info));
+          }}
 {
-  frameIndex = 0;
-  flipsCount = 0;
-
-  vk::DescriptorPoolCreateInfo info{};
-  info.setMaxSets(NUM_DESCRIPTORS);
-  info.setPoolSizes(DEFAULT_POOL_SIZE);
-
-  for (uint32_t i = 0; i < numFrames; i++)
-  {
-    pools.push_back(vkDevice.createDescriptorPool(info).value);
-  }
 }
 
-DynamicDescriptorPool::~DynamicDescriptorPool()
+void DynamicDescriptorPool::beginFrame()
 {
-  for (auto pool : pools)
-    vkDevice.destroyDescriptorPool(pool);
-}
-
-void DynamicDescriptorPool::flip()
-{
-  frameIndex = (frameIndex + 1) % numFrames;
-  flipsCount++;
-  vkDevice.resetDescriptorPool(pools[frameIndex]); /*All allocated sets are destroyed*/
+  vkDevice.resetDescriptorPool(pools.get().get());
 }
 
 void DynamicDescriptorPool::destroyAllocatedSets()
 {
-  for (uint32_t i = 0; i < numFrames; i++)
-    flip();
+  pools.iterate([this](auto& pool) { vkDevice.resetDescriptorPool(pool.get()); });
 }
 
 DescriptorSet DynamicDescriptorPool::allocateSet(
@@ -75,12 +62,13 @@ DescriptorSet DynamicDescriptorPool::allocateSet(
   auto setLayouts = {dslCache.getVkLayout(layout_id)};
 
   vk::DescriptorSetAllocateInfo info{};
-  info.setDescriptorPool(pools[frameIndex]);
+  info.setDescriptorPool(pools.get().get());
   info.setSetLayouts(setLayouts);
 
   vk::DescriptorSet vkSet{};
   ETNA_ASSERT(vkDevice.allocateDescriptorSets(&info, &vkSet) == vk::Result::eSuccess);
-  return DescriptorSet{flipsCount, layout_id, vkSet, std::move(bindings), command_buffer};
+  return DescriptorSet{
+    workCount.batchIndex(), layout_id, vkSet, std::move(bindings), command_buffer};
 }
 
 static bool is_image_resource(vk::DescriptorType ds_type)

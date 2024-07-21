@@ -6,6 +6,8 @@
 #include <vector>
 
 #include <etna/Vulkan.hpp>
+#include <etna/GpuWorkCount.hpp>
+#include <etna/GpuSharedResource.hpp>
 #include <etna/DescriptorSetLayout.hpp>
 #include <etna/BindingItems.hpp>
 
@@ -73,38 +75,33 @@ private:
   vk::CommandBuffer command_buffer;
 };
 
-/*Base version. Allocate and use descriptor sets while writing command buffer, they will be
-destroyed automaticaly. Resource allocation tracking shoud be added. For long-living descriptor sets
-(e.g bindless resource sets) separate allocator shoud be added, with ManagedDescriptorSet with
-destructor*/
+/**
+ * Base version. Allocate and use descriptor sets while writing command buffer, they will be
+ * destroyed automaticaly. Resource allocation tracking shoud be added. For long-living descriptor sets
+ * (e.g bindless resource sets) separate allocator shoud be added, with ManagedDescriptorSet with
+ * destructor
+ */
 struct DynamicDescriptorPool
 {
-  DynamicDescriptorPool(vk::Device dev, uint32_t frames_in_flight);
-  ~DynamicDescriptorPool();
+  DynamicDescriptorPool(vk::Device dev, const GpuWorkCount &work_count);
 
-  void flip();
+  void beginFrame();
   void destroyAllocatedSets();
   void reset(uint32_t frames_in_flight);
 
   DescriptorSet allocateSet(
     DescriptorLayoutId layout_id, std::vector<Binding> bindings, vk::CommandBuffer command_buffer);
 
-  vk::DescriptorPool getCurrentPool() const { return pools[frameIndex]; }
-
-  uint64_t getNumFlips() const { return flipsCount; }
-
   bool isSetValid(const DescriptorSet& set) const
   {
-    return set.getVkSet() && set.getGen() + numFrames > flipsCount;
+    return set.getVkSet() && set.getGen() + workCount.multiBufferingCount() > workCount.batchIndex();
   }
 
 private:
   vk::Device vkDevice;
+  const GpuWorkCount &workCount;
 
-  uint32_t numFrames = 0;
-  uint32_t frameIndex = 0;
-  uint64_t flipsCount = 0; /*for tracking invalid sets*/
-  std::vector<vk::DescriptorPool> pools;
+  GpuSharedResource<vk::UniqueDescriptorPool> pools;
 };
 
 void write_set(const DescriptorSet& dst);
