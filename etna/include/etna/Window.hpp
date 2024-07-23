@@ -2,11 +2,15 @@
 #ifndef ETNA_WINDOW_HPP_INCLUDED
 #define ETNA_WINDOW_HPP_INCLUDED
 
+#include <optional>
+#include <vector>
+
 #include <etna/Vulkan.hpp>
 #include <etna/GpuSharedResource.hpp>
 
 #include <function2/function2.hpp>
 #include <vk_mem_alloc.h>
+
 
 namespace etna
 {
