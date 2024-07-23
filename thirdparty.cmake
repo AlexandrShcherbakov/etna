@@ -61,3 +61,9 @@ CPMAddPackage(
   OPTIONS
     SPDLOG_FMT_EXTERNAL
 )
+
+# Type-erased function containers that actually work
+CPMAddPackage(
+    GITHUB_REPOSITORY Naios/function2
+    GIT_TAG 4.2.4
+)

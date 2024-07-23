@@ -35,8 +35,8 @@ namespace etna
 template <typename T>
 T unwrap_vk_result(vk::ResultValue<T>&& result_val)
 {
-  ETNA_CHECK_VK_RESULT(result_val.result);
-  return result_val.value;
+  ETNA_ASSERTF(result_val.result == vk::Result::eSuccess, "Vulkan error: {}", vk::to_string(result_val.result));
+  return std::move(result_val.value);
 }
 
 } // namespace etna
