@@ -8,6 +8,7 @@
 #include <etna/GpuWorkCount.hpp>
 #include <etna/Image.hpp>
 #include <etna/Buffer.hpp>
+#include <etna/Window.hpp>
 
 #include <vk_mem_alloc.h>
 
@@ -28,8 +29,9 @@ class GlobalContext
   explicit GlobalContext(const struct InitParams& params);
 
 public:
-  Image createImage(Image::CreateInfo info);
-  Buffer createBuffer(Buffer::CreateInfo info);
+  Image createImage(const Image::CreateInfo& info);
+  Buffer createBuffer(const Buffer::CreateInfo& info);
+  std::unique_ptr<Window> createWindow(Window::CreateInfo info);
 
   vk::Device getDevice() const { return vkDevice.get(); }
   vk::PhysicalDevice getPhysicalDevice() const { return vkPhysDevice; }

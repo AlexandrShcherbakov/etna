@@ -305,14 +305,26 @@ GlobalContext::GlobalContext(const InitParams& params)
   resourceTracking = std::make_unique<ResourceStates>();
 }
 
-Image GlobalContext::createImage(Image::CreateInfo info)
+Image GlobalContext::createImage(const Image::CreateInfo& info)
 {
   return Image(vmaAllocator.get(), info);
 }
 
-Buffer GlobalContext::createBuffer(Buffer::CreateInfo info)
+Buffer GlobalContext::createBuffer(const Buffer::CreateInfo& info)
 {
   return Buffer(vmaAllocator.get(), info);
+}
+
+std::unique_ptr<Window> GlobalContext::createWindow(Window::CreateInfo info)
+{
+  Window::Dependencies deps{
+    .workCount = mainWorkStream,
+    .physicalDevice = vkPhysDevice,
+    .device = vkDevice.get(),
+    .presentQueue = universalQueue,
+    .queueFamily = universalQueueFamilyIdx
+  };
+  return std::make_unique<Window>(deps, std::move(info));
 }
 
 ShaderProgramManager& GlobalContext::getShaderManager()
