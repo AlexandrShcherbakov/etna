@@ -50,7 +50,7 @@ static vk::Extent2D chose_swap_extent(
 }
 
 
-Window::Window(const Dependencies &deps, CreateInfo info)
+Window::Window(const Dependencies& deps, CreateInfo info)
   : physicalDevice{deps.physicalDevice}
   , device{deps.device}
   , surface(std::move(info.surface))
@@ -74,7 +74,8 @@ std::optional<Window::SwapchainImage> Window::acquireNext()
     .semaphore = sem,
     .deviceMask = 1,
   };
-  auto [res, index] = device.acquireNextImage2KHR(info);
+  uint32_t index;
+  const auto res = device.acquireNextImage2KHR(&info, &index);
 
   if (res == vk::Result::eErrorOutOfDateKHR)
     return std::nullopt;
@@ -107,7 +108,7 @@ bool Window::present(vk::Semaphore wait, vk::ImageView which)
     .pImageIndices = &index,
   };
 
-  auto res = presentQueue.presentKHR(info);
+  auto res = presentQueue.presentKHR(&info);
 
   if (res == vk::Result::eErrorOutOfDateKHR || res == vk::Result::eSuboptimalKHR)
     return false;
