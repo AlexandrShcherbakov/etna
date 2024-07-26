@@ -37,7 +37,7 @@ public:
     ResolutionProvider resolutionProvider;
   };
 
-  explicit Window(const Dependencies &deps, CreateInfo info);
+  explicit Window(const Dependencies& deps, CreateInfo info);
 
   struct SwapchainImage
   {
