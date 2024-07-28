@@ -49,9 +49,7 @@ public:
   vk::Semaphore submit(vk::CommandBuffer what, vk::Semaphore write_attachments_after);
 
 private:
-  const GpuWorkCount& workCount;
   vk::Device device;
-
   vk::Queue submitQueue;
 
   vk::UniqueCommandPool pool;

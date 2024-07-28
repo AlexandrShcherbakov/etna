@@ -4,8 +4,7 @@ namespace etna
 {
 
 CommandManager::CommandManager(const Dependencies &deps)
-  : workCount{deps.workCount}
-  , device{deps.device}
+  : device{deps.device}
   , submitQueue{deps.submitQueue}
   , pool{unwrap_vk_result(deps.device.createCommandPoolUnique(vk::CommandPoolCreateInfo{
     .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
