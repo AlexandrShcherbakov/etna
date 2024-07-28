@@ -27,7 +27,12 @@
 #endif
 #include <vulkan/vulkan.hpp>
 
-#define ETNA_CHECK_VK_RESULT(expr) ETNA_ASSERT((expr) == vk::Result::eSuccess)
+#define ETNA_CHECK_VK_RESULT(expr)                                                                 \
+  do                                                                                               \
+  {                                                                                                \
+    auto res = expr;                                                                               \
+    ETNA_ASSERTF(res == vk::Result::eSuccess, "Vulkan error: {}", vk::to_string(res));             \
+  } while (0)
 
 namespace etna
 {
@@ -35,7 +40,10 @@ namespace etna
 template <typename T>
 T unwrap_vk_result(vk::ResultValue<T>&& result_val)
 {
-  ETNA_ASSERTF(result_val.result == vk::Result::eSuccess, "Vulkan error: {}", vk::to_string(result_val.result));
+  ETNA_ASSERTF(
+    result_val.result == vk::Result::eSuccess,
+    "Vulkan error: {}",
+    vk::to_string(result_val.result));
   return std::move(result_val.value);
 }
 
