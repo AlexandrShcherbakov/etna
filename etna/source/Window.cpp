@@ -86,8 +86,8 @@ std::optional<Window::SwapchainImage> Window::acquireNext()
 
   auto& element = currentSwapchain.elements[index];
 
-  // NOTE: Sometimes swapchain returns the same image twice in a row. This might break
-  // stuff, but I'm not sure how right now.
+  // NOTE: Sometimes swapchain returns the same image twice in a row.
+  // This might break stuff, but I'm not sure how right now.
 
   return SwapchainImage{
     .image = element.image,
@@ -118,21 +118,8 @@ bool Window::present(vk::Semaphore wait, vk::ImageView which)
   return true;
 }
 
-std::vector<vk::ImageView> Window::getAllImages()
-{
-  std::vector<vk::ImageView> result;
-  result.reserve(currentSwapchain.elements.size());
-  for (auto& el : currentSwapchain.elements)
-  {
-    result.push_back(el.image_view.get());
-  }
-
-  return result;
-}
-
 vk::Extent2D Window::recreateSwapchain()
 {
-  // When the window gets minimized, we have to wait (resolution provider blocks)
   auto resolution = resolutionProvider();
   currentSwapchain = createSwapchain(resolution);
 

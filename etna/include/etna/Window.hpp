@@ -27,8 +27,7 @@ public:
     vk::Device device;
 
     vk::Queue presentQueue;
-    // Reminder: this must be an all-in-one graphics + present queue
-    uint32_t queueFamily;
+    std::uint32_t queueFamily;
   };
 
   struct CreateInfo
@@ -47,23 +46,23 @@ public:
   };
 
   /**
-   * In case this returns a nullopt, swapchain needs recreation at the nearest opportunity.
-   * NOTE: might block
+   * Acquires the next swapchain image from this window to render a frame into.
+   * Blocks when the image is not yet available.
    * \returns nullopt when swapchain is out of date and needs to be recreated, next image otherwise
    */
   std::optional<SwapchainImage> acquireNext();
 
   /**
+   * Presents a swapchain image view acquired from this window to the screen.
+   * May block due to vulkan driver wonkyness.
    * \returns false when swapchain needs to be recreated, true otherwise
    */
   bool present(vk::Semaphore wait, vk::ImageView which);
 
-  std::vector<vk::ImageView> getAllImages();
-
   vk::Format getCurrentFormat() { return currentSwapchain.format; }
 
   /**
-   * NOTE: might block
+   * Recreates the swapchain and returns it's new resolution.
    */
   vk::Extent2D recreateSwapchain();
 
@@ -78,6 +77,9 @@ private:
     vk::UniqueSwapchainKHR swapchain;
     vk::Format format;
     vk::Extent2D extent;
+    // NOTE: unlike what some tutorials might say, this does NOT have the same
+    // size as work count multi-buffering, and vice-versa, multi-buffering count
+    // should NOT be equal to the swap chain image count.
     std::vector<SwapchainElement> elements;
   };
 
@@ -96,6 +98,8 @@ private:
   vk::Queue presentQueue;
 
   SwapchainData currentSwapchain{};
+
+  // TODO: this shouldn't need to be multi-buffered, I think?
   GpuSharedResource<vk::UniqueSemaphore> imageAvailableSem;
 
   bool swapchainMissing{false};
