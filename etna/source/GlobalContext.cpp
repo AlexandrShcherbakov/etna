@@ -322,9 +322,18 @@ std::unique_ptr<Window> GlobalContext::createWindow(Window::CreateInfo info)
     .physicalDevice = vkPhysDevice,
     .device = vkDevice.get(),
     .presentQueue = universalQueue,
-    .queueFamily = universalQueueFamilyIdx
-  };
+    .queueFamily = universalQueueFamilyIdx};
   return std::make_unique<Window>(deps, std::move(info));
+}
+
+std::unique_ptr<CommandManager> GlobalContext::createCommandManager()
+{
+  CommandManager::Dependencies deps{
+    .workCount = mainWorkStream,
+    .device = vkDevice.get(),
+    .submitQueue = universalQueue,
+    .queueFamily = universalQueueFamilyIdx};
+  return std::make_unique<CommandManager>(deps);
 }
 
 ShaderProgramManager& GlobalContext::getShaderManager()
