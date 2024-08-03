@@ -32,7 +32,7 @@ vk::CommandBuffer CommandManager::acquireNext()
   // explicitly. This also synchronizes all other shared
   // resources which live inside GpuSharedResource containers.
   auto curComplete = commandsComplete.get().get();
-  ETNA_CHECK_VK_RESULT(device.waitForFences({curComplete}, vk::True, 1000000));
+  ETNA_CHECK_VK_RESULT(device.waitForFences({curComplete}, vk::True, 1000000000));
   device.resetFences({curComplete});
 
   auto curBuf = buffers->get().get();

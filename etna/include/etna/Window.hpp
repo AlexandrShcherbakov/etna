@@ -99,7 +99,10 @@ private:
 
   SwapchainData currentSwapchain{};
 
-  // TODO: this shouldn't need to be multi-buffered, I think?
+  // NOTE: technically, the semaphore is not GPU-CPU shared,
+  // as it is a GPU-only synchronization primitive, but due to
+  // the way WSI works, it is still kind-of sort-of shared between
+  // the OS and the GPU, and so needs to be multi-buffered.
   GpuSharedResource<vk::UniqueSemaphore> imageAvailableSem;
 
   bool swapchainMissing{false};
