@@ -1,5 +1,19 @@
 #include <etna/Window.hpp>
 
+#include <fmt/ranges.h>
+
+#include <etna/VulkanFormatter.hpp>
+
+
+
+template <>
+struct fmt::formatter<vk::SurfaceFormatKHR> {
+  constexpr auto parse (format_parse_context& ctx) { return ctx.begin(); }
+  template <typename Context>
+  constexpr auto format (const vk::SurfaceFormatKHR &sf, Context& ctx) const {
+      return fmt::format_to(ctx.out(), "({}, {})", sf.format, sf.colorSpace);
+  }
+};
 
 namespace etna
 {
@@ -11,12 +25,21 @@ static vk::SurfaceFormatKHR chose_surface_format(
 
   ETNA_ASSERTF(!formats.empty(), "Device does not support any surface formats!");
 
+  spdlog::info("Supported surface formats: {}", formats);
+
+  auto selected = formats[0];
+
   auto found = std::find_if(formats.begin(), formats.end(), [](const vk::SurfaceFormatKHR& format) {
     return format.format == vk::Format::eB8G8R8A8Srgb &&
       format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
   });
 
-  return found != formats.end() ? *found : formats[0];
+  if (found != formats.end())
+    selected = *found;
+
+  spdlog::info("Selected surface format: {}", selected);
+
+  return selected;
 }
 
 static vk::PresentModeKHR chose_present_mode(
@@ -26,9 +49,20 @@ static vk::PresentModeKHR chose_present_mode(
 
   ETNA_ASSERTF(!modes.empty(), "Device doesn't support any present modes!");
 
-  return std::find(modes.begin(), modes.end(), vk::PresentModeKHR::eMailbox) != modes.end()
-    ? vk::PresentModeKHR::eMailbox
-    : vk::PresentModeKHR::eFifo;
+  spdlog::info("Supported presentation modes: {}", modes);
+
+  auto selected = vk::PresentModeKHR::eImmediate;
+
+  // NOTE: Fifo is basically v-sync, which we prefere so as not to heat up the CPU/GPU pointlessly.
+  // TODO: add an option to enable/disable v-sync
+  if (std::find(modes.begin(), modes.end(), vk::PresentModeKHR::eFifo) != modes.end())
+    selected = vk::PresentModeKHR::eFifo;
+  else if (std::find(modes.begin(), modes.end(), vk::PresentModeKHR::eMailbox) != modes.end())
+    selected = vk::PresentModeKHR::eMailbox;
+
+  spdlog::info("Selected presentation mode: {}", selected);
+
+  return selected;
 }
 
 static vk::Extent2D chose_swap_extent(

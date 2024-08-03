@@ -6,7 +6,7 @@
 
 #include <etna/Assert.hpp>
 #include <etna/ShaderProgram.hpp>
-
+#include <etna/VulkanFormatter.hpp>
 
 namespace etna
 {
@@ -128,31 +128,32 @@ ComputePipeline PipelineManager::createComputePipeline(
 
 static void print_prog_info(const etna::ShaderProgramInfo& info, const std::string& name)
 {
-  std::cout << "Program Info " << name << "\n";
+  std::string result;
+  auto it = std::back_inserter(result);
 
   for (uint32_t set = 0u; set < etna::MAX_PROGRAM_DESCRIPTORS; set++)
   {
     if (!info.isDescriptorSetUsed(set))
       continue;
-    auto setInfo = info.getDescriptorSetInfo(set);
+
+    fmt::format_to(it, " Set {}:\n", set);
+    const auto &setInfo = info.getDescriptorSetInfo(set);
     for (uint32_t binding = 0; binding < etna::MAX_DESCRIPTOR_BINDINGS; binding++)
     {
       if (!setInfo.isBindingUsed(binding))
         continue;
-      auto& vkBinding = setInfo.getBinding(binding);
+      const auto& vkBinding = setInfo.getBinding(binding);
 
-      std::cout << "Binding " << binding << " " << vk::to_string(vkBinding.descriptorType)
-                << ", count = " << vkBinding.descriptorCount << " ";
-      std::cout << " " << vk::to_string(vkBinding.stageFlags) << "\n";
+      fmt::format_to(it, "  Binding {}: {}, count = {}, stages = {}\n", binding, vkBinding.descriptorType,
+        vkBinding.descriptorCount, vkBinding.stageFlags);
     }
   }
 
   auto pc = info.getPushConst();
   if (pc.size > 0)
-  {
-    std::cout << "PushConst "
-              << " size = " << pc.size << " stages = " << vk::to_string(pc.stageFlags) << "\n";
-  }
+    fmt::format_to(it, "  PushConst size = {}, stages = {}\n", pc.size, pc.stageFlags);
+
+  spdlog::info("Program Info for '{}':\n{}", name, result);
 }
 
 GraphicsPipeline PipelineManager::createGraphicsPipeline(
