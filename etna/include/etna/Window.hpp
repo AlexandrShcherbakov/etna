@@ -59,12 +59,13 @@ public:
    */
   bool present(vk::Semaphore wait, vk::ImageView which);
 
-  vk::Format getCurrentFormat() { return currentSwapchain.format; }
+  vk::Format getCurrentFormat() const { return currentSwapchain.format; }
 
   /**
    * Recreates the swapchain and returns it's new resolution.
+   * May fail when the window is minimized.
    */
-  vk::Extent2D recreateSwapchain();
+  std::optional<vk::Extent2D> recreateSwapchain();
 
 private:
   struct SwapchainElement
@@ -105,7 +106,7 @@ private:
   // the OS and the GPU, and so needs to be multi-buffered.
   GpuSharedResource<vk::UniqueSemaphore> imageAvailableSem;
 
-  bool swapchainMissing{false};
+  bool swapchainInvalid{false};
 };
 
 } // namespace etna
