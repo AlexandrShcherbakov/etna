@@ -11,8 +11,9 @@ CommandManager::CommandManager(const Dependencies &deps)
     .queueFamilyIndex = deps.queueFamily,
   }))}
   , commandsComplete{deps.workCount, [&deps](std::size_t){
-    return unwrap_vk_result(deps.device.createFenceUnique(vk::FenceCreateInfo{ .flags = vk::FenceCreateFlagBits::eSignaled }));
+    return unwrap_vk_result(deps.device.createFenceUnique(vk::FenceCreateInfo{}));
   }}
+  , commandsSubmitted{deps.workCount, std::in_place, false}
   , gpuDone{unwrap_vk_result(deps.device.createSemaphoreUnique({}))}
 {
   vk::CommandBufferAllocateInfo cbInfo{
@@ -26,6 +27,9 @@ CommandManager::CommandManager(const Dependencies &deps)
 
 vk::CommandBuffer CommandManager::acquireNext()
 {
+  if (!commandsSubmitted.get())
+    return buffers->get().get();
+
   // Wait for previous execution of the current command
   // buffer to complete. It may in fact already be long
   // finished, but we still have to synchronize GPU and CPU
@@ -37,6 +41,8 @@ vk::CommandBuffer CommandManager::acquireNext()
 
   auto curBuf = buffers->get().get();
   curBuf.reset();
+
+  commandsSubmitted.get() = false;
 
   return curBuf;
 }
@@ -72,6 +78,8 @@ vk::Semaphore CommandManager::submit(vk::CommandBuffer what, vk::Semaphore write
   sInfo.setWaitSemaphoreInfos(wait);
   sInfo.setSignalSemaphoreInfos(signal);
   ETNA_CHECK_VK_RESULT(submitQueue.submit2({sInfo}, commandsComplete.get().get()));
+
+  commandsSubmitted.get() = true;
 
   return gpuDone.get();
 }

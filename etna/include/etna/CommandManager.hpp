@@ -54,6 +54,7 @@ private:
 
   vk::UniqueCommandPool pool;
   GpuSharedResource<vk::UniqueFence> commandsComplete;
+  GpuSharedResource<bool> commandsSubmitted;
 
   // NOTE: semaphores are GPU-only resources, no need to multi-buffer them.
   vk::UniqueSemaphore gpuDone;

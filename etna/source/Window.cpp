@@ -99,6 +99,9 @@ Window::Window(const Dependencies& deps, CreateInfo info)
 
 std::optional<Window::SwapchainImage> Window::acquireNext()
 {
+  if (swapchainInvalid)
+    return std::nullopt;
+
   auto sem = imageAvailableSem.get().get();
 
   // This blocks on mobile when the swapchain has no available images.
@@ -112,7 +115,10 @@ std::optional<Window::SwapchainImage> Window::acquireNext()
   const auto res = device.acquireNextImage2KHR(&info, &index);
 
   if (res == vk::Result::eErrorOutOfDateKHR)
+  {
+    swapchainInvalid = true;
     return std::nullopt;
+  }
 
   // Theoretically we could recover from this maybe?
   if (res != vk::Result::eSuccess && res != vk::Result::eSuboptimalKHR)
@@ -132,6 +138,8 @@ std::optional<Window::SwapchainImage> Window::acquireNext()
 
 bool Window::present(vk::Semaphore wait, vk::ImageView which)
 {
+  ETNA_ASSERTF(!swapchainInvalid, "Tried to present to an invalid swapchain! This is unrecoverable!");
+
   auto index = viewToIdx(which);
 
   vk::PresentInfoKHR info{
@@ -144,7 +152,12 @@ bool Window::present(vk::Semaphore wait, vk::ImageView which)
 
   auto res = presentQueue.presentKHR(&info);
 
-  if (res == vk::Result::eErrorOutOfDateKHR || res == vk::Result::eSuboptimalKHR)
+  if (res == vk::Result::eErrorOutOfDateKHR)
+  {
+    swapchainInvalid = true;
+    return false;
+  }
+  else if (res == vk::Result::eSuboptimalKHR)
     return false;
   else if (res != vk::Result::eSuccess)
     ETNA_PANIC("Presentation queue submission failed! Error code {}", vk::to_string(res));
@@ -152,10 +165,14 @@ bool Window::present(vk::Semaphore wait, vk::ImageView which)
   return true;
 }
 
-vk::Extent2D Window::recreateSwapchain()
+std::optional<vk::Extent2D> Window::recreateSwapchain()
 {
   auto resolution = resolutionProvider();
+  if (resolution.width == 0 || resolution.height == 0)
+    return std::nullopt;
+
   currentSwapchain = createSwapchain(resolution);
+  swapchainInvalid = false;
 
   return currentSwapchain.extent;
 }
