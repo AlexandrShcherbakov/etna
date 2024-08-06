@@ -183,6 +183,10 @@ Window::SwapchainData Window::createSwapchain(vk::Extent2D resolution) const
     unwrap_vk_result(physicalDevice.getSurfaceCapabilitiesKHR(surface.get()));
   const auto format = chose_surface_format(physicalDevice, surface.get());
   const auto presentMode = chose_present_mode(physicalDevice, surface.get());
+  // NOTE: one might think that you can use surfaceCaps.currentExtent instead
+  // of all this resolution provider trickery, but no, if you read the vulkan WSI
+  // docs close enough, it turns out currentExtent will always be (-1, -1) on
+  // wayland and there is nothing we can do about it.
   const auto extent = chose_swap_extent(surfaceCaps, resolution);
 
   std::uint32_t imageCount = surfaceCaps.minImageCount + 1;
