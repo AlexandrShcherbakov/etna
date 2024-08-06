@@ -5,16 +5,6 @@
 #include <etna/VulkanFormatter.hpp>
 
 
-
-template <>
-struct fmt::formatter<vk::SurfaceFormatKHR> {
-  constexpr auto parse (format_parse_context& ctx) { return ctx.begin(); }
-  template <typename Context>
-  constexpr auto format (const vk::SurfaceFormatKHR &sf, Context& ctx) const {
-      return fmt::format_to(ctx.out(), "({}, {})", sf.format, sf.colorSpace);
-  }
-};
-
 namespace etna
 {
 
@@ -24,8 +14,6 @@ static vk::SurfaceFormatKHR chose_surface_format(
   auto formats = unwrap_vk_result(device.getSurfaceFormatsKHR(surface));
 
   ETNA_ASSERTF(!formats.empty(), "Device does not support any surface formats!");
-
-  spdlog::info("Supported surface formats: {}", formats);
 
   auto selected = formats[0];
 
@@ -37,30 +25,24 @@ static vk::SurfaceFormatKHR chose_surface_format(
   if (found != formats.end())
     selected = *found;
 
-  spdlog::info("Selected surface format: {}", selected);
-
   return selected;
 }
 
 static vk::PresentModeKHR chose_present_mode(
-  const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
+  const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface, bool vsync)
 {
   auto modes = unwrap_vk_result(device.getSurfacePresentModesKHR(surface));
 
   ETNA_ASSERTF(!modes.empty(), "Device doesn't support any present modes!");
 
-  spdlog::info("Supported presentation modes: {}", modes);
-
   auto selected = vk::PresentModeKHR::eImmediate;
 
-  // NOTE: Fifo is basically v-sync, which we prefere so as not to heat up the CPU/GPU pointlessly.
-  // TODO: add an option to enable/disable v-sync
-  if (std::find(modes.begin(), modes.end(), vk::PresentModeKHR::eFifo) != modes.end())
+  // NOTE: Fifo is basically v-sync
+  if (vsync && std::find(modes.begin(), modes.end(), vk::PresentModeKHR::eFifo) != modes.end())
     selected = vk::PresentModeKHR::eFifo;
-  else if (std::find(modes.begin(), modes.end(), vk::PresentModeKHR::eMailbox) != modes.end())
-    selected = vk::PresentModeKHR::eMailbox;
 
-  spdlog::info("Selected presentation mode: {}", selected);
+  if (!vsync && std::find(modes.begin(), modes.end(), vk::PresentModeKHR::eMailbox) != modes.end())
+    selected = vk::PresentModeKHR::eMailbox;
 
   return selected;
 }
@@ -88,7 +70,6 @@ Window::Window(const Dependencies& deps, CreateInfo info)
   : physicalDevice{deps.physicalDevice}
   , device{deps.device}
   , surface(std::move(info.surface))
-  , resolutionProvider{std::move(info.resolutionProvider)}
   , queueFamily{deps.queueFamily}
   , presentQueue{deps.presentQueue}
   , imageAvailableSem(deps.workCount, [&deps](std::size_t) {
@@ -165,36 +146,30 @@ bool Window::present(vk::Semaphore wait, vk::ImageView which)
   return true;
 }
 
-std::optional<vk::Extent2D> Window::recreateSwapchain()
+vk::Extent2D Window::recreateSwapchain(const DesiredProperties& props)
 {
-  auto resolution = resolutionProvider();
-  if (resolution.width == 0 || resolution.height == 0)
-    return std::nullopt;
-
-  currentSwapchain = createSwapchain(resolution);
+  ETNA_ASSERT(props.resolution.width != 0 && props.resolution.height != 0);
+  currentSwapchain = createSwapchain(props);
   swapchainInvalid = false;
 
   return currentSwapchain.extent;
 }
 
-Window::SwapchainData Window::createSwapchain(vk::Extent2D resolution) const
+Window::SwapchainData Window::createSwapchain(const DesiredProperties& props) const
 {
   const auto surfaceCaps =
     unwrap_vk_result(physicalDevice.getSurfaceCapabilitiesKHR(surface.get()));
   const auto format = chose_surface_format(physicalDevice, surface.get());
-  const auto presentMode = chose_present_mode(physicalDevice, surface.get());
+  const auto presentMode = chose_present_mode(physicalDevice, surface.get(), props.vsync);
   // NOTE: one might think that you can use surfaceCaps.currentExtent instead
   // of all this resolution provider trickery, but no, if you read the vulkan WSI
   // docs close enough, it turns out currentExtent will always be (-1, -1) on
   // wayland and there is nothing we can do about it.
-  const auto extent = chose_swap_extent(surfaceCaps, resolution);
+  const auto extent = chose_swap_extent(surfaceCaps, props.resolution);
 
   std::uint32_t imageCount = surfaceCaps.minImageCount + 1;
-
   if (surfaceCaps.maxImageCount > 0)
-  {
     imageCount = std::min(imageCount, surfaceCaps.maxImageCount);
-  }
 
   SwapchainData newSwapchain;
 

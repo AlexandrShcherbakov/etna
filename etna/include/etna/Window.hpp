@@ -15,8 +15,6 @@
 namespace etna
 {
 
-using ResolutionProvider = fu2::unique_function<vk::Extent2D() const>;
-
 class Window
 {
 public:
@@ -33,7 +31,6 @@ public:
   struct CreateInfo
   {
     vk::UniqueSurfaceKHR surface;
-    ResolutionProvider resolutionProvider;
   };
 
   explicit Window(const Dependencies& deps, CreateInfo info);
@@ -61,11 +58,18 @@ public:
 
   vk::Format getCurrentFormat() const { return currentSwapchain.format; }
 
+  struct DesiredProperties
+  {
+    vk::Extent2D resolution;
+    bool vsync;
+  };
   /**
-   * Recreates the swapchain and returns it's new resolution.
-   * May fail when the window is minimized.
+   * Recreates the swapchain with the provided desired resolution
+   * and returns the actual resolution the swapchain was created with.
+   * NOTE: desired resolution may not be (0, 0), which the OS
+   * windowing system CAN provide when the window is minimized.
    */
-  std::optional<vk::Extent2D> recreateSwapchain();
+  vk::Extent2D recreateSwapchain(const DesiredProperties& props);
 
 private:
   struct SwapchainElement
@@ -84,7 +88,7 @@ private:
     std::vector<SwapchainElement> elements;
   };
 
-  SwapchainData createSwapchain(vk::Extent2D resolution) const;
+  SwapchainData createSwapchain(const DesiredProperties& props) const;
 
   std::uint32_t viewToIdx(vk::ImageView view);
 
@@ -92,8 +96,6 @@ private:
   vk::PhysicalDevice physicalDevice;
   vk::Device device;
   vk::UniqueSurfaceKHR surface;
-
-  ResolutionProvider resolutionProvider;
 
   std::uint32_t queueFamily;
   vk::Queue presentQueue;
