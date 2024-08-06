@@ -15,6 +15,7 @@ static std::unique_ptr<GlobalContext> gContext{};
 
 GlobalContext& get_context()
 {
+  ETNA_ASSERTF(gContext, "Tried to use Etna before initializing it!");
   return *gContext;
 }
 

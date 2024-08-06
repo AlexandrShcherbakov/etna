@@ -9,7 +9,8 @@
 #include <etna/Image.hpp>
 #include <etna/Buffer.hpp>
 #include <etna/Window.hpp>
-#include <etna/CommandManager.hpp>
+#include <etna/PerFrameCmdMgr.hpp>
+#include <etna/OneShotCmdMgr.hpp>
 
 #include <vk_mem_alloc.h>
 
@@ -33,7 +34,8 @@ public:
   Image createImage(const Image::CreateInfo& info);
   Buffer createBuffer(const Buffer::CreateInfo& info);
   std::unique_ptr<Window> createWindow(Window::CreateInfo info);
-  std::unique_ptr<CommandManager> createCommandManager();
+  std::unique_ptr<PerFrameCmdMgr> createPerFrameCmdMgr();
+  std::unique_ptr<OneShotCmdMgr> createOneShotCmdMgr();
 
   vk::Device getDevice() const { return vkDevice.get(); }
   vk::PhysicalDevice getPhysicalDevice() const { return vkPhysDevice; }

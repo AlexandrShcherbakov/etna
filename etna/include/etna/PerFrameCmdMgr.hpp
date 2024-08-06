@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ETNA_COMMAND_POOL_HPP_INCLUDED
-#define ETNA_COMMAND_POOL_HPP_INCLUDED
+#ifndef ETNA_PER_FRAME_CMD_MGR_HPP_INCLUDED
+#define ETNA_PER_FRAME_CMD_MGR_HPP_INCLUDED
 
 #include <optional>
 
@@ -18,7 +18,7 @@ namespace etna
  * Suboptimal for many reasons, so feel free to read the implementation and be
  * inspired by it.
  */
-class CommandManager
+class PerFrameCmdMgr
 {
 public:
   struct Dependencies
@@ -30,7 +30,7 @@ public:
     std::uint32_t queueFamily;
   };
 
-  explicit CommandManager(const Dependencies& deps);
+  explicit PerFrameCmdMgr(const Dependencies& deps);
 
   /**
    * Acquires the command buffer to use this frame, waiting for
@@ -65,4 +65,4 @@ private:
 } // namespace etna
 
 
-#endif // ETNA_COMMAND_POOL_HPP_INCLUDED
+#endif // ETNA_PER_FRAME_CMD_MGR_HPP_INCLUDED

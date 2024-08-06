@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ETNA_BINDING_ITENS_HPP_INCLUDED
-#define ETNA_BINDING_ITENS_HPP_INCLUDED
+#ifndef ETNA_BINDING_ITEMS_HPP_INCLUDED
+#define ETNA_BINDING_ITEMS_HPP_INCLUDED
 
 #include <etna/Vulkan.hpp>
 
@@ -25,4 +25,4 @@ struct ImageBinding
 
 } // namespace etna
 
-#endif // ETNA_BINDING_ITENS_HPP_INCLUDED
+#endif // ETNA_BINDING_ITEMS_HPP_INCLUDED

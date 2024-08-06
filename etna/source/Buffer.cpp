@@ -18,6 +18,7 @@ Buffer::Buffer(VmaAllocator alloc, CreateInfo info)
 
   VmaAllocationCreateInfo allocInfo{
     .flags = 0,
+    // TODO: VMA changed their API and this is deprecated, we should update
     .usage = info.memoryUsage,
     .requiredFlags = 0,
     .preferredFlags = 0,
