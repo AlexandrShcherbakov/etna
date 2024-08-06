@@ -34,11 +34,3 @@ target_compile_definitions(etna PUBLIC
   VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1
   VULKAN_HPP_NO_EXCEPTIONS
 )
-
-if (CMAKE_SYSTEM_NAME STREQUAL Windows)
-  target_compile_definitions(etna PUBLIC VK_USE_PLATFORM_WIN32_KHR)
-elseif (CMAKE_SYSTEM_NAME STREQUAL Linux)
-  target_compile_definitions(etna PUBLIC VK_USE_PLATFORM_XLIB_KHR)
-elseif (CMAKE_SYSTEM_NAME STREQUAL Darwin)
-  target_compile_definitions(etna PUBLIC VK_USE_PLATFORM_MACOS_MVK)
-endif ()
