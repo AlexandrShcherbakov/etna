@@ -21,7 +21,9 @@ add_library(etna
   "source/StateTracking.cpp"
   "source/DebugUtils.cpp"
   "source/Window.cpp"
-  "source/CommandManager.cpp")
+  "source/PerFrameCmdMgr.cpp"
+  "source/OneShotCmdMgr.cpp"
+  "source/BlockingTransferHelper.cpp")
 
 target_include_directories(etna PUBLIC include)
 target_include_directories(etna PRIVATE source)

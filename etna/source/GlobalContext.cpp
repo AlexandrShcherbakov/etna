@@ -326,14 +326,23 @@ std::unique_ptr<Window> GlobalContext::createWindow(Window::CreateInfo info)
   return std::make_unique<Window>(deps, std::move(info));
 }
 
-std::unique_ptr<CommandManager> GlobalContext::createCommandManager()
+std::unique_ptr<PerFrameCmdMgr> GlobalContext::createPerFrameCmdMgr()
 {
-  CommandManager::Dependencies deps{
+  PerFrameCmdMgr::Dependencies deps{
     .workCount = mainWorkStream,
     .device = vkDevice.get(),
     .submitQueue = universalQueue,
     .queueFamily = universalQueueFamilyIdx};
-  return std::make_unique<CommandManager>(deps);
+  return std::make_unique<PerFrameCmdMgr>(deps);
+}
+
+std::unique_ptr<OneShotCmdMgr> GlobalContext::createOneShotCmdMgr()
+{
+  OneShotCmdMgr::Dependencies deps{
+    .device = vkDevice.get(),
+    .submitQueue = universalQueue,
+    .queueFamily = universalQueueFamilyIdx};
+  return std::make_unique<OneShotCmdMgr>(deps);
 }
 
 ShaderProgramManager& GlobalContext::getShaderManager()

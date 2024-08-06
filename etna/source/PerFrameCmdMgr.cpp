@@ -1,9 +1,9 @@
-#include <etna/CommandManager.hpp>
+#include <etna/PerFrameCmdMgr.hpp>
 
 namespace etna
 {
 
-CommandManager::CommandManager(const Dependencies &deps)
+PerFrameCmdMgr::PerFrameCmdMgr(const Dependencies &deps)
   : device{deps.device}
   , submitQueue{deps.submitQueue}
   , pool{unwrap_vk_result(deps.device.createCommandPoolUnique(vk::CommandPoolCreateInfo{
@@ -25,7 +25,7 @@ CommandManager::CommandManager(const Dependencies &deps)
   buffers.emplace(deps.workCount, [&bufsVec](std::size_t i) { return std::move(bufsVec[i]); });
 }
 
-vk::CommandBuffer CommandManager::acquireNext()
+vk::CommandBuffer PerFrameCmdMgr::acquireNext()
 {
   if (!commandsSubmitted.get())
     return buffers->get().get();
@@ -47,7 +47,7 @@ vk::CommandBuffer CommandManager::acquireNext()
   return curBuf;
 }
 
-vk::Semaphore CommandManager::submit(vk::CommandBuffer what, vk::Semaphore write_attachments_after)
+vk::Semaphore PerFrameCmdMgr::submit(vk::CommandBuffer what, vk::Semaphore write_attachments_after)
 {
   // NOTE: the only point in passing in `what` here is for
   // symmetry an aesthetic reasons.
