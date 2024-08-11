@@ -57,8 +57,7 @@ void ResourceStates::flushBarriers(vk::CommandBuffer com_buf)
     .imageMemoryBarrierCount = static_cast<uint32_t>(barriersToFlush.size()),
     .pImageMemoryBarriers = barriersToFlush.data(),
   };
-  VkDependencyInfo depInformation = (VkDependencyInfo)depInfo;
-  vkCmdPipelineBarrier2(com_buf, &depInformation);
+  com_buf.pipelineBarrier2(depInfo);
   barriersToFlush.clear();
 }
 

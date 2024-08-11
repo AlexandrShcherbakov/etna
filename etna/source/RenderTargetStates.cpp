@@ -10,7 +10,7 @@ namespace etna
 bool RenderTargetState::inScope = false;
 
 RenderTargetState::RenderTargetState(
-  VkCommandBuffer cmd_buff,
+  vk::CommandBuffer cmd_buff,
   vk::Rect2D rect,
   const std::vector<AttachmentParams>& color_attachments,
   AttachmentParams depth_attachment,
@@ -29,10 +29,8 @@ RenderTargetState::RenderTargetState(
     .maxDepth = 1.0f,
   };
 
-  VkViewport vp = (VkViewport)viewport;
-  VkRect2D scis = (VkRect2D)rect;
-  vkCmdSetViewport(commandBuffer, 0, 1, &vp);
-  vkCmdSetScissor(commandBuffer, 0, 1, &scis);
+  commandBuffer.setViewport(0, {viewport});
+  commandBuffer.setScissor(0, {rect});
 
   std::vector<vk::RenderingAttachmentInfo> attachmentInfos(color_attachments.size());
   for (uint32_t i = 0; i < color_attachments.size(); ++i)
@@ -142,13 +140,12 @@ RenderTargetState::RenderTargetState(
     .pDepthAttachment = depth_attachment.view ? &depthAttInfo : nullptr,
     .pStencilAttachment = stencil_attachment.view ? &stencilAttInfo : nullptr,
   };
-  VkRenderingInfo rInf = (VkRenderingInfo)renderInfo;
-  vkCmdBeginRendering(commandBuffer, &rInf);
+  commandBuffer.beginRendering(renderInfo);
 }
 
 RenderTargetState::~RenderTargetState()
 {
-  vkCmdEndRendering(commandBuffer);
+  commandBuffer.endRendering();
   inScope = false;
 }
 

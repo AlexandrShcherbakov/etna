@@ -13,7 +13,7 @@ namespace etna
 
 class RenderTargetState
 {
-  VkCommandBuffer commandBuffer;
+  vk::CommandBuffer commandBuffer;
   static bool inScope;
 
 public:
@@ -38,7 +38,7 @@ public:
   };
 
   RenderTargetState(
-    VkCommandBuffer cmd_buff,
+    vk::CommandBuffer cmd_buff,
     vk::Rect2D rect,
     const std::vector<AttachmentParams>& color_attachments,
     AttachmentParams depth_attachment,
@@ -47,7 +47,7 @@ public:
   // We can't use the default argument for stencil_attachment due to gcc bug 88165
   // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88165
   RenderTargetState(
-    VkCommandBuffer cmd_buff,
+    vk::CommandBuffer cmd_buff,
     vk::Rect2D rect,
     const std::vector<AttachmentParams>& color_attachments,
     AttachmentParams depth_attachment)
