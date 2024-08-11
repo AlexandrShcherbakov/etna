@@ -9,8 +9,6 @@
 #include <etna/Image.hpp>
 #include <etna/Buffer.hpp>
 #include <etna/Window.hpp>
-#include <etna/PerFrameCmdMgr.hpp>
-#include <etna/OneShotCmdMgr.hpp>
 
 #include <vk_mem_alloc.h>
 
@@ -23,6 +21,8 @@ struct ShaderProgramManager;
 class PipelineManager;
 struct DynamicDescriptorPool;
 class ResourceStates;
+class PerFrameCmdMgr;
+class OneShotCmdMgr;
 
 class GlobalContext
 {

@@ -38,7 +38,7 @@ DynamicDescriptorPool::DynamicDescriptorPool(vk::Device dev, const GpuWorkCount&
   , pools{work_count, [dev](std::size_t) {
             vk::DescriptorPoolCreateInfo info{
               .maxSets = NUM_DESCRIPTORS,
-              .poolSizeCount = DEFAULT_POOL_SIZES.size(),
+              .poolSizeCount = static_cast<std::uint32_t>(DEFAULT_POOL_SIZES.size()),
               .pPoolSizes = DEFAULT_POOL_SIZES.data()};
             return unwrap_vk_result(dev.createDescriptorPoolUnique(info));
           }}
