@@ -11,6 +11,9 @@
 #include <etna/DescriptorSet.hpp>
 #include <etna/Assert.hpp>
 #include <etna/EtnaConfig.hpp>
+#include <etna/Window.hpp>
+#include <etna/PerFrameCmdMgr.hpp>
+#include <etna/OneShotCmdMgr.hpp>
 
 #include "StateTracking.hpp"
 
@@ -85,10 +88,14 @@ vk::PhysicalDevice pick_physical_device(vk::Instance instance, const InitParams&
   ETNA_ASSERTF(!pdevices.empty(), "This PC has no GPUs that support Vulkan!");
 
   {
-    std::vector<const char*> pdeviceNames;
+    std::vector<std::string> pdeviceNames;
     pdeviceNames.reserve(pdevices.size());
     for (auto pdevice : pdevices)
-      pdeviceNames.emplace_back(pdevice.getProperties().deviceName);
+    {
+      const auto props = pdevice.getProperties();
+      // TODO: potential bug, is deviceName guaranteed to be null-terminated?
+      pdeviceNames.emplace_back(props.deviceName.data());
+    }
     spdlog::info("List of physical devices: {}", pdeviceNames);
   }
 
