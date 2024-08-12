@@ -119,7 +119,8 @@ std::optional<Window::SwapchainImage> Window::acquireNext()
 
 bool Window::present(vk::Semaphore wait, vk::ImageView which)
 {
-  ETNA_ASSERTF(!swapchainInvalid, "Tried to present to an invalid swapchain! This is unrecoverable!");
+  ETNA_ASSERTF(
+    !swapchainInvalid, "Tried to present to an invalid swapchain! This is unrecoverable!");
 
   auto index = viewToIdx(which);
 

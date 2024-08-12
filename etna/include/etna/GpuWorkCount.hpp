@@ -47,7 +47,8 @@ public:
   void submit()
   {
     ++frameNo;
-    currentResourceIndex = static_cast<std::size_t>(frameNo % static_cast<std::uint64_t>(inflightBatches));
+    currentResourceIndex =
+      static_cast<std::size_t>(frameNo % static_cast<std::uint64_t>(inflightBatches));
   }
 
 private:

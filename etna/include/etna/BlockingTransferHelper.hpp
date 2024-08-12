@@ -52,8 +52,7 @@ public:
   void readbackBuffer(
     OneShotCmdMgr& cmd_mgr, std::span<T> dst, const Buffer& src, std::uint32_t offset)
   {
-    std::span<std::byte> raw{
-      reinterpret_cast<std::byte*>(dst.data()), dst.size_bytes()};
+    std::span<std::byte> raw{reinterpret_cast<std::byte*>(dst.data()), dst.size_bytes()};
     readbackBuffer(cmd_mgr, raw, src, offset);
   }
 
