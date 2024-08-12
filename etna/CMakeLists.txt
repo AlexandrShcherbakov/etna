@@ -28,7 +28,7 @@ add_library(etna
 target_include_directories(etna PUBLIC include)
 target_include_directories(etna PRIVATE source)
 
-target_link_libraries(etna Vulkan::Vulkan VulkanMemoryAllocator StbLibraries "spirv-reflect-static" spdlog::spdlog function2::function2)
+target_link_libraries(etna Vulkan::Vulkan VulkanMemoryAllocator StbLibraries "spirv-reflect-static" spdlog::spdlog)
 target_compile_definitions(etna PUBLIC
   VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
   VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1

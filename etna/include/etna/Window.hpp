@@ -8,7 +8,6 @@
 #include <etna/Vulkan.hpp>
 #include <etna/GpuSharedResource.hpp>
 
-#include <function2/function2.hpp>
 #include <vk_mem_alloc.h>
 
 
