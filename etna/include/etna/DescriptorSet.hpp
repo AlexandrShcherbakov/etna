@@ -77,13 +77,13 @@ private:
 
 /**
  * Base version. Allocate and use descriptor sets while writing command buffer, they will be
- * destroyed automaticaly. Resource allocation tracking shoud be added. For long-living descriptor sets
- * (e.g bindless resource sets) separate allocator shoud be added, with ManagedDescriptorSet with
- * destructor
+ * destroyed automaticaly. Resource allocation tracking shoud be added. For long-living descriptor
+ * sets (e.g bindless resource sets) separate allocator shoud be added, with ManagedDescriptorSet
+ * with destructor
  */
 struct DynamicDescriptorPool
 {
-  DynamicDescriptorPool(vk::Device dev, const GpuWorkCount &work_count);
+  DynamicDescriptorPool(vk::Device dev, const GpuWorkCount& work_count);
 
   void beginFrame();
   void destroyAllocatedSets();
@@ -94,12 +94,13 @@ struct DynamicDescriptorPool
 
   bool isSetValid(const DescriptorSet& set) const
   {
-    return set.getVkSet() && set.getGen() + workCount.multiBufferingCount() > workCount.batchIndex();
+    return set.getVkSet() &&
+      set.getGen() + workCount.multiBufferingCount() > workCount.batchIndex();
   }
 
 private:
   vk::Device vkDevice;
-  const GpuWorkCount &workCount;
+  const GpuWorkCount& workCount;
 
   GpuSharedResource<vk::UniqueDescriptorPool> pools;
 };

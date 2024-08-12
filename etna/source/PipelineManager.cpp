@@ -137,15 +137,20 @@ static void print_prog_info(const etna::ShaderProgramInfo& info, const std::stri
       continue;
 
     fmt::format_to(it, " Set {}:\n", set);
-    const auto &setInfo = info.getDescriptorSetInfo(set);
+    const auto& setInfo = info.getDescriptorSetInfo(set);
     for (uint32_t binding = 0; binding < etna::MAX_DESCRIPTOR_BINDINGS; binding++)
     {
       if (!setInfo.isBindingUsed(binding))
         continue;
       const auto& vkBinding = setInfo.getBinding(binding);
 
-      fmt::format_to(it, "  Binding {}: {}, count = {}, stages = {}\n", binding, vkBinding.descriptorType,
-        vkBinding.descriptorCount, vkBinding.stageFlags);
+      fmt::format_to(
+        it,
+        "  Binding {}: {}, count = {}, stages = {}\n",
+        binding,
+        vkBinding.descriptorType,
+        vkBinding.descriptorCount,
+        vkBinding.stageFlags);
     }
   }
 
