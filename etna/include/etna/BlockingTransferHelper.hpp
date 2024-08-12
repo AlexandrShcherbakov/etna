@@ -2,7 +2,7 @@
 #ifndef ETNA_BLOCKING_TRANSFER_HELPER_HPP_INCLUDED
 #define ETNA_BLOCKING_TRANSFER_HELPER_HPP_INCLUDED
 
-#include <concepts>
+#include <type_traits>
 
 #include <etna/Vulkan.hpp>
 #include <etna/Buffer.hpp>

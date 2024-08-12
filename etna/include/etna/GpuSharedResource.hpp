@@ -49,8 +49,8 @@ public:
   T& get() & { return impl[workCount.currentResource()].get(); }
   const T& get() const& { return impl[workCount.currentResource()].get(); }
 
-  template<std::invocable<T&> F>
-  void iterate(const F &f) &
+  template <std::invocable<T&> F>
+  void iterate(const F& f) &
   {
     for (std::size_t i = 0; i < workCount.multiBufferingCount(); ++i)
       f(impl[i].get());
