@@ -19,8 +19,8 @@ PipelineBase::PipelineBase(
 
 PipelineBase::PipelineBase(PipelineBase&& other) noexcept
   : owner{other.owner}
-  , id{std::exchange(other.id, INVALID_PIPELINE_ID)}
-  , shaderProgramId{std::exchange(other.shaderProgramId, INVALID_SHADER_PROGRAM_ID)}
+  , id{std::exchange(other.id, PipelineId::Invalid)}
+  , shaderProgramId{std::exchange(other.shaderProgramId, ShaderProgramId::Invalid)}
 {
 }
 
@@ -32,8 +32,8 @@ PipelineBase& PipelineBase::operator=(PipelineBase&& other) noexcept
   if (owner != nullptr)
     owner->destroyPipeline(id);
   owner = other.owner;
-  id = std::exchange(other.id, INVALID_PIPELINE_ID);
-  shaderProgramId = std::exchange(other.shaderProgramId, INVALID_SHADER_PROGRAM_ID);
+  id = std::exchange(other.id, PipelineId::Invalid);
+  shaderProgramId = std::exchange(other.shaderProgramId, ShaderProgramId::Invalid);
 
   return *this;
 }

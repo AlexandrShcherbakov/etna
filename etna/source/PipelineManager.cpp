@@ -1,6 +1,5 @@
 #include <etna/PipelineManager.hpp>
 
-#include <iostream>
 #include <span>
 #include <vector>
 
@@ -106,9 +105,9 @@ PipelineManager::PipelineManager(vk::Device dev, ShaderProgramManager& shader_ma
 }
 
 ComputePipeline PipelineManager::createComputePipeline(
-  std::string shader_program_name, ComputePipeline::CreateInfo info)
+  const char* shader_program_name, ComputePipeline::CreateInfo info)
 {
-  const PipelineId pipelineId = pipelineIdCounter++;
+  const PipelineId pipelineId = static_cast<PipelineId>(pipelineIdCounter++);
   const ShaderProgramId progId = shaderManager.getProgram(shader_program_name);
   const std::vector<vk::PipelineShaderStageCreateInfo> shaderStages =
     shaderManager.getShaderStages(progId);
@@ -162,9 +161,9 @@ static void print_prog_info(const etna::ShaderProgramInfo& info, const std::stri
 }
 
 GraphicsPipeline PipelineManager::createGraphicsPipeline(
-  std::string shader_program_name, GraphicsPipeline::CreateInfo info)
+  const char* shader_program_name, GraphicsPipeline::CreateInfo info)
 {
-  const PipelineId pipelineId = pipelineIdCounter++;
+  const PipelineId pipelineId = static_cast<PipelineId>(pipelineIdCounter++);
   const ShaderProgramId progId = shaderManager.getProgram(shader_program_name);
 
   pipelines.emplace(
@@ -200,7 +199,7 @@ void PipelineManager::recreate()
 
 void PipelineManager::destroyPipeline(PipelineId id)
 {
-  if (id == INVALID_PIPELINE_ID)
+  if (id == PipelineId::Invalid)
     return;
 
   pipelines.erase(id);
@@ -209,13 +208,13 @@ void PipelineManager::destroyPipeline(PipelineId id)
 
 vk::Pipeline PipelineManager::getVkPipeline(PipelineId id) const
 {
-  ETNA_ASSERT(id != INVALID_PIPELINE_ID);
+  ETNA_ASSERT(id != PipelineId::Invalid);
   return pipelines.find(id)->second.get();
 }
 
 vk::PipelineLayout PipelineManager::getVkPipelineLayout(ShaderProgramId id) const
 {
-  ETNA_ASSERT(id != INVALID_SHADER_PROGRAM_ID);
+  ETNA_ASSERT(id != ShaderProgramId::Invalid);
   return shaderManager.getProgramLayout(id);
 }
 

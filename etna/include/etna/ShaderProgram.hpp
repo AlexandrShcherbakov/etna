@@ -7,6 +7,7 @@
 #include <vector>
 #include <unordered_map>
 #include <memory>
+#include <filesystem>
 
 #include <etna/Vulkan.hpp>
 #include <etna/Forward.hpp>
@@ -18,7 +19,7 @@ namespace etna
 
 struct ShaderModule
 {
-  ShaderModule(vk::Device device, const std::string& shader_path);
+  ShaderModule(vk::Device device, std::filesystem::path shader_path);
 
   void reload(vk::Device device);
 
@@ -32,7 +33,7 @@ struct ShaderModule
   ShaderModule& operator=(const ShaderModule& mod) = delete;
 
 private:
-  std::string path{};
+  std::filesystem::path path{};
   std::string entryPoint{};
   vk::ShaderStageFlagBits stage;
 
@@ -73,15 +74,16 @@ struct ShaderProgramManager
   ~ShaderProgramManager() { clear(); }
 
   ShaderProgramId loadProgram(
-    const std::string& name, const std::vector<std::string>& shaders_path);
-  ShaderProgramId getProgram(const std::string& name) const;
+    const char* name, std::span<std::filesystem::path const> shaders_path);
+  ShaderProgramId tryGetProgram(const char* name) const;
+  ShaderProgramId getProgram(const char* name) const;
 
   ShaderProgramInfo getProgramInfo(ShaderProgramId id) const
   {
     return ShaderProgramInfo{*this, id};
   }
 
-  ShaderProgramInfo getProgramInfo(const std::string& name) const
+  ShaderProgramInfo getProgramInfo(const char* name) const
   {
     return getProgramInfo(getProgram(name));
   }
@@ -91,29 +93,29 @@ struct ShaderProgramManager
 
   vk::PipelineLayout getProgramLayout(ShaderProgramId id) const
   {
-    return programs.at(id)->progLayout.get();
+    return getProgInternal(id).progLayout.get();
   }
   vk::DescriptorSetLayout getDescriptorLayout(ShaderProgramId id, uint32_t set) const;
 
   DescriptorLayoutId getDescriptorLayoutId(ShaderProgramId id, uint32_t set) const
   {
-    auto& prog = *programs.at(id);
+    auto& prog = *programs.at(static_cast<std::underlying_type_t<ShaderProgramId>>(id));
     if (set >= MAX_PROGRAM_DESCRIPTORS || !prog.usedDescriptors.test(set))
       ETNA_PANIC("ShaderProgram {} invalid descriptor set #{}", prog.name, set);
     return prog.descriptorIds[set];
   }
 
-  std::vector<vk::PipelineShaderStageCreateInfo> getShaderStages(
-    ShaderProgramId id) const; /*for pipeline creation*/
+  // for pipeline creation
+  std::vector<vk::PipelineShaderStageCreateInfo> getShaderStages(ShaderProgramId id) const;
 
   ShaderProgramManager(const ShaderProgramManager&) = delete;
   ShaderProgramManager& operator=(const ShaderProgramManager&) = delete;
 
 private:
-  std::unordered_map<std::string, uint32_t> shaderModuleNames;
+  std::unordered_map<std::filesystem::path, uint32_t> shaderModuleNames;
   std::vector<std::unique_ptr<ShaderModule>> shaderModules;
 
-  uint32_t registerModule(const std::string& path);
+  uint32_t registerModule(std::filesystem::path path);
   const ShaderModule& getModule(uint32_t id) const { return *shaderModules.at(id); }
 
   struct ShaderProgramInternal
@@ -136,12 +138,12 @@ private:
     void reload(ShaderProgramManager& manager);
   };
 
-  std::unordered_map<std::string, uint32_t> programNames;
+  std::unordered_map<std::string, ShaderProgramId> programNames;
   std::vector<std::unique_ptr<ShaderProgramInternal>> programs;
 
   const ShaderProgramInternal& getProgInternal(ShaderProgramId id) const
   {
-    return *programs.at(id);
+    return *programs.at(static_cast<std::underlying_type_t<ShaderProgramId>>(id));
   }
 
   friend ShaderProgramInfo;

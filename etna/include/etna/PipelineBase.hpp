@@ -28,8 +28,8 @@ protected:
 
 private:
   PipelineManager* owner{nullptr};
-  PipelineId id{INVALID_PIPELINE_ID};
-  ShaderProgramId shaderProgramId{INVALID_SHADER_PROGRAM_ID};
+  PipelineId id{PipelineId::Invalid};
+  ShaderProgramId shaderProgramId{ShaderProgramId::Invalid};
 };
 
 } // namespace etna

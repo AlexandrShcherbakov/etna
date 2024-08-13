@@ -43,7 +43,9 @@ void begin_frame();
 void end_frame();
 
 ShaderProgramId create_program(
-  const std::string& name, const std::vector<std::string>& shaders_path);
+  const char* name, std::initializer_list<std::filesystem::path> shaders_path);
+
+ShaderProgramId get_program_id(const char* name);
 
 /*
   Reload shader files. Warning:
@@ -53,7 +55,7 @@ ShaderProgramId create_program(
 void reload_shaders();
 
 ShaderProgramInfo get_shader_program(ShaderProgramId id);
-ShaderProgramInfo get_shader_program(const std::string& name);
+ShaderProgramInfo get_shader_program(const char* name);
 
 
 DescriptorSet create_descriptor_set(

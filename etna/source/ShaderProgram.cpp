@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <spirv_reflect.h>
+#include <fmt/std.h>
 
 #include <etna/GlobalContext.hpp>
 
@@ -9,13 +10,13 @@
 namespace etna
 {
 
-ShaderModule::ShaderModule(vk::Device device, const std::string& shader_path)
+ShaderModule::ShaderModule(vk::Device device, std::filesystem::path shader_path)
   : path{shader_path}
 {
   reload(device);
 }
 
-static std::vector<char> read_file(const std::string& filename)
+static std::vector<char> read_file(std::filesystem::path filename)
 {
   std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
@@ -105,11 +106,11 @@ void ShaderModule::reload(vk::Device device)
   {
     pushConst.size = 0u;
     pushConst.offset = 0u;
-    pushConst.stageFlags = static_cast<vk::ShaderStageFlags>(0u);
+    pushConst.stageFlags = vk::ShaderStageFlags{};
   }
 }
 
-uint32_t ShaderProgramManager::registerModule(const std::string& path)
+uint32_t ShaderProgramManager::registerModule(std::filesystem::path path)
 {
   auto it = shaderModuleNames.find(path);
   if (it != shaderModuleNames.end())
@@ -162,7 +163,7 @@ static void validate_program_shaders(
 }
 
 ShaderProgramId ShaderProgramManager::loadProgram(
-  const std::string& name, const std::vector<std::string>& shaders_path)
+  const char* name, std::span<std::filesystem::path const> shaders_path)
 {
   if (programNames.find(name) != programNames.end())
     ETNA_PANIC("Shader program {} redefenition", name);
@@ -182,12 +183,20 @@ ShaderProgramId ShaderProgramManager::loadProgram(
 
   ShaderProgramId progId = static_cast<ShaderProgramId>(programs.size());
   programs.emplace_back(new ShaderProgramInternal{name, std::move(moduleIds)});
-  programs[progId]->reload(*this);
+  programs[static_cast<std::underlying_type_t<ShaderProgramId>>(progId)]->reload(*this);
   programNames[name] = progId;
   return progId;
 }
 
-ShaderProgramId ShaderProgramManager::getProgram(const std::string& name) const
+ShaderProgramId ShaderProgramManager::tryGetProgram(const char* name) const
+{
+  auto it = programNames.find(name);
+  if (it == programNames.end())
+    return ShaderProgramId::Invalid;
+  return it->second;
+}
+
+ShaderProgramId ShaderProgramManager::getProgram(const char* name) const
 {
   auto it = programNames.find(name);
   if (it == programNames.end())
@@ -285,7 +294,7 @@ void ShaderProgramManager::clear()
 std::vector<vk::PipelineShaderStageCreateInfo> ShaderProgramManager::getShaderStages(
   ShaderProgramId id) const
 {
-  auto& prog = *programs.at(id);
+  auto& prog = getProgInternal(id);
 
   std::vector<vk::PipelineShaderStageCreateInfo> stages;
   stages.reserve(prog.moduleIds.size());

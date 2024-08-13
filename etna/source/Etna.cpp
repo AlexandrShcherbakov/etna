@@ -36,9 +36,14 @@ void shutdown()
 }
 
 ShaderProgramId create_program(
-  const std::string& name, const std::vector<std::string>& shaders_path)
+  const char* name, std::initializer_list<std::filesystem::path> shaders_path)
 {
   return gContext->getShaderManager().loadProgram(name, shaders_path);
+}
+
+ShaderProgramId get_program_id(const char* name)
+{
+  return gContext->getShaderManager().tryGetProgram(name);
 }
 
 void reload_shaders()
@@ -54,7 +59,7 @@ ShaderProgramInfo get_shader_program(ShaderProgramId id)
   return gContext->getShaderManager().getProgramInfo(id);
 }
 
-ShaderProgramInfo get_shader_program(const std::string& name)
+ShaderProgramInfo get_shader_program(const char* name)
 {
   return gContext->getShaderManager().getProgramInfo(name);
 }

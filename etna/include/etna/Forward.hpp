@@ -9,12 +9,16 @@ namespace etna
 {
 
 class PipelineManager;
-using PipelineId = std::uint32_t;
-inline constexpr PipelineId INVALID_PIPELINE_ID = static_cast<PipelineId>(-1);
+enum class PipelineId : std::uint32_t
+{
+  Invalid = ~std::uint32_t{0}
+};
 
 struct ShaderProgramManager;
-using ShaderProgramId = std::uint32_t;
-inline constexpr ShaderProgramId INVALID_SHADER_PROGRAM_ID = static_cast<PipelineId>(-1);
+enum class ShaderProgramId : std::uint32_t
+{
+  Invalid = ~std::uint32_t{0}
+};
 
 } // namespace etna
 

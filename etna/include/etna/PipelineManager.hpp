@@ -23,10 +23,11 @@ public:
   PipelineManager(vk::Device dev, ShaderProgramManager& shader_manager);
 
   GraphicsPipeline createGraphicsPipeline(
-    std::string shader_program_name, GraphicsPipeline::CreateInfo info);
+    const char* shader_program_name, GraphicsPipeline::CreateInfo info);
 
   ComputePipeline createComputePipeline(
-    std::string shader_program_name, ComputePipeline::CreateInfo info);
+    const char* shader_program_name, ComputePipeline::CreateInfo info);
+
   // TODO: createRaytracePipeline, createMeshletPipeline
 
   void recreate();
@@ -41,7 +42,8 @@ private:
   ShaderProgramManager& shaderManager;
 
 
-  PipelineId pipelineIdCounter{0};
+  std::underlying_type_t<PipelineId> pipelineIdCounter{0};
+
   struct PipelineParameters
   {
     ShaderProgramId shaderProgram;
