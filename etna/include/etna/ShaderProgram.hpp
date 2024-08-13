@@ -112,12 +112,13 @@ struct ShaderProgramManager
   ShaderProgramManager& operator=(const ShaderProgramManager&) = delete;
 
 private:
-
   // See https://cplusplus.github.io/LWG/issue3657
-  struct PathHash {
-      auto operator()(const std::filesystem::path& p) const noexcept {
-          return std::filesystem::hash_value(p);
-      }
+  struct PathHash
+  {
+    std::size_t operator()(const std::filesystem::path& p) const noexcept
+    {
+      return std::filesystem::hash_value(p);
+    }
   };
 
   std::unordered_map<std::filesystem::path, uint32_t, PathHash> shaderModuleNames;
