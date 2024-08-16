@@ -75,8 +75,7 @@ DescriptorSet create_descriptor_set(
   return set;
 }
 
-Image create_image_from_bytes(
-  Image::CreateInfo info, vk::CommandBuffer cmd_buf, const void* data)
+Image create_image_from_bytes(Image::CreateInfo info, vk::CommandBuffer cmd_buf, const void* data)
 {
   const auto blockSize = vk::blockSize(info.format);
   const auto imageSize = blockSize * info.extent.width * info.extent.height * info.extent.depth;
@@ -110,22 +109,19 @@ Image create_image_from_bytes(
     .bufferOffset = 0,
     .bufferRowLength = 0,
     .bufferImageHeight = 0,
-    .imageSubresource = vk::ImageSubresourceLayers{
-      .aspectMask = image.getAspectMaskByFormat(),
-      .mipLevel = 0,
-      .baseArrayLayer = 0,
-      .layerCount = static_cast<std::uint32_t>(info.layers),
-    },
+    .imageSubresource =
+      vk::ImageSubresourceLayers{
+        .aspectMask = image.getAspectMaskByFormat(),
+        .mipLevel = 0,
+        .baseArrayLayer = 0,
+        .layerCount = static_cast<std::uint32_t>(info.layers),
+      },
     .imageOffset = {0, 0, 0},
     .imageExtent = info.extent,
   };
 
   cmd_buf.copyBufferToImage(
-    stagingBuf.get(),
-    image.get(),
-    vk::ImageLayout::eTransferDstOptimal,
-    1,
-    &region);
+    stagingBuf.get(), image.get(), vk::ImageLayout::eTransferDstOptimal, 1, &region);
 
   ETNA_CHECK_VK_RESULT(cmd_buf.end());
 
