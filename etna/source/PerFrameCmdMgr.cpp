@@ -60,7 +60,7 @@ vk::Semaphore PerFrameCmdMgr::submit(vk::CommandBuffer what, vk::Semaphore write
   std::array wait{vk::SemaphoreSubmitInfo{
     .semaphore = write_attachments_after,
     .stageMask = vk::PipelineStageFlagBits2::eColorAttachmentOutput,
-    .deviceIndex = 1,
+    .deviceIndex = 0,
   }};
 
   // NOTE: this is intended to be used for presenting, and as far
@@ -70,7 +70,7 @@ vk::Semaphore PerFrameCmdMgr::submit(vk::CommandBuffer what, vk::Semaphore write
   std::array signal{vk::SemaphoreSubmitInfo{
     .semaphore = gpuDone.get(),
     .stageMask = {},
-    .deviceIndex = 1,
+    .deviceIndex = 0,
   }};
 
   vk::SubmitInfo2 sInfo{};
