@@ -21,6 +21,9 @@ public:
   {
     vk::Extent3D extent;
     std::string_view name;
+    // NOTE: this format is the default for TEXTURE ASSETS,
+    // if you are using the image as a render target, you almost
+    // definitely want UNorm.
     vk::Format format = vk::Format::eR8G8B8A8Srgb;
     vk::ImageUsageFlags imageUsage =
       vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled;

@@ -181,7 +181,7 @@ Window::SwapchainData Window::createSwapchain(const DesiredProperties& props) co
     .imageColorSpace = format.colorSpace,
     .imageExtent = extent,
     .imageArrayLayers = 1,
-    .imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
+    .imageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst,
     .imageSharingMode = vk::SharingMode::eExclusive,
     .queueFamilyIndexCount = 1,
     .pQueueFamilyIndices = &queueFamily,
