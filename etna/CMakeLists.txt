@@ -28,9 +28,17 @@ add_library(etna
 target_include_directories(etna PUBLIC include)
 target_include_directories(etna PRIVATE source)
 
-target_link_libraries(etna Vulkan::Vulkan VulkanMemoryAllocator StbLibraries "spirv-reflect-static" spdlog::spdlog)
+target_link_libraries(etna PUBLIC
+  Vulkan::Vulkan
+  VulkanMemoryAllocator
+  StbLibraries
+  "spirv-reflect-static"
+  spdlog::spdlog
+  Tracy::TracyClient
+)
 target_compile_definitions(etna PUBLIC
   VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
   VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1
   VULKAN_HPP_NO_EXCEPTIONS
+  TRACY_VK_USE_SYMBOL_TABLE
 )

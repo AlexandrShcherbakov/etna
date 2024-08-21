@@ -61,3 +61,12 @@ CPMAddPackage(
   OPTIONS
     SPDLOG_FMT_EXTERNAL
 )
+
+# A profiler for both CPU and GPU
+CPMAddPackage(
+  GITHUB_REPOSITORY wolfpld/tracy
+  GIT_TAG v0.11.0
+  OPTIONS
+    "TRACY_ENABLE ON"
+    "TRACY_ON_DEMAND ON"
+)

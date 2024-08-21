@@ -1,6 +1,7 @@
 #include <etna/Window.hpp>
 
 #include <fmt/ranges.h>
+#include <tracy/Tracy.hpp>
 
 #include <etna/VulkanFormatter.hpp>
 
@@ -80,6 +81,8 @@ Window::Window(const Dependencies& deps, CreateInfo info)
 
 std::optional<Window::SwapchainImage> Window::acquireNext()
 {
+  ZoneScoped;
+
   if (swapchainInvalid)
     return std::nullopt;
 
@@ -119,6 +122,8 @@ std::optional<Window::SwapchainImage> Window::acquireNext()
 
 bool Window::present(vk::Semaphore wait, vk::ImageView which)
 {
+  ZoneScoped;
+
   ETNA_ASSERTF(
     !swapchainInvalid, "Tried to present to an invalid swapchain! This is unrecoverable!");
 

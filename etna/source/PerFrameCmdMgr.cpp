@@ -1,5 +1,8 @@
 #include <etna/PerFrameCmdMgr.hpp>
 
+#include <tracy/Tracy.hpp>
+
+
 namespace etna
 {
 
@@ -27,6 +30,8 @@ PerFrameCmdMgr::PerFrameCmdMgr(const Dependencies &deps)
 
 vk::CommandBuffer PerFrameCmdMgr::acquireNext()
 {
+  ZoneScoped;
+
   if (!commandsSubmitted.get())
     return buffers->get().get();
 
@@ -49,6 +54,8 @@ vk::CommandBuffer PerFrameCmdMgr::acquireNext()
 
 vk::Semaphore PerFrameCmdMgr::submit(vk::CommandBuffer what, vk::Semaphore write_attachments_after)
 {
+  ZoneScoped;
+
   // NOTE: the only point in passing in `what` here is for
   // symmetry an aesthetic reasons.
   ETNA_ASSERT(what == buffers->get().get());

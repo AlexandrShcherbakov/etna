@@ -1,5 +1,8 @@
 #include <etna/OneShotCmdMgr.hpp>
 
+#include <tracy/Tracy.hpp>
+
+
 namespace etna
 {
 
@@ -27,6 +30,8 @@ vk::CommandBuffer OneShotCmdMgr::start()
 
 void OneShotCmdMgr::submitAndWait(vk::CommandBuffer buffer)
 {
+  ZoneScoped;
+
   ETNA_ASSERT(buffer == commandBuffer.get());
 
   std::array cbsInfo{vk::CommandBufferSubmitInfo{

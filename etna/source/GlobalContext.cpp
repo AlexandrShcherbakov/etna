@@ -2,7 +2,7 @@
 
 #include <unordered_set>
 #include <spdlog/fmt/ranges.h>
-#include <vulkan/vulkan_structs.hpp>
+#include <tracy/TracyVulkan.hpp>
 
 #include <etna/Etna.hpp>
 #include <etna/DescriptorSetLayout.hpp>
@@ -235,6 +235,7 @@ static VkBool32 debugCallback(
 
 GlobalContext::GlobalContext(const InitParams& params)
   : mainWorkStream{params.numFramesInFlight}
+  , tracyCtx{nullptr, +[](void* ctx) { TracyVkDestroy(reinterpret_cast<TracyVkCtx>(ctx)); }}
 {
   // Proper initialization of vulkan is tricky, as we need to
   // dynamically link vulkan-1.dll and load symbols for various
@@ -310,6 +311,28 @@ GlobalContext::GlobalContext(const InitParams& params)
   pipelineManager = std::make_unique<PipelineManager>(vkDevice.get(), *shaderPrograms);
   descriptorPool = std::make_unique<DynamicDescriptorPool>(vkDevice.get(), mainWorkStream);
   resourceTracking = std::make_unique<ResourceStates>();
+
+  auto tempPool =
+    etna::unwrap_vk_result(vkDevice->createCommandPoolUnique(vk::CommandPoolCreateInfo{
+      .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+      .queueFamilyIndex = universalQueueFamilyIdx,
+    }));
+  auto buf = std::move(
+    etna::unwrap_vk_result(vkDevice->allocateCommandBuffersUnique(vk::CommandBufferAllocateInfo{
+      .commandPool = tempPool.get(),
+      .level = vk::CommandBufferLevel::ePrimary,
+      .commandBufferCount = 1,
+    }))[0]);
+
+  auto ctx = TracyVkContext(
+    vkInstance.get(),
+    vkPhysDevice,
+    vkDevice.get(),
+    universalQueue,
+    buf.get(),
+    VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr,
+    VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceProcAddr);
+  tracyCtx.reset(ctx);
 }
 
 Image GlobalContext::createImage(const Image::CreateInfo& info)

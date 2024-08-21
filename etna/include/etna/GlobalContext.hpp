@@ -51,6 +51,9 @@ public:
   GpuWorkCount& getMainWorkCount() { return mainWorkStream; }
   const GpuWorkCount& getMainWorkCount() const { return mainWorkStream; }
 
+  // Do not use this directly, use Profiling.hpp
+  void* getTracyContext() { return tracyCtx.get(); }
+
   GlobalContext(const GlobalContext&) = delete;
   GlobalContext& operator=(const GlobalContext&) = delete;
   GlobalContext(GlobalContext&&) = delete;
@@ -77,6 +80,7 @@ private:
   std::unique_ptr<PipelineManager> pipelineManager;
   std::unique_ptr<DynamicDescriptorPool> descriptorPool;
   std::unique_ptr<ResourceStates> resourceTracking;
+  std::unique_ptr<void, void (*)(void*)> tracyCtx;
 };
 
 GlobalContext& get_context();
