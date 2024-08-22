@@ -48,13 +48,13 @@ static vk::UniqueInstance createInstance(const InitParams& params)
   createInfo.setPEnabledLayerNames(layers);
   createInfo.setPEnabledExtensionNames(extensions);
 
-  return vk::createInstanceUnique(createInfo).value;
+  return unwrap_vk_result(vk::createInstanceUnique(createInfo));
 }
 
 static bool checkPhysicalDeviceSupportsExtensions(
   vk::PhysicalDevice pdevice, std::span<char const* const> extensions)
 {
-  std::vector availableExtensions = pdevice.enumerateDeviceExtensionProperties().value;
+  std::vector availableExtensions = unwrap_vk_result(pdevice.enumerateDeviceExtensionProperties());
 
   std::unordered_set requestedExtensions(extensions.begin(), extensions.end());
   for (const auto& ext : availableExtensions)
@@ -83,7 +83,7 @@ static bool deviceTypeIsBetter(vk::PhysicalDeviceType first, vk::PhysicalDeviceT
 
 vk::PhysicalDevice pick_physical_device(vk::Instance instance, const InitParams& params)
 {
-  std::vector pdevices = instance.enumeratePhysicalDevices().value;
+  std::vector pdevices = unwrap_vk_result(instance.enumeratePhysicalDevices());
 
   ETNA_ASSERTF(!pdevices.empty(), "This PC has no GPUs that support Vulkan!");
 
@@ -194,15 +194,14 @@ static vk::UniqueDevice createDevice(
   // extensions support. Now pNext has to point to a
   // PhysicalDeviceFeatures2 structure while the actual
   // pEnabledFeatures has to be nullptr.
-  return pdevice
-    .createDeviceUnique(vk::DeviceCreateInfo{
-      .pNext = &sync2Feature,
-      .queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size()),
-      .pQueueCreateInfos = queueInfos.data(),
-      .enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size()),
-      .ppEnabledExtensionNames = deviceExtensions.data(),
-    })
-    .value;
+  vk::DeviceCreateInfo creatInfo{
+    .pNext = &sync2Feature,
+    .queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size()),
+    .pQueueCreateInfos = queueInfos.data(),
+    .enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size()),
+    .ppEnabledExtensionNames = deviceExtensions.data(),
+  };
+  return unwrap_vk_result(pdevice.createDeviceUnique(creatInfo));
 }
 
 #ifndef NDEBUG
@@ -268,7 +267,8 @@ GlobalContext::GlobalContext(const InitParams& params)
       .pfnUserCallback = debugCallback,
       .pUserData = this,
     };
-    vkDebugCallback = vkInstance->createDebugUtilsMessengerEXTUnique(debugUtilsCreateInfo).value;
+    vkDebugCallback =
+      unwrap_vk_result(vkInstance->createDebugUtilsMessengerEXTUnique(debugUtilsCreateInfo));
   }
 #endif
 
@@ -284,6 +284,11 @@ GlobalContext::GlobalContext(const InitParams& params)
   universalQueue = vkDevice->getQueue(universalQueueFamilyIdx, 0);
 
   {
+    VmaVulkanFunctions functions{
+      .vkGetInstanceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr,
+      .vkGetDeviceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceProcAddr,
+    };
+
     VmaAllocatorCreateInfo allocInfo{
       .flags = {},
       .physicalDevice = vkPhysDevice,
@@ -293,7 +298,7 @@ GlobalContext::GlobalContext(const InitParams& params)
       .pAllocationCallbacks = {},
       .pDeviceMemoryCallbacks = {},
       .pHeapSizeLimit = {},
-      .pVulkanFunctions = {},
+      .pVulkanFunctions = &functions,
 
       .instance = vkInstance.get(),
       .vulkanApiVersion = VULKAN_API_VERSION,

@@ -59,7 +59,7 @@ void ShaderModule::reload(vk::Device device)
   if (code.size() % 4 != 0)
     ETNA_PANIC("SPIRV {} broken", path);
 
-  vkModule = device.createShaderModuleUnique(info).value;
+  vkModule = unwrap_vk_result(device.createShaderModuleUnique(info));
 
   std::unique_ptr<SpvReflectShaderModule, SpvModDeleter> spvModule;
   spvModule.reset(new SpvReflectShaderModule{});
@@ -267,7 +267,7 @@ void ShaderProgramManager::ShaderProgramInternal::reload(ShaderProgramManager& m
     info.setPushConstantRangeCount(1u);
   }
 
-  progLayout = get_context().getDevice().createPipelineLayoutUnique(info).value;
+  progLayout = unwrap_vk_result(get_context().getDevice().createPipelineLayoutUnique(info));
 }
 
 void ShaderProgramManager::reloadPrograms()

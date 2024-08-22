@@ -19,7 +19,7 @@ public:
 
   struct CreateInfo
   {
-    std::size_t size;
+    vk::DeviceSize size;
     vk::BufferUsageFlags bufferUsage = vk::BufferUsageFlagBits::eStorageBuffer;
     VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY;
     std::string_view name;

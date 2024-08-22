@@ -12,6 +12,8 @@ CPMAddPackage(
 )
 if (VulkanMemoryAllocator_ADDED)
   add_library(VulkanMemoryAllocator INTERFACE)
+  # SYSTEM is important here it suppresses warnings
+  # AMD won't fix compiler warnings in VMA >:(
   target_include_directories(VulkanMemoryAllocator SYSTEM INTERFACE ${VulkanMemoryAllocator_SOURCE_DIR}/include/)
 endif ()
 

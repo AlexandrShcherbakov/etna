@@ -21,7 +21,7 @@ Sampler::Sampler(CreateInfo info)
     .maxLod = info.maxLod,
     .borderColor = vk::BorderColor::eFloatOpaqueWhite,
   };
-  sampler = etna::get_context().getDevice().createSamplerUnique(createInfo).value;
+  sampler = unwrap_vk_result(etna::get_context().getDevice().createSamplerUnique(createInfo));
   etna::set_debug_name(sampler.get(), info.name.data());
 }
 

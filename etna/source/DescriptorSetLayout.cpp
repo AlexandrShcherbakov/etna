@@ -116,7 +116,7 @@ vk::DescriptorSetLayout DescriptorSetInfo::createVkLayout(vk::Device device) con
   vk::DescriptorSetLayoutCreateInfo info{};
   info.setBindings(apiBindings);
 
-  return device.createDescriptorSetLayout(info).value;
+  return unwrap_vk_result(device.createDescriptorSetLayout(info));
 }
 
 template <typename T>

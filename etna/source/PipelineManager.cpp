@@ -16,7 +16,7 @@ static vk::UniquePipeline createComputePipelineInternal(
   vk::ComputePipelineCreateInfo pipelineInfo{.layout = layout};
   pipelineInfo.setStage(stage);
 
-  return device.createComputePipelineUnique(nullptr, pipelineInfo).value;
+  return unwrap_vk_result(device.createComputePipelineUnique(nullptr, pipelineInfo));
 }
 
 
@@ -95,7 +95,7 @@ static vk::UniquePipeline create_graphics_pipeline_internal(
   };
   pipelineInfo.setStages(stages);
 
-  return device.createGraphicsPipelineUnique(nullptr, pipelineInfo).value;
+  return unwrap_vk_result(device.createGraphicsPipelineUnique(nullptr, pipelineInfo));
 }
 
 PipelineManager::PipelineManager(vk::Device dev, ShaderProgramManager& shader_manager)

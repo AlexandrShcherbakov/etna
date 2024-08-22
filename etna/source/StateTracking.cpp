@@ -1,5 +1,7 @@
 #include "StateTracking.hpp"
 
+#include <bit>
+
 
 namespace etna
 {
@@ -12,7 +14,7 @@ void ResourceStates::setTextureState(
   vk::ImageLayout layout,
   vk::ImageAspectFlags aspect_flags)
 {
-  HandleType resHandle = reinterpret_cast<HandleType>((VkImage)image);
+  HandleType resHandle = std::bit_cast<HandleType>(static_cast<VkImage>(image));
   if (currentStates.count(resHandle) == 0)
   {
     currentStates[resHandle] = TextureState{.owner = com_buffer};

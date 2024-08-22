@@ -133,9 +133,8 @@ vk::ImageView Image::getView(Image::ViewParams params) const
         .baseArrayLayer = 0,
         .layerCount = 1,
       }};
-    it =
-      views.emplace(params, etna::get_context().getDevice().createImageViewUnique(viewInfo).value)
-        .first;
+    auto view = unwrap_vk_result(etna::get_context().getDevice().createImageViewUnique(viewInfo));
+    it = views.emplace(params, std::move(view)).first;
   }
 
   return views[params].get();
