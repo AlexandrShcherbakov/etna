@@ -31,14 +31,15 @@ struct SourceLocation
 
 
 #define ETNA_PANIC(fmtStr, ...)                                                                    \
-  etna::panic(ETNA_CURRENT_LOCATION, fmt::format(fmtStr, ##__VA_ARGS__))
+  etna::panic(ETNA_CURRENT_LOCATION, fmt::format(fmtStr __VA_OPT__(, ) __VA_ARGS__))
 
 #define ETNA_ASSERTF(expr, fmtStr, ...)                                                            \
   do                                                                                               \
   {                                                                                                \
     if (!static_cast<bool>((expr)))                                                                \
     {                                                                                              \
-      ETNA_PANIC("assertion '{}' failed: {}", #expr, fmt::format(fmtStr, ##__VA_ARGS__));          \
+      ETNA_PANIC(                                                                                  \
+        "assertion '{}' failed: {}", #expr, fmt::format(fmtStr __VA_OPT__(, ) __VA_ARGS__));       \
     }                                                                                              \
   } while (0)
 

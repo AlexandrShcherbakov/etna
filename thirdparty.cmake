@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 
 
 find_package(Vulkan 1.3.256 REQUIRED)
@@ -8,14 +8,9 @@ CPMAddPackage(
   NAME VulkanMemoryAllocator
   GITHUB_REPOSITORY GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
   GIT_TAG master
-  DOWNLOAD_ONLY YES
 )
-if (VulkanMemoryAllocator_ADDED)
-  add_library(VulkanMemoryAllocator INTERFACE)
-  # SYSTEM is important here it suppresses warnings
-  # AMD won't fix compiler warnings in VMA >:(
-  target_include_directories(VulkanMemoryAllocator SYSTEM INTERFACE ${VulkanMemoryAllocator_SOURCE_DIR}/include/)
-endif ()
+# VMA headers emit a bunch of warnings >:(
+set_property(TARGET VulkanMemoryAllocator PROPERTY SYSTEM TRUE)
 
 # Collection of libraries for loading various image formats
 CPMAddPackage(

@@ -284,10 +284,9 @@ GlobalContext::GlobalContext(const InitParams& params)
   universalQueue = vkDevice->getQueue(universalQueueFamilyIdx, 0);
 
   {
-    VmaVulkanFunctions functions{
-      .vkGetInstanceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr,
-      .vkGetDeviceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceProcAddr,
-    };
+    VmaVulkanFunctions functions{};
+    functions.vkGetInstanceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr;
+    functions.vkGetDeviceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceProcAddr;
 
     VmaAllocatorCreateInfo allocInfo{
       .flags = {},

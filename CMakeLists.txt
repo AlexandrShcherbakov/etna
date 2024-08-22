@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 
 
 project(etna)
@@ -14,13 +14,6 @@ endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-if (MSVC)
-  add_compile_options(/W3)
-else()
-  add_compile_options(-Wall -Wextra)
-endif()
-
 
 include("get_cpm.cmake")
 include("thirdparty.cmake")

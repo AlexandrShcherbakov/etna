@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 
-if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  add_definitions(-DETNA_SET_VULKAN_DEBUG_NAMES)
-endif()
 
 add_library(etna
   "source/Image.cpp"
@@ -44,3 +41,13 @@ target_compile_definitions(etna PUBLIC
   VMA_STATIC_VULKAN_FUNCTIONS=0
   VMA_DYNAMIC_VULKAN_FUNCTIONS=1
 )
+
+if (MSVC)
+  target_compile_options(etna PRIVATE /W3)
+else()
+  target_compile_options(etna PRIVATE -Wall -Wextra -Werror -pedantic)
+endif()
+
+if (CMAKE_BUILD_TYPE STREQUAL Debug)
+  target_compile_definitions(etna PRIVATE ETNA_SET_VULKAN_DEBUG_NAMES)
+endif()
