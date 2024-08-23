@@ -90,7 +90,6 @@ static bool is_image_resource(vk::DescriptorType ds_type)
   }
 
   ETNA_PANIC("Descriptor write error : unsupported resource {}", vk::to_string(ds_type));
-  return false;
 }
 
 static void validate_descriptor_write(const DescriptorSet& dst)

@@ -43,7 +43,12 @@ target_compile_definitions(etna PUBLIC
 )
 
 if (MSVC)
-  target_compile_options(etna PRIVATE /W3)
+  target_compile_options(etna PRIVATE /W4 /WX
+    # Selectively disable some insane warnings.
+    /wd4061 /wd4514
+    # Enforce standards-compliance in MSVC
+    /permissive- /volatile:iso /Zc:inline /Zc:wchar_t /EHsc /Zc:preprocessor /Zc:__cplusplus
+  )
 else()
   target_compile_options(etna PRIVATE -Wall -Wextra -Werror -pedantic)
 endif()

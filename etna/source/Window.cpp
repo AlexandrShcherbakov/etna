@@ -179,24 +179,27 @@ Window::SwapchainData Window::createSwapchain(const DesiredProperties& props) co
 
   SwapchainData newSwapchain;
 
-  vk::SwapchainCreateInfoKHR info{
-    .surface = surface.get(),
-    .minImageCount = imageCount,
-    .imageFormat = format.format,
-    .imageColorSpace = format.colorSpace,
-    .imageExtent = extent,
-    .imageArrayLayers = 1,
-    .imageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst,
-    .imageSharingMode = vk::SharingMode::eExclusive,
-    .queueFamilyIndexCount = 1,
-    .pQueueFamilyIndices = &queueFamily,
-    .preTransform = surfaceCaps.currentTransform,
-    .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
-    .presentMode = presentMode,
-    .clipped = vk::True,
-    .oldSwapchain = currentSwapchain.swapchain.get()};
+  {
+    vk::SwapchainCreateInfoKHR info{
+      .surface = surface.get(),
+      .minImageCount = imageCount,
+      .imageFormat = format.format,
+      .imageColorSpace = format.colorSpace,
+      .imageExtent = extent,
+      .imageArrayLayers = 1,
+      .imageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst,
+      .imageSharingMode = vk::SharingMode::eExclusive,
+      .queueFamilyIndexCount = 1,
+      .pQueueFamilyIndices = &queueFamily,
+      .preTransform = surfaceCaps.currentTransform,
+      .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
+      .presentMode = presentMode,
+      .clipped = vk::True,
+      .oldSwapchain = currentSwapchain.swapchain.get(),
+    };
 
-  newSwapchain.swapchain = unwrap_vk_result(device.createSwapchainKHRUnique(info));
+    newSwapchain.swapchain = unwrap_vk_result(device.createSwapchainKHRUnique(info));
+  }
 
   newSwapchain.format = format.format;
   newSwapchain.extent = extent;

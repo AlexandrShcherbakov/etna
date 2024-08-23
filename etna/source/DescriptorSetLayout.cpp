@@ -64,9 +64,9 @@ void DescriptorSetInfo::parseShader(
     vk::DescriptorSetLayoutBinding apiBinding{};
     apiBinding.descriptorCount = 1;
 
-    for (uint32_t i = 0; i < spvBinding.array.dims_count; i++)
+    for (uint32_t j = 0; j < spvBinding.array.dims_count; j++)
     {
-      apiBinding.descriptorCount *= spvBinding.array.dims[i];
+      apiBinding.descriptorCount *= spvBinding.array.dims[j];
     }
 
     apiBinding.descriptorType = static_cast<vk::DescriptorType>(spvBinding.descriptor_type);

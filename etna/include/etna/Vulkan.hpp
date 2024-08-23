@@ -30,8 +30,9 @@
 #define ETNA_CHECK_VK_RESULT(expr)                                                                 \
   do                                                                                               \
   {                                                                                                \
-    auto res = expr;                                                                               \
-    ETNA_ASSERTF(res == vk::Result::eSuccess, "Vulkan error: {}", vk::to_string(res));             \
+    auto _resfd1fcd5e = expr;                                                                      \
+    ETNA_ASSERTF(                                                                                  \
+      _resfd1fcd5e == vk::Result::eSuccess, "Vulkan error: {}", vk::to_string(_resfd1fcd5e));      \
   } while (0)
 
 namespace etna

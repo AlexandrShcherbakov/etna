@@ -81,10 +81,10 @@ void ShaderModule::reload(vk::Device device)
 
   for (auto pSet : sets)
   {
-    DescriptorSetInfo info;
-    info.clear();
-    info.parseShader(stage, *pSet);
-    resources.push_back({pSet->set, info});
+    DescriptorSetInfo dsInfo;
+    dsInfo.clear();
+    dsInfo.parseShader(stage, *pSet);
+    resources.push_back({pSet->set, dsInfo});
   }
 
   if (spvModule->push_constant_block_count == 1)
@@ -299,9 +299,9 @@ std::vector<vk::PipelineShaderStageCreateInfo> ShaderProgramManager::getShaderSt
   std::vector<vk::PipelineShaderStageCreateInfo> stages;
   stages.reserve(prog.moduleIds.size());
 
-  for (auto id : prog.moduleIds)
+  for (auto modId : prog.moduleIds)
   {
-    const auto& shaderMod = getModule(id);
+    const auto& shaderMod = getModule(modId);
     vk::PipelineShaderStageCreateInfo info{};
     info.setModule(shaderMod.getVkModule());
     info.setStage(shaderMod.getStage());
