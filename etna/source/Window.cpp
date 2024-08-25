@@ -163,6 +163,8 @@ vk::Extent2D Window::recreateSwapchain(const DesiredProperties& props)
 
 Window::SwapchainData Window::createSwapchain(const DesiredProperties& props) const
 {
+  ZoneScoped;
+
   const auto surfaceCaps =
     unwrap_vk_result(physicalDevice.getSurfaceCapabilitiesKHR(surface.get()));
   const auto format = chose_surface_format(physicalDevice, surface.get());
