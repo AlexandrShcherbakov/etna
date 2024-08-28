@@ -63,7 +63,7 @@ struct SourceLocation
 #define ETNA_ASSERTF(expr, fmtStr, ...) ETNA_VERIFYF(expr, fmtStr __VA_OPT__(, ) __VA_ARGS__)
 #else
 #define ETNA_ASSERT(expr)
-#define ETNA_ASSERTF(expr, fmtStr...)
+#define ETNA_ASSERTF(expr, fmtStr, ...)
 #endif
 
 #endif // ETNA_ASSERT_HPP_INCLUDED
