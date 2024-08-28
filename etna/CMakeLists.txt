@@ -42,9 +42,8 @@ target_compile_definitions(etna PUBLIC
   VMA_DYNAMIC_VULKAN_FUNCTIONS=1
 )
 
-# For enabling debug stuff in "dev" builds, which are RelWithDebInfo.
-if (NOT CMAKE_BUILD_TYPE STREQUAL Release)
-  target_compile_definitions(etna PUBLIC ETNA_DEBUG)
+if (${ETNA_DEBUG})
+  target_compile_definitions(etna PUBLIC ETNA_DEBUG=1)
 endif ()
 
 if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC") # cl and clang-cl

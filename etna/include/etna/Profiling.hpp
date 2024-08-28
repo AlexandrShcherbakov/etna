@@ -3,6 +3,7 @@
 #define ETNA_PROFILING_HPP_INCLUDED
 
 #include <etna/Vulkan.hpp>
+#include <tracy/Tracy.hpp>
 #include <tracy/TracyVulkan.hpp>
 #include <etna/GlobalContext.hpp>
 

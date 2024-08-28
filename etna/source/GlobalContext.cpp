@@ -234,7 +234,10 @@ static VkBool32 debugCallback(
 
 GlobalContext::GlobalContext(const InitParams& params)
   : mainWorkStream{params.numFramesInFlight}
-  , tracyCtx{nullptr, +[](void* ctx) { TracyVkDestroy(reinterpret_cast<TracyVkCtx>(ctx)); }}
+  , tracyCtx{nullptr, +[](void* ctx) {
+               (void)ctx;
+               TracyVkDestroy(reinterpret_cast<TracyVkCtx>(ctx));
+             }}
 {
   // Proper initialization of vulkan is tricky, as we need to
   // dynamically link vulkan-1.dll and load symbols for various
@@ -328,6 +331,8 @@ GlobalContext::GlobalContext(const InitParams& params)
       .commandBufferCount = 1,
     }))[0]);
 
+  // Workaround for issues in Tracy =(
+#ifdef TRACY_ENABLE
   auto ctx = TracyVkContext(
     vkInstance.get(),
     vkPhysDevice,
@@ -337,6 +342,7 @@ GlobalContext::GlobalContext(const InitParams& params)
     VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr,
     VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceProcAddr);
   tracyCtx.reset(ctx);
+#endif
 }
 
 Image GlobalContext::createImage(const Image::CreateInfo& info)

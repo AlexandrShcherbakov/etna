@@ -56,7 +56,7 @@ struct SourceLocation
     }                                                                                              \
   } while (0)
 
-#ifdef ETNA_DEBUG
+#if ETNA_DEBUG
 // ASSERT macros are cut out of the release binary and should be used to check **invariants**.
 #define ETNA_ASSERT(expr) ETNA_VERIFY(expr)
 // ASSERT macros are cut out of the release binary and should be used to check **invariants**.
