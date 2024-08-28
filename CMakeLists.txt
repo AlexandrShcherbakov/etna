@@ -17,7 +17,7 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL Release)
 endif ()
 
 # No profiling in release builds, mostly because Tracy emmits warnings in that case.
-if (ETNA_DEBUG)
+if (${ETNA_DEBUG})
   option(TRACY_ENABLE True)
 endif ()
 
