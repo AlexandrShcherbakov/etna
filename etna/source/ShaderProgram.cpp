@@ -40,12 +40,9 @@ struct SpvModDeleter
   void operator()(SpvReflectShaderModule* mod) const { spvReflectDestroyShaderModule(mod); }
 };
 
-#define SPRV_ASSERT(res, ...)                                                                      \
-  do                                                                                               \
-  {                                                                                                \
-    if ((res) != SPV_REFLECT_RESULT_SUCCESS)                                                       \
-      ETNA_PANIC("SPIRV parse error", __VA_ARGS__);                                                \
-  } while (0)
+
+#define ETNA_SPV_REFLECT_VERIFY(res, path)                                                         \
+  ETNA_VERIFYF((res) == SPV_REFLECT_RESULT_SUCCESS, "SPIR-V parse error in {}", (path))
 
 void ShaderModule::reload(vk::Device device)
 {
@@ -64,7 +61,8 @@ void ShaderModule::reload(vk::Device device)
   std::unique_ptr<SpvReflectShaderModule, SpvModDeleter> spvModule;
   spvModule.reset(new SpvReflectShaderModule{});
 
-  SPRV_ASSERT(spvReflectCreateShaderModule(code.size(), code.data(), spvModule.get()), path);
+  ETNA_SPV_REFLECT_VERIFY(
+    spvReflectCreateShaderModule(code.size(), code.data(), spvModule.get()), path);
 
   stage = static_cast<vk::ShaderStageFlagBits>(spvModule->shader_stage);
   entryPoint = spvModule->entry_point_name;
@@ -72,10 +70,12 @@ void ShaderModule::reload(vk::Device device)
   resources.clear();
 
   uint32_t count = 0;
-  SPRV_ASSERT(spvReflectEnumerateDescriptorSets(spvModule.get(), &count, nullptr), path);
+  ETNA_SPV_REFLECT_VERIFY(
+    spvReflectEnumerateDescriptorSets(spvModule.get(), &count, nullptr), path);
 
   std::vector<SpvReflectDescriptorSet*> sets(count);
-  SPRV_ASSERT(spvReflectEnumerateDescriptorSets(spvModule.get(), &count, sets.data()), path);
+  ETNA_SPV_REFLECT_VERIFY(
+    spvReflectEnumerateDescriptorSets(spvModule.get(), &count, sets.data()), path);
 
   resources.reserve(sets.size());
 
@@ -338,7 +338,7 @@ bool ShaderProgramInfo::isDescriptorSetUsed(uint32_t set) const
 
 DescriptorLayoutId ShaderProgramInfo::getDescriptorLayoutId(uint32_t set) const
 {
-  ETNA_ASSERT(isDescriptorSetUsed(set));
+  ETNA_VERIFY(isDescriptorSetUsed(set));
   return mgr.getProgInternal(id).descriptorIds.at(set);
 }
 

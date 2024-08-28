@@ -14,7 +14,7 @@ static vk::SurfaceFormatKHR chose_surface_format(
 {
   auto formats = unwrap_vk_result(device.getSurfaceFormatsKHR(surface));
 
-  ETNA_ASSERTF(!formats.empty(), "Device does not support any surface formats!");
+  ETNA_VERIFYF(!formats.empty(), "Device does not support any surface formats!");
 
   auto selected = formats[0];
 
@@ -34,7 +34,7 @@ static vk::PresentModeKHR chose_present_mode(
 {
   auto modes = unwrap_vk_result(device.getSurfacePresentModesKHR(surface));
 
-  ETNA_ASSERTF(!modes.empty(), "Device doesn't support any present modes!");
+  ETNA_VERIFYF(!modes.empty(), "Device doesn't support any present modes!");
 
   auto selected = vk::PresentModeKHR::eImmediate;
 
@@ -124,7 +124,7 @@ bool Window::present(vk::Semaphore wait, vk::ImageView which)
 {
   ZoneScoped;
 
-  ETNA_ASSERTF(
+  ETNA_VERIFYF(
     !swapchainInvalid, "Tried to present to an invalid swapchain! This is unrecoverable!");
 
   auto index = viewToIdx(which);
@@ -154,7 +154,7 @@ bool Window::present(vk::Semaphore wait, vk::ImageView which)
 
 vk::Extent2D Window::recreateSwapchain(const DesiredProperties& props)
 {
-  ETNA_ASSERT(props.resolution.width != 0 && props.resolution.height != 0);
+  ETNA_VERIFY(props.resolution.width != 0 && props.resolution.height != 0);
   currentSwapchain = createSwapchain(props);
   swapchainInvalid = false;
 

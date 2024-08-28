@@ -67,5 +67,3 @@ CPMAddPackage(
     "TRACY_ENABLE ON"
     "TRACY_ON_DEMAND ON"
 )
-# Tracy headers emmit (possibly false-positive) warnings on fresh g++
-set_property(TARGET TracyClient PROPERTY SYSTEM TRUE)

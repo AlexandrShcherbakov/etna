@@ -28,7 +28,7 @@ public:
     , currentResourceIndex{0}
     , inflightBatches{inflight_batches}
   {
-    ETNA_ASSERT(0 < inflight_batches && inflight_batches <= MAX_FRAMES_INFLIGHT);
+    ETNA_VERIFY(0 < inflight_batches && inflight_batches <= MAX_FRAMES_INFLIGHT);
   }
 
   /// Get a monotonically increasing index of the current batch of work

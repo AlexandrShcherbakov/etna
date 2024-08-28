@@ -112,7 +112,7 @@ ComputePipeline PipelineManager::createComputePipeline(
   const std::vector<vk::PipelineShaderStageCreateInfo> shaderStages =
     shaderManager.getShaderStages(progId);
 
-  ETNA_ASSERTF(
+  ETNA_VERIFYF(
     shaderStages.size() == 1,
     "Incorrect shader program, expected 1 stage for ComputePipeline, but got {}!",
     shaderStages.size());
@@ -208,13 +208,13 @@ void PipelineManager::destroyPipeline(PipelineId id)
 
 vk::Pipeline PipelineManager::getVkPipeline(PipelineId id) const
 {
-  ETNA_ASSERT(id != PipelineId::Invalid);
+  ETNA_VERIFY(id != PipelineId::Invalid);
   return pipelines.find(id)->second.get();
 }
 
 vk::PipelineLayout PipelineManager::getVkPipelineLayout(ShaderProgramId id) const
 {
-  ETNA_ASSERT(id != ShaderProgramId::Invalid);
+  ETNA_VERIFY(id != ShaderProgramId::Invalid);
   return shaderManager.getProgramLayout(id);
 }
 

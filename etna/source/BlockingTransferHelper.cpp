@@ -21,7 +21,7 @@ BlockingTransferHelper::BlockingTransferHelper(CreateInfo info)
 void BlockingTransferHelper::uploadBuffer(
   OneShotCmdMgr& cmd_mgr, Buffer& dst, std::uint32_t offset, std::span<std::byte const> src)
 {
-  ETNA_ASSERTF(offset % 4 == 0 && src.size() % 4 == 0, "All GPU access must be 16-byte aligned!");
+  ETNA_VERIFYF(offset % 4 == 0 && src.size() % 4 == 0, "All GPU access must be 16-byte aligned!");
 
 
   for (vk::DeviceSize currPos = 0; currPos < src.size(); currPos += stagingSize)
@@ -58,7 +58,7 @@ void BlockingTransferHelper::uploadBuffer(
 void BlockingTransferHelper::readbackBuffer(
   OneShotCmdMgr& cmd_mgr, std::span<std::byte> dst, const Buffer& src, uint32_t offset)
 {
-  ETNA_ASSERTF(offset % 4 == 0 && dst.size() % 4 == 0, "All GPU access must be 16-byte aligned!");
+  ETNA_VERIFYF(offset % 4 == 0 && dst.size() % 4 == 0, "All GPU access must be 16-byte aligned!");
 
 
   for (vk::DeviceSize currPos = 0; currPos < dst.size(); currPos += stagingSize)

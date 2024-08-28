@@ -85,7 +85,7 @@ vk::PhysicalDevice pick_physical_device(vk::Instance instance, const InitParams&
 {
   std::vector pdevices = unwrap_vk_result(instance.enumeratePhysicalDevices());
 
-  ETNA_ASSERTF(!pdevices.empty(), "This PC has no GPUs that support Vulkan!");
+  ETNA_VERIFYF(!pdevices.empty(), "This PC has no GPUs that support Vulkan!");
 
   {
     std::vector<std::string> pdeviceNames;
@@ -101,7 +101,7 @@ vk::PhysicalDevice pick_physical_device(vk::Instance instance, const InitParams&
 
   if (params.physicalDeviceIndexOverride)
   {
-    ETNA_ASSERTF(
+    ETNA_VERIFYF(
       *params.physicalDeviceIndexOverride < pdevices.size(),
       "There's no device with index {}!",
       *params.physicalDeviceIndexOverride);

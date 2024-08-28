@@ -33,7 +33,9 @@ struct SourceLocation
 #define ETNA_PANIC(fmtStr, ...)                                                                    \
   etna::panic(ETNA_CURRENT_LOCATION, fmt::format(fmtStr __VA_OPT__(, ) __VA_ARGS__))
 
-#define ETNA_ASSERTF(expr, fmtStr, ...)                                                            \
+
+// VERIFY macros should be used for checks that must happen even in release builds.
+#define ETNA_VERIFYF(expr, fmtStr, ...)                                                            \
   do                                                                                               \
   {                                                                                                \
     if (!static_cast<bool>((expr)))                                                                \
@@ -44,7 +46,8 @@ struct SourceLocation
   } while (0)
 
 
-#define ETNA_ASSERT(expr)                                                                          \
+// VERIFY macros should be used for checks that must happen even in release builds.
+#define ETNA_VERIFY(expr)                                                                          \
   do                                                                                               \
   {                                                                                                \
     if (!static_cast<bool>((expr)))                                                                \
@@ -53,8 +56,14 @@ struct SourceLocation
     }                                                                                              \
   } while (0)
 
-// NOTE: unsanitary macro for customizing vulkan.hpp
-// Do NOT use in app code!
-#define ETNA_VULKAN_HPP_ASSERT_ON_RESULT(expr) ETNA_ASSERTF(expr, "{}", message)
+#ifdef ETNA_DEBUG
+// ASSERT macros are cut out of the release binary and should be used to check **invariants**.
+#define ETNA_ASSERT(expr) ETNA_VERIFY(expr)
+// ASSERT macros are cut out of the release binary and should be used to check **invariants**.
+#define ETNA_ASSERTF(expr, fmtStr, ...) ETNA_VERIFYF(expr, fmtStr __VA_OPT__(, ) __VA_ARGS__)
+#else
+#define ETNA_ASSERT(expr)
+#define ETNA_ASSERTF(expr, fmtStr...)
+#endif
 
 #endif // ETNA_ASSERT_HPP_INCLUDED

@@ -58,7 +58,7 @@ vk::Semaphore PerFrameCmdMgr::submit(vk::CommandBuffer what, vk::Semaphore write
 
   // NOTE: the only point in passing in `what` here is for
   // symmetry an aesthetic reasons.
-  ETNA_ASSERT(what == buffers->get().get());
+  ETNA_VERIFY(what == buffers->get().get());
   std::array cbsInfo{vk::CommandBufferSubmitInfo{
     .commandBuffer = what,
     .deviceMask = 1,

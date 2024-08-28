@@ -40,7 +40,7 @@ struct DescriptorSetInfo
 
   const vk::DescriptorSetLayoutBinding& getBinding(uint32_t binding) const
   {
-    ETNA_ASSERT(isBindingUsed(binding));
+    ETNA_VERIFY(isBindingUsed(binding));
     return bindings.at(binding);
   }
 

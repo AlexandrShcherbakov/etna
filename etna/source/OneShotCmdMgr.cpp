@@ -32,7 +32,7 @@ void OneShotCmdMgr::submitAndWait(vk::CommandBuffer buffer)
 {
   ZoneScoped;
 
-  ETNA_ASSERT(buffer == commandBuffer.get());
+  ETNA_VERIFY(buffer == commandBuffer.get());
 
   std::array cbsInfo{vk::CommandBufferSubmitInfo{
     .commandBuffer = commandBuffer.get(),

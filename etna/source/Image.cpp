@@ -44,7 +44,7 @@ Image::Image(VmaAllocator alloc, CreateInfo info)
     nullptr);
   // Note that usually vulkan.hpp handles doing the assertion
   // and a pretty message, but VMA cannot do that.
-  ETNA_ASSERTF(
+  ETNA_VERIFYF(
     retcode == VK_SUCCESS,
     "Error {} occurred while trying to allocate an etna::Image!",
     vk::to_string(static_cast<vk::Result>(retcode)));

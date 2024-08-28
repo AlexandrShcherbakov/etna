@@ -23,7 +23,7 @@ static void set_debug_name_base(
     .pObjectName = name,
   };
   auto retcode = etna::get_context().getDevice().debugMarkerSetObjectNameEXT(&debugNameInfo);
-  ETNA_ASSERTF(
+  ETNA_VERIFYF(
     retcode == vk::Result::eSuccess,
     "Error {} occurred while trying to set a debug name!",
     vk::to_string(retcode));

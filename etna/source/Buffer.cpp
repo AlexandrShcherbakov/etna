@@ -38,7 +38,7 @@ Buffer::Buffer(VmaAllocator alloc, CreateInfo info)
     nullptr);
   // Note that usually vulkan.hpp handles doing the assertion
   // and a pretty message, but VMA cannot do that.
-  ETNA_ASSERTF(
+  ETNA_VERIFYF(
     retcode == VK_SUCCESS,
     "Error {} occurred while trying to allocate an etna::Buffer!",
     vk::to_string(static_cast<vk::Result>(retcode)));
@@ -96,7 +96,7 @@ std::byte* Buffer::map()
   // I can't think of a use case where failing to do a mapping
   // is acceptable and recoverable from.
   auto retcode = vmaMapMemory(allocator, allocation, &result);
-  ETNA_ASSERTF(
+  ETNA_VERIFYF(
     retcode == VK_SUCCESS,
     "Error {} occurred while trying to map an etna::Buffer!",
     vk::to_string(static_cast<vk::Result>(retcode)));
@@ -106,7 +106,7 @@ std::byte* Buffer::map()
 
 void Buffer::unmap()
 {
-  ETNA_ASSERT(mapped != nullptr);
+  ETNA_VERIFY(mapped != nullptr);
   vmaUnmapMemory(allocator, allocation);
   mapped = nullptr;
 }

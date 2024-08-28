@@ -7,15 +7,13 @@
 // macro customizations work
 #include <etna/Assert.hpp>
 
-// Note: vulkan.hpp expects assertion macros arguments to not
-// be evaluated with NDEBUG but etna's assertion macros do
-// evaluate them and discard results.
-#if !defined(NDEBUG)
-#define VULKAN_HPP_ASSERT ETNA_ASSERT
-#define VULKAN_HPP_ASSERT_ON_RESULT ETNA_VULKAN_HPP_ASSERT_ON_RESULT
+
+#ifdef ETNA_DEBUG
+#define VULKAN_HPP_ASSERT ETNA_VERIFY
+#define VULKAN_HPP_ASSERT_ON_RESULT(expr) ETNA_VERIFYF(expr, "{}", message)
 #else
-#define VULKAN_HPP_ASSERT(EXPR)
-#define VULKAN_HPP_ASSERT_ON_RESULT(EXPR)
+#define VULKAN_HPP_ASSERT(expr)
+#define VULKAN_HPP_ASSERT_ON_RESULT(expr)
 #endif
 
 // vulkan.hpp includes windows.h :(
@@ -31,7 +29,7 @@
   do                                                                                               \
   {                                                                                                \
     auto _resfd1fcd5e = expr;                                                                      \
-    ETNA_ASSERTF(                                                                                  \
+    ETNA_VERIFYF(                                                                                  \
       _resfd1fcd5e == vk::Result::eSuccess, "Vulkan error: {}", vk::to_string(_resfd1fcd5e));      \
   } while (0)
 
@@ -41,7 +39,7 @@ namespace etna
 template <typename T>
 T unwrap_vk_result(vk::ResultValue<T>&& result_val)
 {
-  ETNA_ASSERTF(
+  ETNA_VERIFYF(
     result_val.result == vk::Result::eSuccess,
     "Vulkan error: {}",
     vk::to_string(result_val.result));

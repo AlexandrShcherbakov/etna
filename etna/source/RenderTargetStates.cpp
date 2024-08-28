@@ -16,7 +16,7 @@ RenderTargetState::RenderTargetState(
   AttachmentParams depth_attachment,
   AttachmentParams stencil_attachment)
 {
-  ETNA_ASSERTF(!inScope, "RenderTargetState scopes shouldn't overlap.");
+  ETNA_VERIFYF(!inScope, "RenderTargetState scopes shouldn't overlap.");
   inScope = true;
   // TODO: add resource state tracking
   commandBuffer = cmd_buff;
@@ -79,7 +79,7 @@ RenderTargetState::RenderTargetState(
 
   if (depth_attachment.image && stencil_attachment.image)
   {
-    ETNA_ASSERTF(
+    ETNA_VERIFYF(
       depth_attachment.view == stencil_attachment.view,
       "depth and stencil attachments must be created from the same image");
     etna::get_context().getResourceTracker().setDepthStencilTarget(

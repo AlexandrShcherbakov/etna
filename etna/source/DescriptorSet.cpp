@@ -66,7 +66,7 @@ DescriptorSet DynamicDescriptorPool::allocateSet(
   info.setSetLayouts(setLayouts);
 
   vk::DescriptorSet vkSet{};
-  ETNA_ASSERT(vkDevice.allocateDescriptorSets(&info, &vkSet) == vk::Result::eSuccess);
+  ETNA_VERIFY(vkDevice.allocateDescriptorSets(&info, &vkSet) == vk::Result::eSuccess);
   return DescriptorSet{
     workCount.batchIndex(), layout_id, vkSet, std::move(bindings), command_buffer};
 }
@@ -137,7 +137,7 @@ static void validate_descriptor_write(const DescriptorSet& dst)
 
 void write_set(const DescriptorSet& dst)
 {
-  ETNA_ASSERT(dst.isValid());
+  ETNA_VERIFY(dst.isValid());
   validate_descriptor_write(dst);
 
   std::vector<vk::WriteDescriptorSet> writes;
