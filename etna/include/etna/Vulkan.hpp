@@ -8,7 +8,7 @@
 #include <etna/Assert.hpp>
 
 
-#ifdef ETNA_DEBUG
+#ifndef NDEBUG
 #define VULKAN_HPP_ASSERT ETNA_VERIFY
 #define VULKAN_HPP_ASSERT_ON_RESULT(expr) ETNA_VERIFYF(expr, "{}", message)
 #else
