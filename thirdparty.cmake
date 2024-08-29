@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.25)
 
 
-find_package(Vulkan 1.3.256 REQUIRED)
+find_package(Vulkan 1.3.275 REQUIRED)
 
 # GPU-side allocator for Vulkan by AMD
 CPMAddPackage(
   NAME VulkanMemoryAllocator
   GITHUB_REPOSITORY GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
+  # A little bit after v3.1.0 to get nice cmake
   GIT_TAG b8e57472fffa3bd6e0a0b675f4615bf0a823ec4d
 )
 # VMA headers emit a bunch of warnings >:(
@@ -16,7 +17,8 @@ set_property(TARGET VulkanMemoryAllocator PROPERTY SYSTEM TRUE)
 CPMAddPackage(
   NAME StbLibraries
   GITHUB_REPOSITORY nothings/stb
-  GIT_TAG master
+  # Some random version because STB doesn't use git tags...
+  GIT_TAG f75e8d1cad7d90d72ef7a4661f1b994ef78b4e31
   DOWNLOAD_ONLY YES
 )
 if (StbLibraries_ADDED)
@@ -25,10 +27,12 @@ if (StbLibraries_ADDED)
 endif ()
 
 # Official library for parsing SPIRV bytecode
+# We grab the exact SDK version from github so that
+# you don't have to remember to mark a checkbox while installing the SDK =)
 CPMAddPackage(
   NAME SpirvReflect
   GITHUB_REPOSITORY KhronosGroup/SPIRV-Reflect
-  GIT_TAG main
+  GIT_TAG "vulkan-sdk-${Vulkan_VERSION}"
   OPTIONS
     "SPIRV_REFLECT_EXECUTABLE OFF"
     "SPIRV_REFLECT_STRIPPER OFF"
