@@ -7,7 +7,7 @@ find_package(Vulkan 1.3.256 REQUIRED)
 CPMAddPackage(
   NAME VulkanMemoryAllocator
   GITHUB_REPOSITORY GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
-  GIT_TAG master
+  GIT_TAG b8e57472fffa3bd6e0a0b675f4615bf0a823ec4d
 )
 # VMA headers emit a bunch of warnings >:(
 set_property(TARGET VulkanMemoryAllocator PROPERTY SYSTEM TRUE)
