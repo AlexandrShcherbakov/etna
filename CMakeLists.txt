@@ -13,13 +13,13 @@ endif()
 
 # For enabling debug stuff in "dev" builds, which are RelWithDebInfo.
 if (NOT CMAKE_BUILD_TYPE STREQUAL Release)
-  set(ETNA_DEBUG True)
+  set(ETNA_DEBUG ON)
+else ()
+  set(ETNA_DEBUG OFF)
 endif ()
 
 # No profiling in release builds, mostly because Tracy emmits warnings in that case.
-if (NOT ${ETNA_DEBUG})
-  option(TRACY_ENABLE OFF)
-endif ()
+option(TRACY_ENABLE ${ETNA_DEBUG})
 
 include("get_cpm.cmake")
 include("thirdparty.cmake")
