@@ -32,7 +32,7 @@ static void set_debug_name_base(
 }
 #else
 template <class T>
-static void set_debug_name_base(T, vk::DebugReportObjectTypeEXT, const char*)
+static void set_debug_name_base(T, vk::ObjectType, const char*)
 {
 }
 #endif

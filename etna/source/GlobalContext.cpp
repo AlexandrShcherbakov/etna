@@ -78,7 +78,9 @@ static vk::UniqueInstance createInstance(const InitParams& params)
 
   // NOTE: Extension for the vulkan loader to list non-conformant implementations, such as
   // for example MoltenVK on Apple devices.
+#if defined(__APPLE__)
   extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+#endif
 
   std::vector<const char*> layers(VULKAN_LAYERS.begin(), VULKAN_LAYERS.end());
 
@@ -87,7 +89,9 @@ static vk::UniqueInstance createInstance(const InitParams& params)
   };
 
   // NOTE: Enable non-conformant Vulkan implementations.
+#if defined(__APPLE__)
   createInfo.setFlags(vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR);
+#endif
 
   createInfo.setPEnabledLayerNames(layers);
   createInfo.setPEnabledExtensionNames(extensions);
@@ -241,7 +245,9 @@ static vk::UniqueDevice createDevice(
 #endif
 
   // NOTE: Enable non-conformant Vulkan implementations.
+#if defined(__APPLE__)
   deviceExtensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
+#endif
 
   // NOTE: original design of PhysicalDeviceFeatures did not
   // support extensions, so they had to use a trick to achieve
