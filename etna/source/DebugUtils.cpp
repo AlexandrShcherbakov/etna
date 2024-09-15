@@ -13,8 +13,7 @@ namespace etna
 // but it is considered to be abandoned in favour of VK_EXT_debug_utils.
 #ifdef ETNA_SET_VULKAN_DEBUG_NAMES
 template <class T>
-static void set_debug_name_base(
-  T object, vk::ObjectType object_type, const char* name)
+static void set_debug_name_base(T object, vk::ObjectType object_type, const char* name)
 {
   const auto nativeHandle = static_cast<typename std::remove_cvref_t<T>::NativeType>(object);
   // The NativeType for a vulkan object can either be a uint64_t,

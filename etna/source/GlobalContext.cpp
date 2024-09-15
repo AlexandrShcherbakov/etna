@@ -23,38 +23,22 @@ namespace etna
 
 static const void* getExtraValidation()
 {
-  // NOTE: Turn on shader access synchronization validation, which is disabled by default
-  // in newest versions of validation layers.
-  // For more info see https://github.com/KhronosGroup/Vulkan-ValidationLayers/issues/8467
-  constexpr static VkBool32 ACTIVATE_SHADER_SYNC = VK_TRUE;
-  constexpr static VkLayerSettingEXT SETTING_SHADER_ACCESS_SYNC_VALIDATE{
-    .pLayerName = "VK_LAYER_KHRONOS_validation",
-    .pSettingName = "syncval_shader_accesses_heuristic",
-    .type = VK_LAYER_SETTING_TYPE_BOOL32_EXT,
-    .valueCount = 1U,
-    .pValues = &ACTIVATE_SHADER_SYNC
-  };
-
   static constexpr vk::ValidationFeatureEnableEXT EXTRA_FEATURES[] = {
     vk::ValidationFeatureEnableEXT::eGpuAssisted,
     vk::ValidationFeatureEnableEXT::eBestPractices,
-    vk::ValidationFeatureEnableEXT::eSynchronizationValidation
-  };
+    vk::ValidationFeatureEnableEXT::eSynchronizationValidation};
 
-  static constexpr vk::ValidationFeatureDisableEXT DISABLE_EXTRA_FEATURES[] = {
+  static constexpr vk::ValidationFeatureDisableEXT APPLE_DISABLE_FEATURES[] = {
     vk::ValidationFeatureDisableEXT::eShaders,
-    vk::ValidationFeatureDisableEXT::eShaderValidationCache
-  };
+    vk::ValidationFeatureDisableEXT::eShaderValidationCache};
 
   static constexpr vk::ValidationFeaturesEXT FEATURES_INFO{
-    .pNext = &SETTING_SHADER_ACCESS_SYNC_VALIDATE,
-
     .enabledValidationFeatureCount = std::size(EXTRA_FEATURES),
     .pEnabledValidationFeatures = EXTRA_FEATURES,
 
 #if defined(__APPLE__)
-    .disabledValidationFeatureCount = std::size(DISABLE_EXTRA_FEATURES),
-    .pDisabledValidationFeatures = DISABLE_EXTRA_FEATURES
+    .disabledValidationFeatureCount = std::size(APPLE_DISABLE_FEATURES),
+    .pDisabledValidationFeatures = APPLE_DISABLE_FEATURES
 #endif
   };
 
@@ -96,7 +80,8 @@ static vk::UniqueInstance createInstance(const InitParams& params)
   createInfo.setPEnabledLayerNames(layers);
   createInfo.setPEnabledExtensionNames(extensions);
 
-  if (params.validationLevel == ValidationLevel::eExtensive) {
+  if (params.validationLevel == ValidationLevel::eExtensive)
+  {
     createInfo.setPNext(getExtraValidation());
   }
 
