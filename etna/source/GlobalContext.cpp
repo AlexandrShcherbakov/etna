@@ -21,6 +21,46 @@
 namespace etna
 {
 
+static const void* getExtraValidation()
+{
+  // NOTE: Turn on shader access synchronization validation, which is disabled by default
+  // in newest versions of validation layers.
+  // For more info see https://github.com/KhronosGroup/Vulkan-ValidationLayers/issues/8467
+  constexpr static VkBool32 ACTIVATE_SHADER_SYNC = VK_TRUE;
+  constexpr static VkLayerSettingEXT SETTING_SHADER_ACCESS_SYNC_VALIDATE{
+    .pLayerName = "VK_LAYER_KHRONOS_validation",
+    .pSettingName = "syncval_shader_accesses_heuristic",
+    .type = VK_LAYER_SETTING_TYPE_BOOL32_EXT,
+    .valueCount = 1U,
+    .pValues = &ACTIVATE_SHADER_SYNC
+  };
+
+  static constexpr vk::ValidationFeatureEnableEXT EXTRA_FEATURES[] = {
+    vk::ValidationFeatureEnableEXT::eGpuAssisted,
+    vk::ValidationFeatureEnableEXT::eBestPractices,
+    vk::ValidationFeatureEnableEXT::eSynchronizationValidation
+  };
+
+  static constexpr vk::ValidationFeatureDisableEXT DISABLE_EXTRA_FEATURES[] = {
+    vk::ValidationFeatureDisableEXT::eShaders,
+    vk::ValidationFeatureDisableEXT::eShaderValidationCache
+  };
+
+  static constexpr vk::ValidationFeaturesEXT FEATURES_INFO{
+    .pNext = &SETTING_SHADER_ACCESS_SYNC_VALIDATE,
+
+    .enabledValidationFeatureCount = std::size(EXTRA_FEATURES),
+    .pEnabledValidationFeatures = EXTRA_FEATURES,
+
+#if defined(__APPLE__)
+    .disabledValidationFeatureCount = std::size(DISABLE_EXTRA_FEATURES),
+    .pDisabledValidationFeatures = DISABLE_EXTRA_FEATURES
+#endif
+  };
+
+  return &FEATURES_INFO;
+}
+
 static vk::UniqueInstance createInstance(const InitParams& params)
 {
   vk::ApplicationInfo appInfo{
@@ -34,19 +74,27 @@ static vk::UniqueInstance createInstance(const InitParams& params)
   std::vector<const char*> extensions(
     params.instanceExtensions.begin(), params.instanceExtensions.end());
   extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+  extensions.push_back(VK_EXT_LAYER_SETTINGS_EXTENSION_NAME);
 
-  std::vector<const char*> layers(VALIDATION_LAYERS.begin(), VALIDATION_LAYERS.end());
-  // Compatibility layer for devices that do not implement this extension natively.
-  // Sync2 provides potential for driver optimization and a saner programmer API,
-  // but is able to be translated into old synchronization calls if needed.
-  layers.push_back("VK_LAYER_KHRONOS_synchronization2");
+  // NOTE: Extension for the vulkan loader to list non-conformant implementations, such as
+  // for example MoltenVK on Apple devices.
+  extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+
+  std::vector<const char*> layers(VULKAN_LAYERS.begin(), VULKAN_LAYERS.end());
 
   vk::InstanceCreateInfo createInfo{
     .pApplicationInfo = &appInfo,
   };
 
+  // NOTE: Enable non-conformant Vulkan implementations.
+  createInfo.setFlags(vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR);
+
   createInfo.setPEnabledLayerNames(layers);
   createInfo.setPEnabledExtensionNames(extensions);
+
+  if (params.validationLevel == ValidationLevel::eExtensive) {
+    createInfo.setPNext(getExtraValidation());
+  }
 
   return unwrap_vk_result(vk::createInstanceUnique(createInfo));
 }
@@ -184,10 +232,16 @@ static vk::UniqueDevice createDevice(
   std::vector<char const*> deviceExtensions(
     params.deviceExtensions.begin(), params.deviceExtensions.end());
   deviceExtensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
-#ifdef ETNA_SET_VULKAN_DEBUG_NAMES
-  deviceExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
+
+  // NOTE: These extensions are needed on MoltenVK to be set explicitly due to
+  // it not fully supporting Vulkan 1.3 yet.
+#if defined(__APPLE__)
+  deviceExtensions.push_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
+  deviceExtensions.push_back(VK_KHR_COPY_COMMANDS_2_EXTENSION_NAME);
 #endif
 
+  // NOTE: Enable non-conformant Vulkan implementations.
+  deviceExtensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
 
   // NOTE: original design of PhysicalDeviceFeatures did not
   // support extensions, so they had to use a trick to achieve
