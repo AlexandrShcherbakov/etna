@@ -40,9 +40,6 @@ struct InitParams
 
   /// How much do we allow the CPU to "outrun" the GPU asynchronously
   uint32_t numFramesInFlight = 2;
-
-  /// How extensive the validation should be. The more extensive the more overhead validation has!
-  ValidationLevel validationLevel = ValidationLevel::eBasic;
 };
 
 bool is_initilized();

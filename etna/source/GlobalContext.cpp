@@ -21,33 +21,6 @@
 namespace etna
 {
 
-static const void* getExtraValidation()
-{
-  static constexpr vk::ValidationFeatureEnableEXT EXTRA_FEATURES[] = {
-    vk::ValidationFeatureEnableEXT::eGpuAssisted,
-    vk::ValidationFeatureEnableEXT::eBestPractices,
-    vk::ValidationFeatureEnableEXT::eSynchronizationValidation};
-
-#if defined(__APPLE__)
-  static constexpr vk::ValidationFeatureDisableEXT APPLE_DISABLE_FEATURES[] = {
-    vk::ValidationFeatureDisableEXT::eShaders,
-    vk::ValidationFeatureDisableEXT::eShaderValidationCache};
-#endif
-
-  static constexpr vk::ValidationFeaturesEXT FEATURES_INFO
-  {
-    .enabledValidationFeatureCount = std::size(EXTRA_FEATURES),
-    .pEnabledValidationFeatures = EXTRA_FEATURES,
-
-#if defined(__APPLE__)
-    .disabledValidationFeatureCount = std::size(APPLE_DISABLE_FEATURES),
-    .pDisabledValidationFeatures = APPLE_DISABLE_FEATURES
-#endif
-  };
-
-  return &FEATURES_INFO;
-}
-
 static vk::UniqueInstance createInstance(const InitParams& params)
 {
   vk::ApplicationInfo appInfo{
@@ -61,7 +34,6 @@ static vk::UniqueInstance createInstance(const InitParams& params)
   std::vector<const char*> extensions(
     params.instanceExtensions.begin(), params.instanceExtensions.end());
   extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-  extensions.push_back(VK_EXT_LAYER_SETTINGS_EXTENSION_NAME);
 
   // NOTE: Extension for the vulkan loader to list non-conformant implementations, such as
   // for example MoltenVK on Apple devices.
@@ -82,11 +54,6 @@ static vk::UniqueInstance createInstance(const InitParams& params)
 
   createInfo.setPEnabledLayerNames(layers);
   createInfo.setPEnabledExtensionNames(extensions);
-
-  if (params.validationLevel == ValidationLevel::eExtensive)
-  {
-    createInfo.setPNext(getExtraValidation());
-  }
 
   return unwrap_vk_result(vk::createInstanceUnique(createInfo));
 }
@@ -295,9 +262,8 @@ GlobalContext::GlobalContext(const InitParams& params)
   // 1) load version-independent symbols
   // 2) load device-independent symbols
   // 3) load device-specific symbols
-  vk::DynamicLoader dl;
   VULKAN_HPP_DEFAULT_DISPATCHER.init(
-    dl.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr"));
+    vkDynamicLoader.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr"));
 
   vkInstance = createInstance(params);
   VULKAN_HPP_DEFAULT_DISPATCHER.init(vkInstance.get());
