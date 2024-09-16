@@ -32,7 +32,8 @@ static const void* getExtraValidation()
     vk::ValidationFeatureDisableEXT::eShaders,
     vk::ValidationFeatureDisableEXT::eShaderValidationCache};
 
-  static constexpr vk::ValidationFeaturesEXT FEATURES_INFO{
+  static constexpr vk::ValidationFeaturesEXT FEATURES_INFO
+  {
     .enabledValidationFeatureCount = std::size(EXTRA_FEATURES),
     .pEnabledValidationFeatures = EXTRA_FEATURES,
 
