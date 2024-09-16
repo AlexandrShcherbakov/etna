@@ -23,6 +23,12 @@
 #endif
 #define WIN32_LEAN_AND_MEAN
 #endif
+
+// Need to enable beta extensions for VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME to be declared
+#if defined(__APPLE__)
+#define VK_ENABLE_BETA_EXTENSIONS
+#endif
+
 #include <vulkan/vulkan.hpp>
 
 #define ETNA_CHECK_VK_RESULT(expr)                                                                 \

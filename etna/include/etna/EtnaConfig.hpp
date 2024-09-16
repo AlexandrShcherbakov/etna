@@ -9,11 +9,14 @@ namespace etna
 {
 
 #if NDEBUG
-inline constexpr std::array<const char*, 0> VALIDATION_LAYERS = {};
+inline constexpr std::array<const char*, 0> VULKAN_LAYERS = {};
 #else
-inline constexpr std::array VALIDATION_LAYERS = {
+inline constexpr std::array VULKAN_LAYERS = {
   "VK_LAYER_KHRONOS_validation",
-  "VK_LAYER_LUNARG_monitor",
+
+#if !defined(__APPLE__)
+  "VK_LAYER_LUNARG_monitor"
+#endif
 };
 #endif
 
