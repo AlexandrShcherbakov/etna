@@ -37,7 +37,7 @@ static std::vector<char> read_file(std::filesystem::path filename)
 struct SpvModDeleter
 {
   SpvModDeleter() {}
-  void operator()(SpvReflectShaderModule* mod) const { spvReflectDestroyShaderModule(mod); }
+  void operator()(SpvReflectShaderModule* mod) const { spvReflectDestroyShaderModule(mod); delete mod; }
 };
 
 
