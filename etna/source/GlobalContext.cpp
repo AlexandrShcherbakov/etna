@@ -28,9 +28,11 @@ static const void* getExtraValidation()
     vk::ValidationFeatureEnableEXT::eBestPractices,
     vk::ValidationFeatureEnableEXT::eSynchronizationValidation};
 
+#if defined(__APPLE__)
   static constexpr vk::ValidationFeatureDisableEXT APPLE_DISABLE_FEATURES[] = {
     vk::ValidationFeatureDisableEXT::eShaders,
     vk::ValidationFeatureDisableEXT::eShaderValidationCache};
+#endif
 
   static constexpr vk::ValidationFeaturesEXT FEATURES_INFO
   {
