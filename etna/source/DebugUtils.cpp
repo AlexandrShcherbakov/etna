@@ -41,6 +41,11 @@ void set_debug_name(vk::Image image, const char* name)
   set_debug_name_base(image, vk::ObjectType::eImage, name);
 }
 
+void set_debug_name(vk::ImageView image_view, const char* name)
+{
+  set_debug_name_base(image_view, vk::ObjectType::eImageView, name);
+}
+
 void set_debug_name(vk::Buffer buffer, const char* name)
 {
   set_debug_name_base(buffer, vk::ObjectType::eBuffer, name);

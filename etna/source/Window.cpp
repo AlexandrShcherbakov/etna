@@ -4,6 +4,10 @@
 #include <tracy/Tracy.hpp>
 
 #include <etna/VulkanFormatter.hpp>
+#include <etna/GlobalContext.hpp>
+
+#include "StateTracking.hpp"
+#include "DebugUtils.hpp"
 
 
 namespace etna
@@ -113,6 +117,9 @@ std::optional<Window::SwapchainImage> Window::acquireNext()
   // NOTE: Sometimes swapchain returns the same image twice in a row.
   // This might break stuff, but I'm not sure how right now.
 
+  etna::get_context().getResourceTracker().setExternalTextureState(element.image,
+    vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::AccessFlagBits2::eNone, vk::ImageLayout::eUndefined);
+
   return SwapchainImage{
     .image = element.image,
     .view = element.image_view.get(),
@@ -209,12 +216,13 @@ Window::SwapchainData Window::createSwapchain(const DesiredProperties& props) co
   auto imgs = unwrap_vk_result(device.getSwapchainImagesKHR(newSwapchain.swapchain.get()));
 
   newSwapchain.elements.reserve(imgs.size());
-  for (auto img : imgs)
+  for (std::size_t i = 0; i < imgs.size(); ++i)
   {
     auto& el = newSwapchain.elements.emplace_back();
-    el.image = img;
+    el.image = imgs[i];
+    set_debug_name(el.image, fmt::format("Swapchain element #{}", i).c_str());
     vk::ImageViewCreateInfo info{
-      .image = img,
+      .image = el.image,
       .viewType = vk::ImageViewType::e2D,
       .format = format.format,
       .components = vk::ComponentMapping{},
@@ -225,6 +233,7 @@ Window::SwapchainData Window::createSwapchain(const DesiredProperties& props) co
         .baseArrayLayer = 0,
         .layerCount = 1}};
     el.image_view = unwrap_vk_result(device.createImageViewUnique(info));
+    set_debug_name(el.image_view.get(), fmt::format("Swapchain element #{}", i).c_str());
   }
 
   return newSwapchain;

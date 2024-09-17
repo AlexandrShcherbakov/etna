@@ -26,10 +26,16 @@ class ResourceStates
   std::vector<vk::ImageMemoryBarrier2> barriersToFlush;
 
 public:
+  void setExternalTextureState(
+    vk::Image image,
+    vk::PipelineStageFlags2 pipeline_stage_flag,
+    vk::AccessFlags2 access_flags,
+    vk::ImageLayout layout);
+
   void setTextureState(
     vk::CommandBuffer com_buffer,
     vk::Image image,
-    vk::PipelineStageFlagBits2 pipeline_stage_flag,
+    vk::PipelineStageFlags2 pipeline_stage_flag,
     vk::AccessFlags2 access_flags,
     vk::ImageLayout layout,
     vk::ImageAspectFlags aspect_flags);

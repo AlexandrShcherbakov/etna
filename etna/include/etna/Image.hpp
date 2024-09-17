@@ -88,6 +88,7 @@ private:
   VmaAllocation allocation{};
   vk::Image image{};
   vk::Format format;
+  std::string name;
 };
 
 } // namespace etna

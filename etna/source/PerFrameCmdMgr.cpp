@@ -76,7 +76,7 @@ vk::Semaphore PerFrameCmdMgr::submit(vk::CommandBuffer what, vk::Semaphore write
   // https://github.com/KhronosGroup/Vulkan-Docs/issues/1308
   std::array signal{vk::SemaphoreSubmitInfo{
     .semaphore = gpuDone.get(),
-    .stageMask = {},
+    .stageMask = vk::PipelineStageFlagBits2::eColorAttachmentOutput,
     .deviceIndex = 0,
   }};
 

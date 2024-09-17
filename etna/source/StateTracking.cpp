@@ -6,10 +6,25 @@
 namespace etna
 {
 
+void ResourceStates::setExternalTextureState(
+  vk::Image image,
+  vk::PipelineStageFlags2 pipeline_stage_flag,
+  vk::AccessFlags2 access_flags,
+  vk::ImageLayout layout)
+{
+  HandleType resHandle = std::bit_cast<HandleType>(static_cast<VkImage>(image));
+  currentStates[resHandle] = TextureState{
+    .piplineStageFlags = pipeline_stage_flag,
+    .accessFlags = access_flags,
+    .layout = layout,
+    .owner = {},
+  };
+}
+
 void ResourceStates::setTextureState(
   vk::CommandBuffer com_buffer,
   vk::Image image,
-  vk::PipelineStageFlagBits2 pipeline_stage_flag,
+  vk::PipelineStageFlags2 pipeline_stage_flag,
   vk::AccessFlags2 access_flags,
   vk::ImageLayout layout,
   vk::ImageAspectFlags aspect_flags)
@@ -80,7 +95,7 @@ void ResourceStates::setDepthStencilTarget(
   setTextureState(
     com_buffer,
     image,
-    vk::PipelineStageFlagBits2::eEarlyFragmentTests,
+    vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
     vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
     vk::ImageLayout::eDepthStencilAttachmentOptimal,
     aspect_flags);

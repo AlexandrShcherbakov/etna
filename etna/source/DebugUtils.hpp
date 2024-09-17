@@ -8,6 +8,7 @@ namespace etna
 {
 
 void set_debug_name(vk::Image image, const char* name);
+void set_debug_name(vk::ImageView image_view, const char* name);
 void set_debug_name(vk::Buffer buffer, const char* name);
 void set_debug_name(vk::Sampler sampler, const char* name);
 
