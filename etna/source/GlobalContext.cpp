@@ -58,14 +58,22 @@ static vk::UniqueInstance createInstance(const InitParams& params)
   return unwrap_vk_result(vk::createInstanceUnique(createInfo));
 }
 
+template<std::size_t SIZE>
+static std::string_view safe_view_of_array(const vk::ArrayWrapper1D<char, SIZE> &array)
+{
+  // Paranoic strlen
+  const std::size_t length = static_cast<const char *>(std::memchr(array.data(), '\0', SIZE)) - array.data();
+  return std::string_view{array.data(), length};
+}
+
 static bool checkPhysicalDeviceSupportsExtensions(
   vk::PhysicalDevice pdevice, std::span<char const* const> extensions)
 {
   std::vector availableExtensions = unwrap_vk_result(pdevice.enumerateDeviceExtensionProperties());
 
-  std::unordered_set requestedExtensions(extensions.begin(), extensions.end());
+  std::unordered_set<std::string_view> requestedExtensions(extensions.begin(), extensions.end());
   for (const auto& ext : availableExtensions)
-    requestedExtensions.erase(ext.extensionName);
+    requestedExtensions.erase(safe_view_of_array(ext.extensionName));
 
   return requestedExtensions.empty();
 }
@@ -190,11 +198,11 @@ static vk::UniqueDevice createDevice(
 
   std::vector<char const*> deviceExtensions(
     params.deviceExtensions.begin(), params.deviceExtensions.end());
-  deviceExtensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
 
   // NOTE: These extensions are needed on MoltenVK to be set explicitly due to
   // it not fully supporting Vulkan 1.3 yet.
 #if defined(__APPLE__)
+  deviceExtensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
   deviceExtensions.push_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
   deviceExtensions.push_back(VK_KHR_COPY_COMMANDS_2_EXTENSION_NAME);
 #endif
