@@ -37,7 +37,11 @@ static std::vector<char> read_file(std::filesystem::path filename)
 struct SpvModDeleter
 {
   SpvModDeleter() {}
-  void operator()(SpvReflectShaderModule* mod) const { spvReflectDestroyShaderModule(mod); delete mod; }
+  void operator()(SpvReflectShaderModule* mod) const
+  {
+    spvReflectDestroyShaderModule(mod);
+    delete mod;
+  }
 };
 
 
@@ -226,8 +230,14 @@ void ShaderProgramManager::ShaderProgramInternal::reload(ShaderProgramManager& m
       }
       else
       {
-        if (pushConst.size != modPushConst.size)
-          ETNA_PANIC("ShaderProgram {} : not compatible push constant blocks", name);
+        ETNA_ASSERTF(
+          pushConst.size == modPushConst.size,
+          "ShaderProgram {}: push constant blocks differ between modules (stages), "
+          "expected {} bytes but got {} bytes in module {}",
+          name,
+          pushConst.size,
+          modPushConst.size,
+          shaderMod.getName());
         pushConst.stageFlags |= modPushConst.stageFlags;
       }
     }
