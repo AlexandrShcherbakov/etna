@@ -11,11 +11,12 @@ Image::Image(VmaAllocator alloc, CreateInfo info)
   : allocator{alloc}
   , format{info.format}
   , name{info.name}
+  , extent{info.extent}
 {
   vk::ImageCreateInfo imageInfo{
     .imageType = vk::ImageType::e2D,
     .format = format,
-    .extent = info.extent,
+    .extent = extent,
     .mipLevels = static_cast<uint32_t>(info.mipLevels),
     .arrayLayers = static_cast<uint32_t>(info.layers),
     .samples = info.samples,
@@ -59,6 +60,8 @@ void Image::swap(Image& other)
   std::swap(allocation, other.allocation);
   std::swap(image, other.image);
   std::swap(format, other.format);
+  std::swap(name, other.name);
+  std::swap(extent, other.extent);
 }
 
 Image::Image(Image&& other) noexcept

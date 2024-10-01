@@ -28,7 +28,6 @@ target_include_directories(etna PRIVATE source)
 target_link_libraries(etna PUBLIC
   Vulkan::Vulkan
   VulkanMemoryAllocator
-  StbLibraries
   "spirv-reflect-static"
   spdlog::spdlog
   Tracy::TracyClient

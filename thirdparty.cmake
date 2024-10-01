@@ -13,19 +13,6 @@ CPMAddPackage(
 # VMA headers emit a bunch of warnings >:(
 set_property(TARGET VulkanMemoryAllocator PROPERTY SYSTEM TRUE)
 
-# Collection of libraries for loading various image formats
-CPMAddPackage(
-  NAME StbLibraries
-  GITHUB_REPOSITORY nothings/stb
-  # Some random version because STB doesn't use git tags...
-  GIT_TAG f75e8d1cad7d90d72ef7a4661f1b994ef78b4e31
-  DOWNLOAD_ONLY YES
-)
-if (StbLibraries_ADDED)
-  add_library(StbLibraries INTERFACE)
-  target_include_directories(StbLibraries INTERFACE ${StbLibraries_SOURCE_DIR}/)
-endif ()
-
 # Official library for parsing SPIRV bytecode
 # We grab the exact SDK version from github so that
 # you don't have to remember to mark a checkbox while installing the SDK =)
