@@ -19,7 +19,7 @@ else ()
 endif ()
 
 # No profiling in release builds, mostly because Tracy emmits warnings in that case.
-option(TRACY_ENABLE ${ETNA_DEBUG})
+option(TRACY_ENABLE "Enable profiling" ${ETNA_DEBUG})
 
 include("get_cpm.cmake")
 include("thirdparty.cmake")
