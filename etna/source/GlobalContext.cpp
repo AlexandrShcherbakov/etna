@@ -55,18 +55,21 @@ static vk::UniqueInstance createInstance(const InitParams& params)
   createInfo.setPEnabledLayerNames(layers);
   createInfo.setPEnabledExtensionNames(extensions);
 
+  spdlog::info("Creating a Vulkan instance with the following extensions and layers: {}; {}", extensions, layers);
+
   return unwrap_vk_result(vk::createInstanceUnique(createInfo));
 }
 
-template<std::size_t SIZE>
-static std::string_view safe_view_of_array(const vk::ArrayWrapper1D<char, SIZE> &array)
+template <std::size_t SIZE>
+static std::string_view safe_view_of_array(const vk::ArrayWrapper1D<char, SIZE>& array)
 {
   // Paranoic strlen
-  const std::size_t length = static_cast<const char *>(std::memchr(array.data(), '\0', SIZE)) - array.data();
+  const std::size_t length =
+    static_cast<const char*>(std::memchr(array.data(), '\0', SIZE)) - array.data();
   return std::string_view{array.data(), length};
 }
 
-static bool checkPhysicalDeviceSupportsExtensions(
+static bool check_physical_device_supports_extensions(
   vk::PhysicalDevice pdevice, std::span<char const* const> extensions)
 {
   std::vector availableExtensions = unwrap_vk_result(pdevice.enumerateDeviceExtensionProperties());
@@ -78,7 +81,28 @@ static bool checkPhysicalDeviceSupportsExtensions(
   return requestedExtensions.empty();
 }
 
-static bool deviceTypeIsBetter(vk::PhysicalDeviceType first, vk::PhysicalDeviceType second)
+struct OptionalExtensionsFound
+{
+  bool hasVkExtCalibratedTimestamps = false;
+};
+
+static OptionalExtensionsFound collect_optional_extensions_to_use(vk::PhysicalDevice pdevice)
+{
+  const std::vector availableExtensions =
+    unwrap_vk_result(pdevice.enumerateDeviceExtensionProperties());
+
+  OptionalExtensionsFound result;
+
+  for (const auto& ext : availableExtensions)
+  {
+    if (safe_view_of_array(ext.extensionName) == std::string_view(VK_EXT_CALIBRATED_TIMESTAMPS_EXTENSION_NAME))
+      result.hasVkExtCalibratedTimestamps = true;
+  }
+
+  return result;
+}
+
+static bool device_type_is_better(vk::PhysicalDeviceType first, vk::PhysicalDeviceType second)
 {
   auto score = [](vk::PhysicalDeviceType type) {
     switch (type)
@@ -108,8 +132,7 @@ vk::PhysicalDevice pick_physical_device(vk::Instance instance, const InitParams&
     for (auto pdevice : pdevices)
     {
       const auto props = pdevice.getProperties();
-      // TODO: potential bug, is deviceName guaranteed to be null-terminated?
-      pdeviceNames.emplace_back(props.deviceName.data());
+      pdeviceNames.emplace_back(safe_view_of_array(props.deviceName));
     }
     spdlog::info("List of physical devices: {}", pdeviceNames);
   }
@@ -123,7 +146,7 @@ vk::PhysicalDevice pick_physical_device(vk::Instance instance, const InitParams&
 
     auto pdevice = pdevices[*params.physicalDeviceIndexOverride];
 
-    if (checkPhysicalDeviceSupportsExtensions(pdevice, params.deviceExtensions))
+    if (check_physical_device_supports_extensions(pdevice, params.deviceExtensions))
     {
       return pdevice;
     }
@@ -132,7 +155,7 @@ vk::PhysicalDevice pick_physical_device(vk::Instance instance, const InitParams&
       "Chosen physical device override '{}' does"
       " not support requested extensions! Falling back to automatic"
       " device selection.",
-      std::string_view{pdevice.getProperties().deviceName});
+      safe_view_of_array(pdevice.getProperties().deviceName));
   }
 
   auto bestDevice = pdevices.front();
@@ -141,15 +164,17 @@ vk::PhysicalDevice pick_physical_device(vk::Instance instance, const InitParams&
   {
     auto props = pdevice.getProperties();
 
-    if (!checkPhysicalDeviceSupportsExtensions(pdevice, params.deviceExtensions))
+    if (!check_physical_device_supports_extensions(pdevice, params.deviceExtensions))
       continue;
 
-    if (deviceTypeIsBetter(props.deviceType, bestDeviceProps.deviceType))
+    if (device_type_is_better(props.deviceType, bestDeviceProps.deviceType))
     {
       bestDevice = pdevice;
       bestDeviceProps = props;
     }
   }
+
+  spdlog::info("Chosing physical device {}", safe_view_of_array(bestDeviceProps.deviceName));
 
   return bestDevice;
 }
@@ -169,13 +194,16 @@ static uint32_t get_queue_family_index(vk::PhysicalDevice pdevice, vk::QueueFlag
   ETNA_PANIC("Could not find a queue family that supports all requested flags!");
 }
 
-static vk::UniqueDevice createDevice(
-  vk::PhysicalDevice pdevice, uint32_t universal_queue_family, const InitParams& params)
+static vk::UniqueDevice create_logical_device(
+  vk::PhysicalDevice pdevice,
+  uint32_t universal_queue_family,
+  const InitParams& params,
+  const OptionalExtensionsFound& optional_exts)
 {
   const float defaultQueuePriority{0.0f};
 
   // For now we use a single universal queue for everything.
-  // Also, it's up to the framework to decide what queueus it needs and supports.
+  // Also, it's up to the framework to decide what queues it needs and supports.
 
   const std::array queueInfos{
     vk::DeviceQueueCreateInfo{
@@ -199,8 +227,11 @@ static vk::UniqueDevice createDevice(
   std::vector<char const*> deviceExtensions(
     params.deviceExtensions.begin(), params.deviceExtensions.end());
 
-  // NOTE: These extensions are needed on MoltenVK to be set explicitly due to
-  // it not fully supporting Vulkan 1.3 yet.
+  if (optional_exts.hasVkExtCalibratedTimestamps)
+    deviceExtensions.push_back(VK_EXT_CALIBRATED_TIMESTAMPS_EXTENSION_NAME);
+
+    // NOTE: These extensions are needed on MoltenVK to be set explicitly due to
+    // it not fully supporting Vulkan 1.3 yet.
 #if defined(__APPLE__)
   deviceExtensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
   deviceExtensions.push_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
@@ -224,6 +255,9 @@ static vk::UniqueDevice createDevice(
     .enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size()),
     .ppEnabledExtensionNames = deviceExtensions.data(),
   };
+
+  spdlog::info("Creating a logical device with the following extensions: {}", deviceExtensions);
+
   return unwrap_vk_result(pdevice.createDeviceUnique(creatInfo));
 }
 
@@ -299,11 +333,12 @@ GlobalContext::GlobalContext(const InitParams& params)
 
   vkPhysDevice = pick_physical_device(vkInstance.get(), params);
 
+  const auto optionalExts = collect_optional_extensions_to_use(vkPhysDevice);
 
   constexpr auto UNIVERSAL_QUEUE_FLAGS =
     vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute | vk::QueueFlagBits::eTransfer;
   universalQueueFamilyIdx = get_queue_family_index(vkPhysDevice, UNIVERSAL_QUEUE_FLAGS);
-  vkDevice = createDevice(vkPhysDevice, universalQueueFamilyIdx, params);
+  vkDevice = create_logical_device(vkPhysDevice, universalQueueFamilyIdx, params, optionalExts);
   VULKAN_HPP_DEFAULT_DISPATCHER.init(vkDevice.get());
 
   universalQueue = vkDevice->getQueue(universalQueueFamilyIdx, 0);
@@ -355,15 +390,31 @@ GlobalContext::GlobalContext(const InitParams& params)
 
   // Workaround for issues in Tracy =(
 #ifdef TRACY_ENABLE
-  auto ctx = TracyVkContext(
-    vkInstance.get(),
-    vkPhysDevice,
-    vkDevice.get(),
-    universalQueue,
-    buf.get(),
-    VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr,
-    VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceProcAddr);
-  tracyCtx.reset(ctx);
+  // TODO: support TracyVkContextHostCalibrated
+  if (optionalExts.hasVkExtCalibratedTimestamps)
+  {
+    auto ctx = TracyVkContextCalibrated(
+      vkInstance.get(),
+      vkPhysDevice,
+      vkDevice.get(),
+      universalQueue,
+      buf.get(),
+      VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr,
+      VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceProcAddr);
+    tracyCtx.reset(ctx);
+  }
+  else
+  {
+    auto ctx = TracyVkContext(
+      vkInstance.get(),
+      vkPhysDevice,
+      vkDevice.get(),
+      universalQueue,
+      buf.get(),
+      VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr,
+      VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceProcAddr);
+    tracyCtx.reset(ctx);
+  }
 #endif
 }
 
