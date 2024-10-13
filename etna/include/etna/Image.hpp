@@ -21,6 +21,7 @@ public:
   {
     vk::Extent3D extent;
     std::string_view name;
+    vk::ImageCreateFlags flags;
     // NOTE: this format is the default for TEXTURE ASSETS,
     // if you are using the image as a render target, you almost
     // definitely want UNorm.
@@ -50,8 +51,11 @@ public:
 
   struct ViewParams
   {
+    vk::ImageViewType type = vk::ImageViewType::e2D;
     uint32_t baseMip = 0;
-    uint32_t levelCount = 1;
+    uint32_t levelCount = VK_REMAINING_MIP_LEVELS;
+    uint32_t baseLayer = 0;
+    uint32_t layerCount = VK_REMAINING_ARRAY_LAYERS;
     std::optional<vk::ImageAspectFlagBits> aspectMask{};
 
     bool operator==(const ViewParams& b) const = default;
@@ -59,7 +63,10 @@ public:
   vk::ImageView getView(ViewParams params) const;
 
   ImageBinding genBinding(
-    vk::Sampler sampler, vk::ImageLayout layout, ViewParams params = {0, 1, {}}) const;
+    vk::Sampler sampler,
+    vk::ImageLayout layout,
+    ViewParams params = {
+      vk::ImageViewType::e2D, 0, VK_REMAINING_MIP_LEVELS, 0, VK_REMAINING_ARRAY_LAYERS, {}}) const;
 
   vk::ImageAspectFlags getAspectMaskByFormat() const;
 

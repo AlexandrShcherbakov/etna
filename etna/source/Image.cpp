@@ -14,6 +14,7 @@ Image::Image(VmaAllocator alloc, CreateInfo info)
   , extent{info.extent}
 {
   vk::ImageCreateInfo imageInfo{
+    .flags = info.flags,
     .imageType = vk::ImageType::e2D,
     .format = format,
     .extent = extent,
@@ -128,14 +129,14 @@ vk::ImageView Image::getView(Image::ViewParams params) const
   {
     vk::ImageViewCreateInfo viewInfo{
       .image = image,
-      .viewType = vk::ImageViewType::e2D, // TODO: support other types
-      .format = format,                   // TODO: Maybe support another type view
+      .viewType = params.type,
+      .format = format,
       .subresourceRange = vk::ImageSubresourceRange{
         .aspectMask = params.aspectMask ? params.aspectMask.value() : get_aspect_mask(format),
         .baseMipLevel = params.baseMip,
         .levelCount = params.levelCount,
-        .baseArrayLayer = 0,
-        .layerCount = 1,
+        .baseArrayLayer = params.baseLayer,
+        .layerCount = params.layerCount,
       }};
     auto view = unwrap_vk_result(etna::get_context().getDevice().createImageViewUnique(viewInfo));
     set_debug_name(view.get(), name.c_str());
