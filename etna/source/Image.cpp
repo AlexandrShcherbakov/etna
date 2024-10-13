@@ -9,13 +9,14 @@ namespace etna
 
 Image::Image(VmaAllocator alloc, CreateInfo info)
   : allocator{alloc}
+  , type{info.type}
   , format{info.format}
   , name{info.name}
   , extent{info.extent}
 {
   vk::ImageCreateInfo imageInfo{
     .flags = info.flags,
-    .imageType = vk::ImageType::e2D,
+    .imageType = type,
     .format = format,
     .extent = extent,
     .mipLevels = static_cast<uint32_t>(info.mipLevels),
@@ -116,6 +117,21 @@ static vk::ImageAspectFlags get_aspect_mask(vk::Format format)
   }
 }
 
+static vk::ImageViewType get_view_type(vk::ImageType image_type)
+{
+  switch (image_type)
+  {
+  case vk::ImageType::e1D:
+    return vk::ImageViewType::e1D;
+  case vk::ImageType::e2D:
+    return vk::ImageViewType::e2D;
+  case vk::ImageType::e3D:
+    return vk::ImageViewType::e3D;
+  default:
+    return vk::ImageViewType::e2D;
+  }
+}
+
 vk::ImageAspectFlags Image::getAspectMaskByFormat() const
 {
   return get_aspect_mask(format);
@@ -129,7 +145,7 @@ vk::ImageView Image::getView(Image::ViewParams params) const
   {
     vk::ImageViewCreateInfo viewInfo{
       .image = image,
-      .viewType = params.type,
+      .viewType = params.type ? params.type.value() : get_view_type(type),
       .format = format,
       .subresourceRange = vk::ImageSubresourceRange{
         .aspectMask = params.aspectMask ? params.aspectMask.value() : get_aspect_mask(format),
