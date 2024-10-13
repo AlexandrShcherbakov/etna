@@ -32,6 +32,8 @@ public:
     std::size_t layers = 1;
     std::size_t mipLevels = 1;
     vk::SampleCountFlagBits samples = vk::SampleCountFlagBits::e1;
+    vk::ImageType type = vk::ImageType::e2D;
+    vk::ImageCreateFlags flags;
   };
 
   Image(VmaAllocator alloc, CreateInfo info);
@@ -51,15 +53,20 @@ public:
   struct ViewParams
   {
     uint32_t baseMip = 0;
-    uint32_t levelCount = 1;
+    uint32_t levelCount = VK_REMAINING_MIP_LEVELS;
+    uint32_t baseLayer = 0;
+    uint32_t layerCount = VK_REMAINING_ARRAY_LAYERS;
     std::optional<vk::ImageAspectFlagBits> aspectMask{};
+    std::optional<vk::ImageViewType> type{};
 
     bool operator==(const ViewParams& b) const = default;
   };
   vk::ImageView getView(ViewParams params) const;
 
   ImageBinding genBinding(
-    vk::Sampler sampler, vk::ImageLayout layout, ViewParams params = {0, 1, {}}) const;
+    vk::Sampler sampler,
+    vk::ImageLayout layout,
+    ViewParams params = {0, VK_REMAINING_MIP_LEVELS, 0, VK_REMAINING_ARRAY_LAYERS, {}, {}}) const;
 
   vk::ImageAspectFlags getAspectMaskByFormat() const;
 
@@ -90,6 +97,7 @@ private:
 
   VmaAllocation allocation{};
   vk::Image image{};
+  vk::ImageType type;
   vk::Format format;
   std::string name;
   vk::Extent3D extent;
