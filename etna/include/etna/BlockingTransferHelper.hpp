@@ -48,7 +48,6 @@ public:
     OneShotCmdMgr& cmd_mgr, Buffer& dst, std::uint32_t offset, std::span<std::byte const> src);
 
 
-
   template <class T>
     requires std::is_trivially_copyable_v<T>
   void readbackBuffer(
@@ -64,7 +63,11 @@ public:
 
   // NOTE: uploads only mip 0 and layer 0 for now and doesn't support 3D images
   void uploadImage(
-    OneShotCmdMgr& cmd_mgr, Image& dst, uint32_t mip_level, uint32_t layer, std::span<std::byte const> src);
+    OneShotCmdMgr& cmd_mgr,
+    Image& dst,
+    uint32_t mip_level,
+    uint32_t layer,
+    std::span<std::byte const> src);
 
 private:
   vk::DeviceSize stagingSize;

@@ -95,7 +95,8 @@ void ResourceStates::setDepthStencilTarget(
   setTextureState(
     com_buffer,
     image,
-    vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
+    vk::PipelineStageFlagBits2::eEarlyFragmentTests |
+      vk::PipelineStageFlagBits2::eLateFragmentTests,
     vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
     vk::ImageLayout::eDepthStencilAttachmentOptimal,
     aspect_flags);

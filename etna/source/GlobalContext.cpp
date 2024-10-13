@@ -55,7 +55,10 @@ static vk::UniqueInstance createInstance(const InitParams& params)
   createInfo.setPEnabledLayerNames(layers);
   createInfo.setPEnabledExtensionNames(extensions);
 
-  spdlog::info("Creating a Vulkan instance with the following extensions and layers: {}; {}", extensions, layers);
+  spdlog::info(
+    "Creating a Vulkan instance with the following extensions and layers: {}; {}",
+    extensions,
+    layers);
 
   return unwrap_vk_result(vk::createInstanceUnique(createInfo));
 }
@@ -95,7 +98,9 @@ static OptionalExtensionsFound collect_optional_extensions_to_use(vk::PhysicalDe
 
   for (const auto& ext : availableExtensions)
   {
-    if (safe_view_of_array(ext.extensionName) == std::string_view(VK_EXT_CALIBRATED_TIMESTAMPS_EXTENSION_NAME))
+    if (
+      safe_view_of_array(ext.extensionName) ==
+      std::string_view(VK_EXT_CALIBRATED_TIMESTAMPS_EXTENSION_NAME))
       result.hasVkExtCalibratedTimestamps = true;
   }
 

@@ -117,8 +117,11 @@ std::optional<Window::SwapchainImage> Window::acquireNext()
   // NOTE: Sometimes swapchain returns the same image twice in a row.
   // This might break stuff, but I'm not sure how right now.
 
-  etna::get_context().getResourceTracker().setExternalTextureState(element.image,
-    vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::AccessFlagBits2::eNone, vk::ImageLayout::eUndefined);
+  etna::get_context().getResourceTracker().setExternalTextureState(
+    element.image,
+    vk::PipelineStageFlagBits2::eColorAttachmentOutput,
+    vk::AccessFlagBits2::eNone,
+    vk::ImageLayout::eUndefined);
 
   return SwapchainImage{
     .image = element.image,
