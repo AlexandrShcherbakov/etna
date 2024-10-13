@@ -96,7 +96,11 @@ void BlockingTransferHelper::readbackBuffer(
 }
 
 void BlockingTransferHelper::uploadImage(
-  OneShotCmdMgr& cmd_mgr, Image& dst, uint32_t mip_level, uint32_t layer, std::span<std::byte const> src)
+  OneShotCmdMgr& cmd_mgr,
+  Image& dst,
+  uint32_t mip_level,
+  uint32_t layer,
+  std::span<std::byte const> src)
 {
   auto [w, h, d] = dst.getExtent();
 
@@ -114,15 +118,18 @@ void BlockingTransferHelper::uploadImage(
   const std::size_t linesPerUpload = stagingSize / bytesPerLine;
   ETNA_ASSERTF(
     linesPerUpload > 0,
-    "Unable to fit a single line into the staging buffer! Buffer size is {} bytes, but a single line is {} bytes!",
+    "Unable to fit a single line into the staging buffer! Buffer size is {} bytes, but a single "
+    "line is {} bytes!",
     stagingSize,
-    w * bytesPerPixel
-  );
+    w * bytesPerPixel);
 
   for (std::size_t uploadedLines = 0; uploadedLines < h; uploadedLines += linesPerUpload)
   {
     const std::size_t linesThisUpload = std::min(linesPerUpload, h - uploadedLines);
-    std::memcpy(stagingBuffer.data(), src.data() + uploadedLines * bytesPerLine, linesThisUpload * bytesPerLine);
+    std::memcpy(
+      stagingBuffer.data(),
+      src.data() + uploadedLines * bytesPerLine,
+      linesThisUpload * bytesPerLine);
 
     auto cmdBuf = cmd_mgr.start();
 
