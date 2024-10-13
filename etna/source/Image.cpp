@@ -58,9 +58,11 @@ Image::Image(VmaAllocator alloc, CreateInfo info)
 
 void Image::swap(Image& other)
 {
+  std::swap(views, other.views);
   std::swap(allocator, other.allocator);
   std::swap(allocation, other.allocation);
   std::swap(image, other.image);
+  std::swap(type, other.type);
   std::swap(format, other.format);
   std::swap(name, other.name);
   std::swap(extent, other.extent);
