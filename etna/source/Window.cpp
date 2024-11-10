@@ -14,7 +14,7 @@ namespace etna
 {
 
 static vk::SurfaceFormatKHR chose_surface_format(
-  const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
+  const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface, bool auto_gamma)
 {
   auto formats = unwrap_vk_result(device.getSurfaceFormatsKHR(surface));
 
@@ -22,10 +22,13 @@ static vk::SurfaceFormatKHR chose_surface_format(
 
   auto selected = formats[0];
 
-  auto found = std::find_if(formats.begin(), formats.end(), [](const vk::SurfaceFormatKHR& format) {
-    return format.format == vk::Format::eB8G8R8A8Srgb &&
-      format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
-  });
+  const auto desiredFormat = auto_gamma ? vk::Format::eB8G8R8A8Srgb : vk::Format::eB8G8R8A8Unorm;
+
+  auto found = std::find_if(
+    formats.begin(), formats.end(), [&desiredFormat](const vk::SurfaceFormatKHR& format) {
+      return format.format == desiredFormat &&
+        format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
+    });
 
   if (found != formats.end())
     selected = *found;
@@ -177,7 +180,7 @@ Window::SwapchainData Window::createSwapchain(const DesiredProperties& props) co
 
   const auto surfaceCaps =
     unwrap_vk_result(physicalDevice.getSurfaceCapabilitiesKHR(surface.get()));
-  const auto format = chose_surface_format(physicalDevice, surface.get());
+  const auto format = chose_surface_format(physicalDevice, surface.get(), props.autoGamma);
   const auto presentMode = chose_present_mode(physicalDevice, surface.get(), props.vsync);
   // NOTE: one might think that you can use surfaceCaps.currentExtent instead
   // of all this resolution provider trickery, but no, if you read the vulkan WSI

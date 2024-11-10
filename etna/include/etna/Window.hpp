@@ -59,8 +59,29 @@ public:
 
   struct DesiredProperties
   {
+    /**
+     * Should be set to a resolution acquired from the OS windowing library.
+     */
     vk::Extent2D resolution;
-    bool vsync;
+
+    /**
+     * Vsync turns on "fifo" mode on swapchain images: you get N images, acquireNext
+     * gives you the "next" one among them, present returns an image to the OS.
+     * After some time, the OS is going to be done with presenting the image and it
+     * will become available for acquiring again. If no image is available at the time
+     * acquireNext is called, it will block.
+     * Hence, effectively, Vsync locks the application frame rate  to the refresh rate of the
+     * monitor.
+     */
+    bool vsync = false;
+
+    /**
+     * Auto-gamma selects an Srgb image format for the swapchain, which assumes all
+     * writes to be in linear color space and automatically performs gamma-correction
+     * after each and every write to a swapchain image.
+     * Should be disabled whenever tone mapping is being performed manually in shaders.
+     */
+    bool autoGamma = true;
   };
   /**
    * Recreates the swapchain with the provided desired resolution
