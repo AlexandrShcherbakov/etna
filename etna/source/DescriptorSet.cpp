@@ -195,33 +195,47 @@ void write_set(const DescriptorSet& dst)
   get_context().getDevice().updateDescriptorSets(writes, {});
 }
 
-constexpr static vk::PipelineStageFlagBits2 shader_stage_to_pipeline_stage(
+constexpr static vk::PipelineStageFlags2 shader_stage_to_pipeline_stage(
   vk::ShaderStageFlags shader_stages)
 {
-  constexpr uint32_t MAPPING_LENGTH = 1;
+  constexpr uint32_t MAPPING_LENGTH = 6;
   constexpr std::array<vk::ShaderStageFlagBits, MAPPING_LENGTH> SHADER_STAGES = {
+    vk::ShaderStageFlagBits::eVertex,
+    vk::ShaderStageFlagBits::eTessellationControl,
+    vk::ShaderStageFlagBits::eTessellationEvaluation,
+    vk::ShaderStageFlagBits::eGeometry,
     vk::ShaderStageFlagBits::eFragment,
+    vk::ShaderStageFlagBits::eCompute,
   };
   constexpr std::array<vk::PipelineStageFlagBits2, MAPPING_LENGTH> PIPELINE_STAGES = {
+    vk::PipelineStageFlagBits2::eVertexShader,
+    vk::PipelineStageFlagBits2::eTessellationControlShader,
+    vk::PipelineStageFlagBits2::eTessellationEvaluationShader,
+    vk::PipelineStageFlagBits2::eGeometryShader,
     vk::PipelineStageFlagBits2::eFragmentShader,
+    vk::PipelineStageFlagBits2::eComputeShader,
   };
+
+  vk::PipelineStageFlags2 pipelineStages = vk::PipelineStageFlagBits2::eNone;
   for (uint32_t i = 0; i < MAPPING_LENGTH; ++i)
   {
     if (SHADER_STAGES[i] & shader_stages)
-      return PIPELINE_STAGES[i];
+      pipelineStages |= PIPELINE_STAGES[i];
   }
-  return vk::PipelineStageFlagBits2::eNone;
+
+  return pipelineStages;
 }
 
-constexpr static vk::AccessFlagBits2 descriptor_type_to_access_flag(
-  vk::DescriptorType descriptor_type)
+constexpr static vk::AccessFlags2 descriptor_type_to_access_flag(vk::DescriptorType descriptor_type)
 {
-  constexpr uint32_t MAPPING_LENGTH = 1;
+  constexpr uint32_t MAPPING_LENGTH = 2;
   constexpr std::array<vk::DescriptorType, MAPPING_LENGTH> DESCRIPTOR_TYPES = {
     vk::DescriptorType::eSampledImage,
+    vk::DescriptorType::eStorageImage,
   };
-  constexpr std::array<vk::AccessFlagBits2, MAPPING_LENGTH> ACCESS_FLAGS = {
-    vk::AccessFlagBits2::eShaderRead,
+  constexpr std::array<vk::AccessFlags2, MAPPING_LENGTH> ACCESS_FLAGS = {
+    vk::AccessFlagBits2::eShaderSampledRead,
+    vk::AccessFlagBits2::eShaderStorageRead | vk::AccessFlagBits2::eShaderStorageWrite,
   };
   for (uint32_t i = 0; i < MAPPING_LENGTH; ++i)
   {

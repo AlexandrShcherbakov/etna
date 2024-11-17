@@ -102,7 +102,7 @@ Image create_image_from_bytes(
  *
  * \param com_buffer The command buffer being recorded.
  * \param image The image to set the state for.
- * \param pipeline_stage_flag Where will the image be used?
+ * \param pipeline_stage_flags Where will the image be used?
  * \param access_flags How will it be used?
  * \param layout What layout do we want it to be in?
  * \param aspect_flags Which aspects of the image will be used?
@@ -110,7 +110,7 @@ Image create_image_from_bytes(
 void set_state(
   vk::CommandBuffer com_buffer,
   vk::Image image,
-  vk::PipelineStageFlagBits2 pipeline_stage_flag,
+  vk::PipelineStageFlags2 pipeline_stage_flags,
   vk::AccessFlags2 access_flags,
   vk::ImageLayout layout,
   vk::ImageAspectFlags aspect_flags);
