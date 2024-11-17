@@ -152,13 +152,13 @@ void end_frame()
 void set_state(
   vk::CommandBuffer com_buffer,
   vk::Image image,
-  vk::PipelineStageFlagBits2 pipeline_stage_flag,
+  vk::PipelineStageFlags2 pipeline_stage_flags,
   vk::AccessFlags2 access_flags,
   vk::ImageLayout layout,
   vk::ImageAspectFlags aspect_flags)
 {
   etna::get_context().getResourceTracker().setTextureState(
-    com_buffer, image, pipeline_stage_flag, access_flags, layout, aspect_flags);
+    com_buffer, image, pipeline_stage_flags, access_flags, layout, aspect_flags);
 }
 
 void finish_frame(vk::CommandBuffer com_buffer)
