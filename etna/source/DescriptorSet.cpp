@@ -226,8 +226,7 @@ constexpr static vk::PipelineStageFlags2 shader_stage_to_pipeline_stage(
   return pipelineStages;
 }
 
-constexpr static vk::AccessFlags2 descriptor_type_to_access_flag(
-  vk::DescriptorType descriptor_type)
+constexpr static vk::AccessFlags2 descriptor_type_to_access_flag(vk::DescriptorType descriptor_type)
 {
   constexpr uint32_t MAPPING_LENGTH = 2;
   constexpr std::array<vk::DescriptorType, MAPPING_LENGTH> DESCRIPTOR_TYPES = {
