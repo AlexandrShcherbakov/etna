@@ -68,9 +68,12 @@ ShaderProgramInfo get_shader_program(const char* name)
 }
 
 DescriptorSet create_descriptor_set(
-  DescriptorLayoutId layout, vk::CommandBuffer command_buffer, std::vector<Binding> bindings)
+  DescriptorLayoutId layout,
+  vk::CommandBuffer command_buffer,
+  std::vector<Binding> bindings,
+  DescriptorSet::Behavoir behavoir)
 {
-  auto set = gContext->getDescriptorPool().allocateSet(layout, bindings, command_buffer);
+  auto set = gContext->getDescriptorPool().allocateSet(layout, bindings, command_buffer, behavoir);
   write_set(set);
   return set;
 }

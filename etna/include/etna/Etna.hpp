@@ -91,7 +91,10 @@ ShaderProgramInfo get_shader_program(const char* name);
  * \return The descriptor set that can then be bound.
  */
 DescriptorSet create_descriptor_set(
-  DescriptorLayoutId layout, vk::CommandBuffer command_buffer, std::vector<Binding> bindings);
+  DescriptorLayoutId layout,
+  vk::CommandBuffer command_buffer,
+  std::vector<Binding> bindings,
+  DescriptorSet::Behavoir behavoir = DescriptorSet::Behavoir::eDefault);
 
 Image create_image_from_bytes(
   Image::CreateInfo info, vk::CommandBuffer command_buffer, const void* data);

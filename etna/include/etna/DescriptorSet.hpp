@@ -39,20 +39,29 @@ struct Binding
 /*Maybe we need a hierarchy of descriptor sets*/
 struct DescriptorSet
 {
+  enum class Behavoir
+  {
+    eDefault,
+    eNoProcessBarriers
+  };
   DescriptorSet() {}
   DescriptorSet(
     uint64_t gen,
     DescriptorLayoutId id,
     vk::DescriptorSet vk_set,
     std::vector<Binding> resources,
-    vk::CommandBuffer cmd_buffer)
+    vk::CommandBuffer cmd_buffer,
+    Behavoir behavoir = Behavoir::eDefault)
     : generation{gen}
     , layoutId{id}
     , set{vk_set}
     , bindings{std::move(resources)}
     , command_buffer{cmd_buffer}
   {
-    processBarriers();
+    if (behavoir != Behavoir::eNoProcessBarriers)
+    {
+      processBarriers();
+    }
   }
 
   bool isValid() const;
@@ -90,7 +99,10 @@ struct DynamicDescriptorPool
   void reset(uint32_t frames_in_flight);
 
   DescriptorSet allocateSet(
-    DescriptorLayoutId layout_id, std::vector<Binding> bindings, vk::CommandBuffer command_buffer);
+    DescriptorLayoutId layout_id,
+    std::vector<Binding> bindings,
+    vk::CommandBuffer command_buffer,
+    DescriptorSet::Behavoir behavoir = DescriptorSet::Behavoir::eDefault);
 
   bool isSetValid(const DescriptorSet& set) const
   {
