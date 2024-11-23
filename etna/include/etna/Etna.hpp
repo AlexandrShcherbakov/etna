@@ -119,7 +119,8 @@ void set_state(
   vk::PipelineStageFlags2 pipeline_stage_flags,
   vk::AccessFlags2 access_flags,
   vk::ImageLayout layout,
-  vk::ImageAspectFlags aspect_flags);
+  vk::ImageAspectFlags aspect_flags,
+  ForceSetState force = ForceSetState::eFalse);
 
 /**
  * \brief Flushes all barriers resulting from set_state calls.

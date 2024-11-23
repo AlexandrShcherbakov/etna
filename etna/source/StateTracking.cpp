@@ -28,7 +28,8 @@ void ResourceStates::setTextureState(
   vk::PipelineStageFlags2 pipeline_stage_flag,
   vk::AccessFlags2 access_flags,
   vk::ImageLayout layout,
-  vk::ImageAspectFlags aspect_flags)
+  vk::ImageAspectFlags aspect_flags,
+  ForceSetState force)
 {
   HandleType resHandle = std::bit_cast<HandleType>(static_cast<VkImage>(image));
   if (currentStates.count(resHandle) == 0)
@@ -42,7 +43,7 @@ void ResourceStates::setTextureState(
     .owner = com_buffer,
   };
   auto& oldState = std::get<0>(currentStates[resHandle]);
-  if (newState == oldState)
+  if (force == ForceSetState::eTrue && newState == oldState)
     return;
   barriersToFlush.push_back(vk::ImageMemoryBarrier2{
     .srcStageMask = oldState.piplineStageFlags,

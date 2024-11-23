@@ -12,4 +12,12 @@ enum class BarrierBehavoir
   eGenerateBarriers
 };
 
+/// Force set_state to create barriers, even when they seem unnecessary
+enum class ForceSetState
+{
+  // foo(true) is less readable than foo(ForceSetState::eTrue)
+  eFalse,
+  eTrue
+};
+
 #endif // BARRIERBEHAVOIR_HPP
