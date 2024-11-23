@@ -3,6 +3,7 @@
 #define ETNA_STATETRACKING_HPP_INCLUDED
 
 #include "etna/Vulkan.hpp"
+#include "etna/BarrierBehavoir.hpp"
 
 #include <variant>
 #include <unordered_map>
@@ -40,11 +41,20 @@ public:
     vk::ImageLayout layout,
     vk::ImageAspectFlags aspect_flags);
 
-  void setColorTarget(vk::CommandBuffer com_buffer, vk::Image image);
+  void setColorTarget(
+    vk::CommandBuffer com_buffer,
+    vk::Image image,
+    BarrierBehavoir behavoir = BarrierBehavoir::eDefault);
   void setDepthStencilTarget(
-    vk::CommandBuffer com_buffer, vk::Image image, vk::ImageAspectFlags aspect_flags);
+    vk::CommandBuffer com_buffer,
+    vk::Image image,
+    vk::ImageAspectFlags aspect_flags,
+    BarrierBehavoir behavoir = BarrierBehavoir::eDefault);
   void setResolveTarget(
-    vk::CommandBuffer com_buffer, vk::Image image, vk::ImageAspectFlags aspect_flags);
+    vk::CommandBuffer com_buffer,
+    vk::Image image,
+    vk::ImageAspectFlags aspect_flags,
+    BarrierBehavoir behavoir = BarrierBehavoir::eDefault);
 
   void flushBarriers(vk::CommandBuffer com_buf);
 };

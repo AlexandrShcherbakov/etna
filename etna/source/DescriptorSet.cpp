@@ -59,7 +59,7 @@ DescriptorSet DynamicDescriptorPool::allocateSet(
   DescriptorLayoutId layout_id,
   std::vector<Binding> bindings,
   vk::CommandBuffer command_buffer,
-  DescriptorSet::Behavoir behavoir)
+  BarrierBehavoir behavoir)
 {
   auto& dslCache = get_context().getDescriptorSetLayouts();
   auto setLayouts = {dslCache.getVkLayout(layout_id)};

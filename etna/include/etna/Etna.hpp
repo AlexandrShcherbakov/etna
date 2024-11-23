@@ -10,7 +10,7 @@
 #include <etna/ShaderProgram.hpp>
 #include <etna/DescriptorSet.hpp>
 #include <etna/Image.hpp>
-
+#include <etna/BarrierBehavoir.hpp>
 
 namespace etna
 {
@@ -40,6 +40,9 @@ struct InitParams
 
   /// How much do we allow the CPU to "outrun" the GPU asynchronously
   uint32_t numFramesInFlight = 2;
+
+  /// Whether things like createDescriptorSet or renderTarget should auto-create barriers
+  bool generateBarriersAutomatically = true;
 };
 
 bool is_initilized();
@@ -94,7 +97,7 @@ DescriptorSet create_descriptor_set(
   DescriptorLayoutId layout,
   vk::CommandBuffer command_buffer,
   std::vector<Binding> bindings,
-  DescriptorSet::Behavoir behavoir = DescriptorSet::Behavoir::eDefault);
+  BarrierBehavoir behavoir = BarrierBehavoir::eDefault);
 
 Image create_image_from_bytes(
   Image::CreateInfo info, vk::CommandBuffer command_buffer, const void* data);

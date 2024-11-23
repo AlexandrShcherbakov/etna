@@ -10,7 +10,8 @@
 #include <etna/GpuSharedResource.hpp>
 #include <etna/DescriptorSetLayout.hpp>
 #include <etna/BindingItems.hpp>
-
+#include <etna/BarrierBehavoir.hpp>
+#include <etna/GlobalContext.hpp>
 
 namespace etna
 {
@@ -39,11 +40,6 @@ struct Binding
 /*Maybe we need a hierarchy of descriptor sets*/
 struct DescriptorSet
 {
-  enum class Behavoir
-  {
-    eDefault,
-    eNoProcessBarriers
-  };
   DescriptorSet() {}
   DescriptorSet(
     uint64_t gen,
@@ -51,14 +47,16 @@ struct DescriptorSet
     vk::DescriptorSet vk_set,
     std::vector<Binding> resources,
     vk::CommandBuffer cmd_buffer,
-    Behavoir behavoir = Behavoir::eDefault)
+    BarrierBehavoir behavoir = BarrierBehavoir::eDefault)
     : generation{gen}
     , layoutId{id}
     , set{vk_set}
     , bindings{std::move(resources)}
     , command_buffer{cmd_buffer}
   {
-    if (behavoir != Behavoir::eNoProcessBarriers)
+    if (
+      behavoir == BarrierBehavoir::eGenerateBarriers ||
+      (behavoir == BarrierBehavoir::eDefault && get_context().shouldGenerateBarriers()))
     {
       processBarriers();
     }
@@ -102,7 +100,7 @@ struct DynamicDescriptorPool
     DescriptorLayoutId layout_id,
     std::vector<Binding> bindings,
     vk::CommandBuffer command_buffer,
-    DescriptorSet::Behavoir behavoir = DescriptorSet::Behavoir::eDefault);
+    BarrierBehavoir behavoir = BarrierBehavoir::eDefault);
 
   bool isSetValid(const DescriptorSet& set) const
   {

@@ -14,7 +14,8 @@ RenderTargetState::RenderTargetState(
   vk::Rect2D rect,
   const std::vector<AttachmentParams>& color_attachments,
   AttachmentParams depth_attachment,
-  AttachmentParams stencil_attachment)
+  AttachmentParams stencil_attachment,
+  BarrierBehavoir behavoir)
 {
   ETNA_VERIFYF(!inScope, "RenderTargetState scopes shouldn't overlap.");
   inScope = true;
@@ -42,12 +43,15 @@ RenderTargetState::RenderTargetState(
     attachmentInfos[i].clearValue = color_attachments[i].clearColorValue;
 
     etna::get_context().getResourceTracker().setColorTarget(
-      commandBuffer, color_attachments[i].image);
+      commandBuffer, color_attachments[i].image, behavoir);
 
     if (color_attachments[i].resolveImage)
     {
       etna::get_context().getResourceTracker().setResolveTarget(
-        commandBuffer, color_attachments[i].resolveImage, vk::ImageAspectFlagBits::eColor);
+        commandBuffer,
+        color_attachments[i].resolveImage,
+        vk::ImageAspectFlagBits::eColor,
+        behavoir);
 
       attachmentInfos[i].resolveImageLayout = vk::ImageLayout::eGeneral;
       attachmentInfos[i].resolveImageView = color_attachments[i].resolveImageView;
@@ -85,14 +89,16 @@ RenderTargetState::RenderTargetState(
     etna::get_context().getResourceTracker().setDepthStencilTarget(
       commandBuffer,
       depth_attachment.image,
-      vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil);
+      vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil,
+      behavoir);
 
     if (depth_attachment.resolveImage && stencil_attachment.resolveImage)
     {
       etna::get_context().getResourceTracker().setResolveTarget(
         commandBuffer,
         depth_attachment.resolveImage,
-        vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil);
+        vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil,
+        behavoir);
     }
   }
   else
@@ -102,14 +108,16 @@ RenderTargetState::RenderTargetState(
       etna::get_context().getResourceTracker().setDepthStencilTarget(
         commandBuffer,
         depth_attachment.image,
-        depth_attachment.imageAspect.value_or(vk::ImageAspectFlagBits::eDepth));
+        depth_attachment.imageAspect.value_or(vk::ImageAspectFlagBits::eDepth),
+        behavoir);
 
       if (depth_attachment.resolveImage)
       {
         etna::get_context().getResourceTracker().setResolveTarget(
           commandBuffer,
           depth_attachment.resolveImage,
-          depth_attachment.resolveImageAspect.value_or(vk::ImageAspectFlagBits::eDepth));
+          depth_attachment.resolveImageAspect.value_or(vk::ImageAspectFlagBits::eDepth),
+          behavoir);
       }
     }
 
@@ -118,14 +126,16 @@ RenderTargetState::RenderTargetState(
       etna::get_context().getResourceTracker().setDepthStencilTarget(
         commandBuffer,
         stencil_attachment.image,
-        stencil_attachment.imageAspect.value_or(vk::ImageAspectFlagBits::eStencil));
+        stencil_attachment.imageAspect.value_or(vk::ImageAspectFlagBits::eStencil),
+        behavoir);
 
       if (stencil_attachment.resolveImage)
       {
         etna::get_context().getResourceTracker().setResolveTarget(
           commandBuffer,
           stencil_attachment.resolveImage,
-          stencil_attachment.resolveImageAspect.value_or(vk::ImageAspectFlagBits::eStencil));
+          stencil_attachment.resolveImageAspect.value_or(vk::ImageAspectFlagBits::eStencil),
+          behavoir);
       }
     }
   }

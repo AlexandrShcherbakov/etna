@@ -42,6 +42,7 @@ public:
   vk::Instance getInstance() const { return vkInstance.get(); }
   vk::Queue getQueue() const { return universalQueue; }
   uint32_t getQueueFamilyIdx() const { return universalQueueFamilyIdx; }
+  bool shouldGenerateBarriers() const { return shouldGenerateBarriersFlag; }
 
   ShaderProgramManager& getShaderManager();
   PipelineManager& getPipelineManager();
@@ -82,6 +83,8 @@ private:
   std::unique_ptr<DynamicDescriptorPool> descriptorPool;
   std::unique_ptr<ResourceStates> resourceTracking;
   std::unique_ptr<void, void (*)(void*)> tracyCtx;
+
+  bool shouldGenerateBarriersFlag;
 };
 
 GlobalContext& get_context();
