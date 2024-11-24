@@ -43,7 +43,7 @@ void ResourceStates::setTextureState(
     .owner = com_buffer,
   };
   auto& oldState = std::get<0>(currentStates[resHandle]);
-  if (force == ForceSetState::eTrue && newState == oldState)
+  if (force == ForceSetState::eFalse && newState == oldState)
     return;
   barriersToFlush.push_back(vk::ImageMemoryBarrier2{
     .srcStageMask = oldState.piplineStageFlags,
