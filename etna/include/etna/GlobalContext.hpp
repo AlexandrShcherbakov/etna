@@ -37,7 +37,7 @@ public:
   std::unique_ptr<Window> createWindow(Window::CreateInfo info);
   std::unique_ptr<PerFrameCmdMgr> createPerFrameCmdMgr();
   std::unique_ptr<OneShotCmdMgr> createOneShotCmdMgr();
-  bool shouldGenerateBarrierWhen(BarrierBehavoir behavoir) const;
+  bool shouldGenerateBarriersWhen(BarrierBehavoir behavoir) const;
 
   vk::Device getDevice() const { return vkDevice.get(); }
   vk::PhysicalDevice getPhysicalDevice() const { return vkPhysDevice; }

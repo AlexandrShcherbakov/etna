@@ -492,7 +492,7 @@ ResourceStates& GlobalContext::getResourceTracker()
 GlobalContext::~GlobalContext() = default;
 
 
-bool GlobalContext::shouldGenerateBarrierWhen(BarrierBehavoir behavoir) const
+bool GlobalContext::shouldGenerateBarriersWhen(BarrierBehavoir behavoir) const
 {
   if (behavoir == BarrierBehavoir::eDefault)
   {
