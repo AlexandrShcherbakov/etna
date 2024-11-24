@@ -54,9 +54,7 @@ struct DescriptorSet
     , bindings{std::move(resources)}
     , command_buffer{cmd_buffer}
   {
-    if (
-      behavoir == BarrierBehavoir::eGenerateBarriers ||
-      (behavoir == BarrierBehavoir::eDefault && get_context().shouldGenerateBarriers()))
+    if (get_context().shouldGenerateBarriersWhen(behavoir))
     {
       processBarriers();
     }

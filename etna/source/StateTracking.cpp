@@ -83,9 +83,7 @@ void ResourceStates::flushBarriers(vk::CommandBuffer com_buf)
 void ResourceStates::setColorTarget(
   vk::CommandBuffer com_buffer, vk::Image image, BarrierBehavoir behavoir)
 {
-  if (
-    behavoir == BarrierBehavoir::eGenerateBarriers ||
-    (behavoir == BarrierBehavoir::eDefault && get_context().shouldGenerateBarriers()))
+  if (get_context().shouldGenerateBarriersWhen(behavoir))
   {
     setTextureState(
       com_buffer,
@@ -103,9 +101,7 @@ void ResourceStates::setDepthStencilTarget(
   vk::ImageAspectFlags aspect_flags,
   BarrierBehavoir behavoir)
 {
-  if (
-    behavoir == BarrierBehavoir::eGenerateBarriers ||
-    (behavoir == BarrierBehavoir::eDefault && get_context().shouldGenerateBarriers()))
+  if (get_context().shouldGenerateBarriersWhen(behavoir))
   {
     setTextureState(
       com_buffer,
@@ -124,9 +120,7 @@ void ResourceStates::setResolveTarget(
   vk::ImageAspectFlags aspect_flags,
   BarrierBehavoir behavoir)
 {
-  if (
-    behavoir == BarrierBehavoir::eGenerateBarriers ||
-    (behavoir == BarrierBehavoir::eDefault && get_context().shouldGenerateBarriers()))
+  if (get_context().shouldGenerateBarriersWhen(behavoir))
   {
     setTextureState(
       com_buffer,
