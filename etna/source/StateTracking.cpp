@@ -1,4 +1,5 @@
 #include "StateTracking.hpp"
+#include "etna/GlobalContext.hpp"
 
 #include <bit>
 
@@ -27,7 +28,8 @@ void ResourceStates::setTextureState(
   vk::PipelineStageFlags2 pipeline_stage_flag,
   vk::AccessFlags2 access_flags,
   vk::ImageLayout layout,
-  vk::ImageAspectFlags aspect_flags)
+  vk::ImageAspectFlags aspect_flags,
+  ForceSetState force)
 {
   HandleType resHandle = std::bit_cast<HandleType>(static_cast<VkImage>(image));
   if (currentStates.count(resHandle) == 0)
@@ -41,7 +43,7 @@ void ResourceStates::setTextureState(
     .owner = com_buffer,
   };
   auto& oldState = std::get<0>(currentStates[resHandle]);
-  if (newState == oldState)
+  if (force == ForceSetState::eFalse && newState == oldState)
     return;
   barriersToFlush.push_back(vk::ImageMemoryBarrier2{
     .srcStageMask = oldState.piplineStageFlags,
@@ -78,40 +80,56 @@ void ResourceStates::flushBarriers(vk::CommandBuffer com_buf)
   barriersToFlush.clear();
 }
 
-void ResourceStates::setColorTarget(vk::CommandBuffer com_buffer, vk::Image image)
+void ResourceStates::setColorTarget(
+  vk::CommandBuffer com_buffer, vk::Image image, BarrierBehavoir behavoir)
 {
-  setTextureState(
-    com_buffer,
-    image,
-    vk::PipelineStageFlagBits2::eColorAttachmentOutput,
-    vk::AccessFlagBits2::eColorAttachmentWrite,
-    vk::ImageLayout::eColorAttachmentOptimal,
-    vk::ImageAspectFlagBits::eColor);
+  if (get_context().shouldGenerateBarriersWhen(behavoir))
+  {
+    setTextureState(
+      com_buffer,
+      image,
+      vk::PipelineStageFlagBits2::eColorAttachmentOutput,
+      vk::AccessFlagBits2::eColorAttachmentWrite,
+      vk::ImageLayout::eColorAttachmentOptimal,
+      vk::ImageAspectFlagBits::eColor);
+  }
 }
 
 void ResourceStates::setDepthStencilTarget(
-  vk::CommandBuffer com_buffer, vk::Image image, vk::ImageAspectFlags aspect_flags)
+  vk::CommandBuffer com_buffer,
+  vk::Image image,
+  vk::ImageAspectFlags aspect_flags,
+  BarrierBehavoir behavoir)
 {
-  setTextureState(
-    com_buffer,
-    image,
-    vk::PipelineStageFlagBits2::eEarlyFragmentTests |
-      vk::PipelineStageFlagBits2::eLateFragmentTests,
-    vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
-    vk::ImageLayout::eDepthStencilAttachmentOptimal,
-    aspect_flags);
+  if (get_context().shouldGenerateBarriersWhen(behavoir))
+  {
+    setTextureState(
+      com_buffer,
+      image,
+      vk::PipelineStageFlagBits2::eEarlyFragmentTests |
+        vk::PipelineStageFlagBits2::eLateFragmentTests,
+      vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
+      vk::ImageLayout::eDepthStencilAttachmentOptimal,
+      aspect_flags);
+  }
 }
 
 void ResourceStates::setResolveTarget(
-  vk::CommandBuffer com_buffer, vk::Image image, vk::ImageAspectFlags aspect_flags)
+  vk::CommandBuffer com_buffer,
+  vk::Image image,
+  vk::ImageAspectFlags aspect_flags,
+  BarrierBehavoir behavoir)
 {
-  setTextureState(
-    com_buffer,
-    image,
-    vk::PipelineStageFlagBits2::eResolve,
-    vk::AccessFlagBits2::eTransferWrite,
-    vk::ImageLayout::eGeneral,
-    aspect_flags);
+  if (get_context().shouldGenerateBarriersWhen(behavoir))
+  {
+    setTextureState(
+      com_buffer,
+      image,
+      vk::PipelineStageFlagBits2::eResolve,
+      vk::AccessFlagBits2::eTransferWrite,
+      vk::ImageLayout::eGeneral,
+      aspect_flags);
+  }
 }
 
 } // namespace etna

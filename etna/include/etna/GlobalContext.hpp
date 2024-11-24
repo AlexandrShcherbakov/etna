@@ -9,6 +9,7 @@
 #include <etna/Image.hpp>
 #include <etna/Buffer.hpp>
 #include <etna/Window.hpp>
+#include <etna/BarrierBehavoir.hpp>
 
 #include <vk_mem_alloc.h>
 
@@ -36,6 +37,7 @@ public:
   std::unique_ptr<Window> createWindow(Window::CreateInfo info);
   std::unique_ptr<PerFrameCmdMgr> createPerFrameCmdMgr();
   std::unique_ptr<OneShotCmdMgr> createOneShotCmdMgr();
+  bool shouldGenerateBarriersWhen(BarrierBehavoir behavoir) const;
 
   vk::Device getDevice() const { return vkDevice.get(); }
   vk::PhysicalDevice getPhysicalDevice() const { return vkPhysDevice; }
@@ -82,6 +84,8 @@ private:
   std::unique_ptr<DynamicDescriptorPool> descriptorPool;
   std::unique_ptr<ResourceStates> resourceTracking;
   std::unique_ptr<void, void (*)(void*)> tracyCtx;
+
+  bool shouldGenerateBarriersFlag;
 };
 
 GlobalContext& get_context();

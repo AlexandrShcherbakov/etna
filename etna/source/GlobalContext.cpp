@@ -300,6 +300,7 @@ GlobalContext::GlobalContext(const InitParams& params)
                (void)ctx;
                TracyVkDestroy(reinterpret_cast<TracyVkCtx>(ctx));
              }}
+  , shouldGenerateBarriersFlag{params.generateBarriersAutomatically}
 {
   // Proper initialization of vulkan is tricky, as we need to
   // dynamically link vulkan-1.dll and load symbols for various
@@ -489,5 +490,15 @@ ResourceStates& GlobalContext::getResourceTracker()
 }
 
 GlobalContext::~GlobalContext() = default;
+
+
+bool GlobalContext::shouldGenerateBarriersWhen(BarrierBehavoir behavoir) const
+{
+  if (behavoir == BarrierBehavoir::eDefault)
+  {
+    return shouldGenerateBarriersFlag;
+  }
+  return behavoir == BarrierBehavoir::eGenerateBarriers;
+}
 
 } // namespace etna

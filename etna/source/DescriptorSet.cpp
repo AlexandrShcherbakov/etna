@@ -56,7 +56,10 @@ void DynamicDescriptorPool::destroyAllocatedSets()
 }
 
 DescriptorSet DynamicDescriptorPool::allocateSet(
-  DescriptorLayoutId layout_id, std::vector<Binding> bindings, vk::CommandBuffer command_buffer)
+  DescriptorLayoutId layout_id,
+  std::vector<Binding> bindings,
+  vk::CommandBuffer command_buffer,
+  BarrierBehavoir behavoir)
 {
   auto& dslCache = get_context().getDescriptorSetLayouts();
   auto setLayouts = {dslCache.getVkLayout(layout_id)};
@@ -68,7 +71,7 @@ DescriptorSet DynamicDescriptorPool::allocateSet(
   vk::DescriptorSet vkSet{};
   ETNA_VERIFY(vkDevice.allocateDescriptorSets(&info, &vkSet) == vk::Result::eSuccess);
   return DescriptorSet{
-    workCount.batchIndex(), layout_id, vkSet, std::move(bindings), command_buffer};
+    workCount.batchIndex(), layout_id, vkSet, std::move(bindings), command_buffer, behavoir};
 }
 
 static bool is_image_resource(vk::DescriptorType ds_type)
