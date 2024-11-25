@@ -19,8 +19,8 @@ class RenderTargetState
 public:
   struct AttachmentParams
   {
-    vk::Image image = VK_NULL_HANDLE;
-    vk::ImageView view = VK_NULL_HANDLE;
+    vk::Image image = {};
+    vk::ImageView view = {};
     std::optional<vk::ImageAspectFlags> imageAspect{};
     vk::AttachmentLoadOp loadOp = vk::AttachmentLoadOp::eClear;
     vk::AttachmentStoreOp storeOp = vk::AttachmentStoreOp::eStore;
@@ -31,8 +31,8 @@ public:
     // but not produce a final single-sample result.
     // These fields below are for the final MSAA image.
     // Ignore unless you know what MSAA is and aren't sure you need it.
-    vk::Image resolveImage = VK_NULL_HANDLE;
-    vk::ImageView resolveImageView = VK_NULL_HANDLE;
+    vk::Image resolveImage = {};
+    vk::ImageView resolveImageView = {};
     std::optional<vk::ImageAspectFlags> resolveImageAspect{};
     vk::ResolveModeFlagBits resolveMode = vk::ResolveModeFlagBits::eNone;
   };
@@ -53,7 +53,9 @@ public:
     const std::vector<AttachmentParams>& color_attachments,
     AttachmentParams depth_attachment,
     BarrierBehavoir behavoir = BarrierBehavoir::eDefault)
-    : RenderTargetState(cmd_buff, rect, color_attachments, depth_attachment, {}, behavoir){};
+    : RenderTargetState(cmd_buff, rect, color_attachments, depth_attachment, {}, behavoir)
+  {
+  }
 
   ~RenderTargetState();
 };

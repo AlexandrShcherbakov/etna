@@ -113,7 +113,7 @@ public:
   ImageBinding genBinding(
     vk::Sampler sampler,
     vk::ImageLayout layout,
-    ViewParams params = {0, VK_REMAINING_MIP_LEVELS, 0, VK_REMAINING_ARRAY_LAYERS, {}, {}}) const;
+    ViewParams params = {0, vk::RemainingMipLevels, 0, vk::RemainingArrayLayers, {}, {}}) const;
 
   // Returns the "all" aspects combination of flags based on the image's real format
   vk::ImageAspectFlags getAspectMaskByFormat() const;

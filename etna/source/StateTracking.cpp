@@ -52,16 +52,16 @@ void ResourceStates::setTextureState(
     .dstAccessMask = newState.accessFlags,
     .oldLayout = oldState.layout,
     .newLayout = newState.layout,
-    .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-    .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+    .srcQueueFamilyIndex = vk::QueueFamilyIgnored,
+    .dstQueueFamilyIndex = vk::QueueFamilyIgnored,
     .image = image,
     .subresourceRange =
       {
         .aspectMask = aspect_flags,
         .baseMipLevel = 0,
-        .levelCount = VK_REMAINING_MIP_LEVELS,
+        .levelCount = vk::RemainingMipLevels,
         .baseArrayLayer = 0,
-        .layerCount = VK_REMAINING_ARRAY_LAYERS,
+        .layerCount = vk::RemainingArrayLayers,
       },
   });
   oldState = newState;

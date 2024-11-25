@@ -48,7 +48,7 @@ public:
   [[nodiscard]] vk::Buffer get() const { return buffer; }
   [[nodiscard]] std::byte* data() { return mapped; }
 
-  BufferBinding genBinding(vk::DeviceSize offset = 0, vk::DeviceSize range = VK_WHOLE_SIZE) const;
+  BufferBinding genBinding(vk::DeviceSize offset = 0, vk::DeviceSize range = vk::WholeSize) const;
 
   // If the buffer is in CPU_TO_GPU or GPU_TO_CPU memory, returns a CPU-accessible
   // pointer to the start of this buffer's bytes, which can be used for reading or
