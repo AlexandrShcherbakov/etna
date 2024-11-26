@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 
+set(ETNA_ENGINE_CONFIG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/include/etna/EtnaEngineConfig.hpp)
+configure_file(${ETNA_ENGINE_CONFIG_FILE}.in ${ETNA_ENGINE_CONFIG_FILE} @ONLY)
 
 add_library(etna
   "source/Image.cpp"

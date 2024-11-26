@@ -11,6 +11,7 @@
 #include <etna/DescriptorSet.hpp>
 #include <etna/Assert.hpp>
 #include <etna/EtnaConfig.hpp>
+#include <etna/EtnaEngineConfig.hpp>
 #include <etna/Window.hpp>
 #include <etna/PerFrameCmdMgr.hpp>
 #include <etna/OneShotCmdMgr.hpp>
@@ -27,7 +28,7 @@ static vk::UniqueInstance createInstance(const InitParams& params)
     .pApplicationName = params.applicationName,
     .applicationVersion = params.applicationVersion,
     .pEngineName = ETNA_ENGINE_NAME,
-    .engineVersion = ETNA_VERSION,
+    .engineVersion = ETNA_ENGINE_VERSION,
     .apiVersion = VULKAN_API_VERSION,
   };
 
