@@ -231,14 +231,16 @@ constexpr static vk::PipelineStageFlags2 shader_stage_to_pipeline_stage(
 
 constexpr static vk::AccessFlags2 descriptor_type_to_access_flag(vk::DescriptorType descriptor_type)
 {
-  constexpr uint32_t MAPPING_LENGTH = 2;
+  constexpr uint32_t MAPPING_LENGTH = 3;
   constexpr std::array<vk::DescriptorType, MAPPING_LENGTH> DESCRIPTOR_TYPES = {
     vk::DescriptorType::eSampledImage,
     vk::DescriptorType::eStorageImage,
+    vk::DescriptorType::eCombinedImageSampler,
   };
   constexpr std::array<vk::AccessFlags2, MAPPING_LENGTH> ACCESS_FLAGS = {
     vk::AccessFlagBits2::eShaderSampledRead,
     vk::AccessFlagBits2::eShaderStorageRead | vk::AccessFlagBits2::eShaderStorageWrite,
+    vk::AccessFlagBits2::eShaderSampledRead,
   };
   for (uint32_t i = 0; i < MAPPING_LENGTH; ++i)
   {
