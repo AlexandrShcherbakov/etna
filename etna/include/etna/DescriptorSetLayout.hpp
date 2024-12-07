@@ -65,7 +65,8 @@ struct DescriptorSetLayoutCache
 {
   DescriptorSetLayoutCache() {}
   ~DescriptorSetLayoutCache()
-  { /*make device global and call clear hear*/
+  {
+    // make device global and call clear hear
   }
 
   DescriptorLayoutId registerLayout(vk::Device device, const DescriptorSetInfo& info);

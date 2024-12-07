@@ -20,10 +20,7 @@ inline constexpr std::array VULKAN_LAYERS = {
 };
 #endif
 
-inline constexpr uint32_t VULKAN_API_VERSION = VK_API_VERSION_1_3;
-
-inline constexpr const char* ETNA_ENGINE_NAME = "etna";
-inline constexpr uint32_t ETNA_VERSION = VK_MAKE_VERSION(0, 1, 0);
+inline constexpr uint32_t VULKAN_API_VERSION = vk::ApiVersion13;
 
 inline constexpr size_t MAX_FRAMES_INFLIGHT = 4;
 

@@ -23,6 +23,7 @@ option(TRACY_ENABLE "Enable profiling" ${ETNA_DEBUG})
 
 include("get_cpm.cmake")
 include("thirdparty.cmake")
+include("get_version.cmake")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)

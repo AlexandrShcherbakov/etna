@@ -3,3 +3,4 @@
 .cache
 build
 out
+etna/include/etna/EtnaEngineConfig.hpp

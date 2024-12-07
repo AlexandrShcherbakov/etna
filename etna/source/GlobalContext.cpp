@@ -11,6 +11,7 @@
 #include <etna/DescriptorSet.hpp>
 #include <etna/Assert.hpp>
 #include <etna/EtnaConfig.hpp>
+#include <etna/EtnaEngineConfig.hpp>
 #include <etna/Window.hpp>
 #include <etna/PerFrameCmdMgr.hpp>
 #include <etna/OneShotCmdMgr.hpp>
@@ -27,18 +28,18 @@ static vk::UniqueInstance createInstance(const InitParams& params)
     .pApplicationName = params.applicationName,
     .applicationVersion = params.applicationVersion,
     .pEngineName = ETNA_ENGINE_NAME,
-    .engineVersion = ETNA_VERSION,
+    .engineVersion = ETNA_ENGINE_VERSION,
     .apiVersion = VULKAN_API_VERSION,
   };
 
   std::vector<const char*> extensions(
     params.instanceExtensions.begin(), params.instanceExtensions.end());
-  extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+  extensions.push_back(vk::EXTDebugUtilsExtensionName);
 
   // NOTE: Extension for the vulkan loader to list non-conformant implementations, such as
   // for example MoltenVK on Apple devices.
 #if defined(__APPLE__)
-  extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+  extensions.push_back(vk::KHRPortabilityEnumerationExtensionName);
 #endif
 
   std::vector<const char*> layers(VULKAN_LAYERS.begin(), VULKAN_LAYERS.end());
@@ -100,7 +101,7 @@ static OptionalExtensionsFound collect_optional_extensions_to_use(vk::PhysicalDe
   {
     if (
       safe_view_of_array(ext.extensionName) ==
-      std::string_view(VK_EXT_CALIBRATED_TIMESTAMPS_EXTENSION_NAME))
+      std::string_view(vk::KHRCalibratedTimestampsExtensionName))
       result.hasVkExtCalibratedTimestamps = true;
   }
 
@@ -221,31 +222,31 @@ static vk::UniqueDevice create_logical_device(
   vk::PhysicalDeviceDynamicRenderingFeatures dynamicRenderingFeature{
     // Evil const cast due to C not having const
     .pNext = const_cast<vk::PhysicalDeviceFeatures2*>(&params.features), // NOLINT
-    .dynamicRendering = VK_TRUE,
+    .dynamicRendering = vk::True,
   };
 
   vk::PhysicalDeviceSynchronization2Features sync2Feature{
     .pNext = &dynamicRenderingFeature,
-    .synchronization2 = VK_TRUE,
+    .synchronization2 = vk::True,
   };
 
   std::vector<char const*> deviceExtensions(
     params.deviceExtensions.begin(), params.deviceExtensions.end());
 
   if (optional_exts.hasVkExtCalibratedTimestamps)
-    deviceExtensions.push_back(VK_EXT_CALIBRATED_TIMESTAMPS_EXTENSION_NAME);
+  {
+    deviceExtensions.push_back(vk::KHRCalibratedTimestampsExtensionName);
+  }
 
-    // NOTE: These extensions are needed on MoltenVK to be set explicitly due to
-    // it not fully supporting Vulkan 1.3 yet.
+  // NOTE: These extensions are needed on MoltenVK to be set explicitly due to
+  // it not fully supporting Vulkan 1.3 yet.
 #if defined(__APPLE__)
-  deviceExtensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
-  deviceExtensions.push_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
-  deviceExtensions.push_back(VK_KHR_COPY_COMMANDS_2_EXTENSION_NAME);
-#endif
+  deviceExtensions.push_back(vk::KHRDynamicRenderingExtensionName);
+  deviceExtensions.push_back(vk::KHRSynchronization2ExtensionName);
+  deviceExtensions.push_back(vk::KHRCopyCommands2ExtensionName);
 
   // NOTE: Enable non-conformant Vulkan implementations.
-#if defined(__APPLE__)
-  deviceExtensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
+  deviceExtensions.push_back(vk::KHRPortabilitySubsetExtensionName);
 #endif
 
   // NOTE: original design of PhysicalDeviceFeatures did not

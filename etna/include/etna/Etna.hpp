@@ -26,7 +26,7 @@ struct InitParams
   /// Can be anything
   const char* applicationName;
 
-  /// Use VK_MAKE_VERSION macro
+  /// Use vk::makeApiVersion macro
   uint32_t applicationVersion;
 
   std::span<char const* const> instanceExtensions{};
