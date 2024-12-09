@@ -27,6 +27,8 @@ CPMAddPackage(
     "SPIRV_REFLECT_BUILD_TESTS OFF"
     "SPIRV_REFLECT_STATIC_LIB ON"
 )
+# SpirvReflect headers also emit warnings now
+set_property(TARGET spirv-reflect-static PROPERTY SYSTEM TRUE)
 
 # Fmt is a dependency of spdlog, but to be
 # safe we explicitly specify our version
