@@ -38,7 +38,14 @@ public:
 
     // Basically determines the memory type this texture will live in.
     // You almost definitely almost always want GPU-only memory.
-    VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY;
+    VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+
+    // Basically determines the memory properties for the image.
+    // You can use CREATE_DEDICATED_MEMORY_BIT for special, big resources,
+    // like fullscreen images used as attachments.
+    // See recommended usage patterns:
+    // https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/usage_patterns.html
+    VmaAllocationCreateFlags allocationCreate = 0;
 
     // Images are stored in "chunks" on the GPU, which is called "optimal tiling".
     // The way these chunks work is platform-dependent and unspecified, so you

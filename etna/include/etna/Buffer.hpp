@@ -27,10 +27,17 @@ public:
     vk::BufferUsageFlags bufferUsage = vk::BufferUsageFlagBits::eStorageBuffer;
 
     // Basically determines the memory type this buffer will live in.
-    // You want GPU_ONLY for stuff that is produced on the GPU or read very often
+    // You want AUTO_PREFER_DEVICE for stuff that is produced on the GPU or read very often
     // on the GPU and not updated from the CPU all that often (and update it via copies).
-    // Otherwise, feel free to use CPU_TO_GPU or GPU_TO_CPU e.g. for uniform buffers.
-    VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY;
+    // Otherwise, feel free to use VMA_MEMORY_USAGE_AUTO.
+    VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+
+    // Basically determines the memory properties for the buffer.
+    // You want HOST_ACCESS_SEQUENTIAL_WRITE_BIT | CREATE_MAPPED_BIT for uniform buffers,
+    // that you want to map and write from the CPU and read on GPU
+    // See recommended usage patterns:
+    // https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/usage_patterns.html
+    VmaAllocationCreateFlags allocationCreate = 0;
 
     // Name of the image for debugging tools
     std::string_view name;
