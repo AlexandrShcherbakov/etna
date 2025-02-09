@@ -8,6 +8,7 @@
 #include <etna/PipelineManager.hpp>
 #include <vulkan/vulkan_structs.hpp>
 #include "StateTracking.hpp"
+#include "etna/Image.hpp"
 #include "etna/Vulkan.hpp"
 
 
@@ -85,7 +86,9 @@ Image create_image_from_bytes(Image::CreateInfo info, vk::CommandBuffer cmd_buf,
   etna::Buffer stagingBuf = gContext->createBuffer(etna::Buffer::CreateInfo{
     .size = imageSize,
     .bufferUsage = vk::BufferUsageFlagBits::eTransferSrc,
-    .memoryUsage = VMA_MEMORY_USAGE_CPU_ONLY,
+    .memoryUsage = VMA_MEMORY_USAGE_AUTO,
+    .allocationCreate =
+      VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
     .name = "tmp_staging_buf",
   });
 

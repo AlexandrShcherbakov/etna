@@ -1,3 +1,4 @@
+#include "etna/Image.hpp"
 #include <etna/BlockingTransferHelper.hpp>
 
 #include <vulkan/vulkan_format_traits.hpp>
@@ -14,7 +15,9 @@ BlockingTransferHelper::BlockingTransferHelper(CreateInfo info)
   , stagingBuffer{etna::get_context().createBuffer(Buffer::CreateInfo{
       .size = stagingSize,
       .bufferUsage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eTransferSrc,
-      .memoryUsage = VMA_MEMORY_USAGE_CPU_TO_GPU,
+      .memoryUsage = VMA_MEMORY_USAGE_AUTO,
+      .allocationCreate =
+        VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
       .name = "BlockingTransferHelper::stagingBuffer",
     })}
 {
