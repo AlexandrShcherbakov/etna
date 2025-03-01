@@ -23,6 +23,11 @@ struct ImageBinding
   vk::DescriptorImageInfo descriptor_info;
 };
 
+struct SamplerBinding
+{
+  vk::DescriptorImageInfo descriptor_info;
+};
+
 } // namespace etna
 
 #endif // ETNA_BINDING_ITEMS_HPP_INCLUDED

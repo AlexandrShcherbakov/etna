@@ -26,6 +26,9 @@ public:
 
   [[nodiscard]] vk::Sampler get() const { return sampler.get(); }
 
+  // Creates a binding to be used with etna::Binding and etna::create_descriptor_set
+  SamplerBinding genBinding() const;
+
 private:
   vk::UniqueSampler sampler{};
 };
