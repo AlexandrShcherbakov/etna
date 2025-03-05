@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.25)
 
 
-find_package(Vulkan 1.3.275...<1.4.0 REQUIRED)
+find_package(Vulkan 1.3.275 REQUIRED)
+if(Vulkan_VERSION VERSION_GREATER_EQUAL 1.4.0)
+  message(FATAL_ERROR "Vulkan sdk version >1.3.xxx not supported")
+endif()
 
 # GPU-side allocator for Vulkan by AMD
 CPMAddPackage(
