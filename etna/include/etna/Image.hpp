@@ -112,6 +112,8 @@ public:
     // By default views it as 1/2/3D automatically based on the image itself.
     std::optional<vk::ImageViewType> type = std::nullopt;
 
+    std::optional<vk::Format> format = std::nullopt;
+
     bool operator==(const ViewParams& b) const = default;
   };
   vk::ImageView getView(ViewParams params) const;
@@ -120,7 +122,7 @@ public:
   ImageBinding genBinding(
     vk::Sampler sampler,
     vk::ImageLayout layout,
-    ViewParams params = {0, vk::RemainingMipLevels, 0, vk::RemainingArrayLayers, {}, {}}) const;
+    ViewParams params = {0, vk::RemainingMipLevels, 0, vk::RemainingArrayLayers, {}, {}, {}}) const;
 
   // Returns the "all" aspects combination of flags based on the image's real format
   vk::ImageAspectFlags getAspectMaskByFormat() const;
