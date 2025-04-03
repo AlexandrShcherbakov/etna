@@ -6,7 +6,7 @@
 
 #include <etna/Vulkan.hpp>
 #include <etna/Image.hpp>
-#include <etna/BarrierBehavoir.hpp>
+#include <etna/BarrierBehavior.hpp>
 
 namespace etna
 {
@@ -43,7 +43,7 @@ public:
     const std::vector<AttachmentParams>& color_attachments,
     AttachmentParams depth_attachment,
     AttachmentParams stencil_attachment,
-    BarrierBehavoir behavoir = BarrierBehavoir::eDefault);
+    BarrierBehavior behavior = BarrierBehavior::eDefault);
 
   // We can't use the default argument for stencil_attachment due to gcc bug 88165
   // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88165
@@ -52,8 +52,8 @@ public:
     vk::Rect2D rect,
     const std::vector<AttachmentParams>& color_attachments,
     AttachmentParams depth_attachment,
-    BarrierBehavoir behavoir = BarrierBehavoir::eDefault)
-    : RenderTargetState(cmd_buff, rect, color_attachments, depth_attachment, {}, behavoir)
+    BarrierBehavior behavior = BarrierBehavior::eDefault)
+    : RenderTargetState(cmd_buff, rect, color_attachments, depth_attachment, {}, behavior)
   {
   }
 

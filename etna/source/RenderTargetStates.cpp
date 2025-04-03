@@ -15,7 +15,7 @@ RenderTargetState::RenderTargetState(
   const std::vector<AttachmentParams>& color_attachments,
   AttachmentParams depth_attachment,
   AttachmentParams stencil_attachment,
-  BarrierBehavoir behavoir)
+  BarrierBehavior behavior)
 {
   ETNA_VERIFYF(!inScope, "RenderTargetState scopes shouldn't overlap.");
   inScope = true;
@@ -43,7 +43,7 @@ RenderTargetState::RenderTargetState(
     attachmentInfos[i].clearValue = color_attachments[i].clearColorValue;
 
     etna::get_context().getResourceTracker().setColorTarget(
-      commandBuffer, color_attachments[i].image, behavoir);
+      commandBuffer, color_attachments[i].image, behavior);
 
     if (color_attachments[i].resolveImage)
     {
@@ -51,7 +51,7 @@ RenderTargetState::RenderTargetState(
         commandBuffer,
         color_attachments[i].resolveImage,
         vk::ImageAspectFlagBits::eColor,
-        behavoir);
+        behavior);
 
       attachmentInfos[i].resolveImageLayout = vk::ImageLayout::eGeneral;
       attachmentInfos[i].resolveImageView = color_attachments[i].resolveImageView;
@@ -90,7 +90,7 @@ RenderTargetState::RenderTargetState(
       commandBuffer,
       depth_attachment.image,
       vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil,
-      behavoir);
+      behavior);
 
     if (depth_attachment.resolveImage && stencil_attachment.resolveImage)
     {
@@ -98,7 +98,7 @@ RenderTargetState::RenderTargetState(
         commandBuffer,
         depth_attachment.resolveImage,
         vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil,
-        behavoir);
+        behavior);
     }
   }
   else
@@ -109,7 +109,7 @@ RenderTargetState::RenderTargetState(
         commandBuffer,
         depth_attachment.image,
         depth_attachment.imageAspect.value_or(vk::ImageAspectFlagBits::eDepth),
-        behavoir);
+        behavior);
 
       if (depth_attachment.resolveImage)
       {
@@ -117,7 +117,7 @@ RenderTargetState::RenderTargetState(
           commandBuffer,
           depth_attachment.resolveImage,
           depth_attachment.resolveImageAspect.value_or(vk::ImageAspectFlagBits::eDepth),
-          behavoir);
+          behavior);
       }
     }
 
@@ -127,7 +127,7 @@ RenderTargetState::RenderTargetState(
         commandBuffer,
         stencil_attachment.image,
         stencil_attachment.imageAspect.value_or(vk::ImageAspectFlagBits::eStencil),
-        behavoir);
+        behavior);
 
       if (stencil_attachment.resolveImage)
       {
@@ -135,7 +135,7 @@ RenderTargetState::RenderTargetState(
           commandBuffer,
           stencil_attachment.resolveImage,
           stencil_attachment.resolveImageAspect.value_or(vk::ImageAspectFlagBits::eStencil),
-          behavoir);
+          behavior);
       }
     }
   }
