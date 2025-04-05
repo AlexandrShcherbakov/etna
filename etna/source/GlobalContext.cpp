@@ -493,13 +493,13 @@ ResourceStates& GlobalContext::getResourceTracker()
 GlobalContext::~GlobalContext() = default;
 
 
-bool GlobalContext::shouldGenerateBarriersWhen(BarrierBehavoir behavoir) const
+bool GlobalContext::shouldGenerateBarriersWhen(BarrierBehavior behavior) const
 {
-  if (behavoir == BarrierBehavoir::eDefault)
+  if (behavior == BarrierBehavior::eDefault)
   {
     return shouldGenerateBarriersFlag;
   }
-  return behavoir == BarrierBehavoir::eGenerateBarriers;
+  return behavior == BarrierBehavior::eGenerateBarriers;
 }
 
 } // namespace etna
