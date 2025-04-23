@@ -21,6 +21,7 @@ struct DescriptorSetLayoutCache;
 struct ShaderProgramManager;
 class PipelineManager;
 struct DynamicDescriptorPool;
+struct PersistentDescriptorPool;
 class ResourceStates;
 class PerFrameCmdMgr;
 class OneShotCmdMgr;
@@ -49,6 +50,7 @@ public:
   PipelineManager& getPipelineManager();
   DescriptorSetLayoutCache& getDescriptorSetLayouts();
   DynamicDescriptorPool& getDescriptorPool();
+  PersistentDescriptorPool& getPersistentDescriptorPool();
   ResourceStates& getResourceTracker();
   GpuWorkCount& getMainWorkCount() { return mainWorkStream; }
   const GpuWorkCount& getMainWorkCount() const { return mainWorkStream; }
@@ -81,7 +83,8 @@ private:
   std::unique_ptr<DescriptorSetLayoutCache> descriptorSetLayouts;
   std::unique_ptr<ShaderProgramManager> shaderPrograms;
   std::unique_ptr<PipelineManager> pipelineManager;
-  std::unique_ptr<DynamicDescriptorPool> descriptorPool;
+  std::unique_ptr<DynamicDescriptorPool> perFrameDescriptorPool;
+  std::unique_ptr<PersistentDescriptorPool> persistentDescriptorPool;
   std::unique_ptr<ResourceStates> resourceTracking;
   std::unique_ptr<void, void (*)(void*)> tracyCtx;
 

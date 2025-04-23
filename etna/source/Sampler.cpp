@@ -25,4 +25,9 @@ Sampler::Sampler(CreateInfo info)
   etna::set_debug_name(sampler.get(), info.name.data());
 }
 
+SamplerBinding Sampler::genBinding() const
+{
+  return SamplerBinding{vk::DescriptorImageInfo{sampler.get()}};
+}
+
 } // namespace etna

@@ -74,6 +74,30 @@ DescriptorSet DynamicDescriptorPool::allocateSet(
     workCount.batchIndex(), layout_id, vkSet, std::move(bindings), command_buffer, behavoir};
 }
 
+PersistentDescriptorPool::PersistentDescriptorPool(vk::Device dev)
+  : vkDevice{dev}
+  , pool{unwrap_vk_result(dev.createDescriptorPoolUnique(vk::DescriptorPoolCreateInfo{
+      .maxSets = NUM_DESCRIPTORS,
+      .poolSizeCount = static_cast<std::uint32_t>(DEFAULT_POOL_SIZES.size()),
+      .pPoolSizes = DEFAULT_POOL_SIZES.data()}))}
+{
+}
+
+PersistentDescriptorSet PersistentDescriptorPool::allocateSet(
+  DescriptorLayoutId layout_id, std::vector<Binding> bindings)
+{
+  auto& dslCache = get_context().getDescriptorSetLayouts();
+  auto setLayouts = {dslCache.getVkLayout(layout_id)};
+
+  vk::DescriptorSetAllocateInfo info{};
+  info.setDescriptorPool(pool.get());
+  info.setSetLayouts(setLayouts);
+
+  vk::DescriptorSet vkSet{};
+  ETNA_VERIFY(vkDevice.allocateDescriptorSets(&info, &vkSet) == vk::Result::eSuccess);
+  return PersistentDescriptorSet{layout_id, vkSet, std::move(bindings)};
+}
+
 static bool is_image_resource(vk::DescriptorType ds_type)
 {
   switch (ds_type)
@@ -95,7 +119,8 @@ static bool is_image_resource(vk::DescriptorType ds_type)
   ETNA_PANIC("Descriptor write error : unsupported resource {}", vk::to_string(ds_type));
 }
 
-static void validate_descriptor_write(const DescriptorSet& dst)
+template <class TDescriptorSet>
+static void validate_descriptor_write(const TDescriptorSet& dst, bool allow_unbound_slots)
 {
   const auto& layoutInfo = get_context().getDescriptorSetLayouts().getLayoutInfo(dst.getLayoutId());
   const auto& bindings = dst.getBindings();
@@ -116,32 +141,37 @@ static void validate_descriptor_write(const DescriptorSet& dst)
     const auto& bindingInfo = layoutInfo.getBinding(binding.binding);
     bool isImageRequired = is_image_resource(bindingInfo.descriptorType);
     bool isImageBinding = std::get_if<ImageBinding>(&binding.resources) != nullptr;
-    if (isImageRequired != isImageBinding)
+    bool isSamplerBinding = std::get_if<SamplerBinding>(&binding.resources) != nullptr;
+    if (isImageRequired != (isImageBinding || isSamplerBinding))
     {
       ETNA_PANIC(
         "Descriptor write error: slot {} {} required but {} bound",
         binding.binding,
-        (isImageRequired ? "image" : "buffer"),
-        (isImageBinding ? "imaged" : "buffer"));
+        (isImageRequired ? "image/sampler" : "buffer"),
+        (isImageBinding ? "image" : (isSamplerBinding ? "sampler" : "buffer")));
     }
 
     unboundResources[binding.binding] -= 1;
   }
 
-  for (uint32_t binding = 0; binding < MAX_DESCRIPTOR_BINDINGS; binding++)
+  if (!allow_unbound_slots)
   {
-    if (unboundResources[binding] > 0)
-      ETNA_PANIC(
-        "Descriptor write error: slot {} has {} unbound resources",
-        binding,
-        unboundResources[binding]);
+    for (uint32_t binding = 0; binding < MAX_DESCRIPTOR_BINDINGS; binding++)
+    {
+      if (unboundResources[binding] > 0)
+        ETNA_PANIC(
+          "Descriptor write error: slot {} has {} unbound resources",
+          binding,
+          unboundResources[binding]);
+    }
   }
 }
 
-void write_set(const DescriptorSet& dst)
+template <class TDescriptorSet>
+void write_set(const TDescriptorSet& dst, bool allow_unbound_slots)
 {
   ETNA_VERIFY(dst.isValid());
-  validate_descriptor_write(dst);
+  validate_descriptor_write(dst, allow_unbound_slots);
 
   std::vector<vk::WriteDescriptorSet> writes;
   writes.reserve(dst.getBindings().size());
@@ -179,8 +209,11 @@ void write_set(const DescriptorSet& dst)
 
     if (is_image_resource(bindingInfo.descriptorType))
     {
-      const auto img = std::get<ImageBinding>(binding.resources).descriptor_info;
-      imageInfos[numImageInfo] = img;
+      const auto* imgMaybe = std::get_if<ImageBinding>(&binding.resources);
+      const auto* smpMaybe = std::get_if<SamplerBinding>(&binding.resources);
+      const auto& descriptorInfo =
+        imgMaybe != nullptr ? imgMaybe->descriptor_info : smpMaybe->descriptor_info;
+      imageInfos[numImageInfo] = descriptorInfo;
       write.setPImageInfo(imageInfos.data() + numImageInfo);
       numImageInfo++;
     }
@@ -197,6 +230,9 @@ void write_set(const DescriptorSet& dst)
 
   get_context().getDevice().updateDescriptorSets(writes, {});
 }
+
+template void write_set<DescriptorSet>(const DescriptorSet&, bool);
+template void write_set<PersistentDescriptorSet>(const PersistentDescriptorSet&, bool);
 
 constexpr static vk::PipelineStageFlags2 shader_stage_to_pipeline_stage(
   vk::ShaderStageFlags shader_stages)
@@ -250,9 +286,12 @@ constexpr static vk::AccessFlags2 descriptor_type_to_access_flag(vk::DescriptorT
   return vk::AccessFlagBits2::eNone;
 }
 
-void DescriptorSet::processBarriers() const
+static void process_barriers_to_cmd_buf(
+  vk::CommandBuffer cmd_buffer,
+  DescriptorLayoutId layout_id,
+  std::span<const etna::Binding> bindings)
 {
-  auto& layoutInfo = get_context().getDescriptorSetLayouts().getLayoutInfo(layoutId);
+  auto& layoutInfo = get_context().getDescriptorSetLayouts().getLayoutInfo(layout_id);
   for (auto& binding : bindings)
   {
     if (std::get_if<ImageBinding>(&binding.resources) == nullptr)
@@ -261,13 +300,23 @@ void DescriptorSet::processBarriers() const
     auto& bindingInfo = layoutInfo.getBinding(binding.binding);
     const ImageBinding& imgData = std::get<ImageBinding>(binding.resources);
     etna::set_state(
-      command_buffer,
+      cmd_buffer,
       imgData.image.get(),
       shader_stage_to_pipeline_stage(bindingInfo.stageFlags),
       descriptor_type_to_access_flag(bindingInfo.descriptorType),
       imgData.descriptor_info.imageLayout,
       imgData.image.getAspectMaskByFormat());
   }
+}
+
+void DescriptorSet::processBarriers() const
+{
+  process_barriers_to_cmd_buf(command_buffer, layoutId, bindings);
+}
+
+void PersistentDescriptorSet::processBarriers(vk::CommandBuffer cmd_buffer) const
+{
+  process_barriers_to_cmd_buf(cmd_buffer, layoutId, bindings);
 }
 
 } // namespace etna
