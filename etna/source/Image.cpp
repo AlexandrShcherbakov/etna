@@ -147,10 +147,10 @@ vk::ImageView Image::getView(Image::ViewParams params) const
   {
     vk::ImageViewCreateInfo viewInfo{
       .image = image,
-      .viewType = params.type ? params.type.value() : get_view_type(type),
-      .format = format,
+      .viewType = params.type.value_or(get_view_type(type)),
+      .format = params.format.value_or(format),
       .subresourceRange = vk::ImageSubresourceRange{
-        .aspectMask = params.aspectMask ? params.aspectMask.value() : get_aspect_mask(format),
+        .aspectMask = params.aspectMask.value_or(get_aspect_mask(params.format.value_or(format))),
         .baseMipLevel = params.baseMip,
         .levelCount = params.levelCount,
         .baseArrayLayer = params.baseLayer,
