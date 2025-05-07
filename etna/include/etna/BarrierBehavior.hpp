@@ -1,13 +1,13 @@
 #pragma once
-#ifndef BARRIERBEHAVOIR_HPP
-#define BARRIERBEHAVOIR_HPP
+#ifndef BARRIERBEHAVIOR_HPP
+#define BARRIERBEHAVIOR_HPP
 
-enum class BarrierBehavoir
+enum class BarrierBehavior
 {
   /// Inherits it's value from etna configuration
   eDefault,
 
-  /// Explicit way to set behavoir. Ignores etna config
+  /// Explicit way to set behavior. Ignores etna config
   eSuppressBarriers,
   eGenerateBarriers
 };
@@ -20,4 +20,4 @@ enum class ForceSetState
   eTrue
 };
 
-#endif // BARRIERBEHAVOIR_HPP
+#endif // BARRIERBEHAVIOR_HPP

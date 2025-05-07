@@ -72,9 +72,9 @@ DescriptorSet create_descriptor_set(
   DescriptorLayoutId layout,
   vk::CommandBuffer command_buffer,
   std::vector<Binding> bindings,
-  BarrierBehavoir behavoir)
+  BarrierBehavior behavior)
 {
-  auto set = gContext->getDescriptorPool().allocateSet(layout, bindings, command_buffer, behavoir);
+  auto set = gContext->getDescriptorPool().allocateSet(layout, bindings, command_buffer, behavior);
   write_set(set);
   return set;
 }

@@ -10,7 +10,7 @@
 #include <etna/ShaderProgram.hpp>
 #include <etna/DescriptorSet.hpp>
 #include <etna/Image.hpp>
-#include <etna/BarrierBehavoir.hpp>
+#include <etna/BarrierBehavior.hpp>
 
 namespace etna
 {
@@ -97,7 +97,7 @@ DescriptorSet create_descriptor_set(
   DescriptorLayoutId layout,
   vk::CommandBuffer command_buffer,
   std::vector<Binding> bindings,
-  BarrierBehavoir behavoir = BarrierBehavoir::eDefault);
+  BarrierBehavior behavior = BarrierBehavior::eDefault);
 
 /**
  * \brief Creates a persistent descriptor set which does not automatically set
