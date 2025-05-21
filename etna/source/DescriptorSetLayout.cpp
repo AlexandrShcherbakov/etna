@@ -1,4 +1,5 @@
 #include <etna/DescriptorSetLayout.hpp>
+#include <etna/DescriptorSet.hpp>
 
 #include <spirv_reflect.h>
 
@@ -15,7 +16,8 @@ static bool is_dynamic_descriptor(vk::DescriptorType type)
     type == vk::DescriptorType::eStorageBufferDynamic;
 }
 
-void DescriptorSetInfo::addResource(const vk::DescriptorSetLayoutBinding& binding)
+void DescriptorSetInfo::addResource(
+  const vk::DescriptorSetLayoutBinding& binding, vk::DescriptorBindingFlags flags)
 {
   if (binding.binding > MAX_DESCRIPTOR_BINDINGS)
     ETNA_PANIC(
@@ -32,14 +34,16 @@ void DescriptorSetInfo::addResource(const vk::DescriptorSetLayoutBinding& bindin
     }
 
     src.stageFlags |= binding.stageFlags;
+    bindingFlags[binding.binding] |= flags;
     return;
   }
 
   usedBindings.set(binding.binding);
   bindings[binding.binding] = binding;
+  bindingFlags[binding.binding] = flags;
 
-  if (binding.binding + 1 > maxUsedBinding)
-    maxUsedBinding = binding.binding + 1;
+  if (binding.binding + 1 > usedBindingsCap)
+    usedBindingsCap = binding.binding + 1;
 
   if (is_dynamic_descriptor(binding.descriptorType))
     dynOffsets++;
@@ -47,11 +51,13 @@ void DescriptorSetInfo::addResource(const vk::DescriptorSetLayoutBinding& bindin
 
 void DescriptorSetInfo::clear()
 {
-  maxUsedBinding = 0;
+  usedBindingsCap = 0;
   dynOffsets = 0;
   usedBindings.reset();
   for (auto& binding : bindings)
     binding = vk::DescriptorSetLayoutBinding{};
+  for (auto& flags : bindingFlags)
+    flags = vk::DescriptorBindingFlags{};
 }
 
 void DescriptorSetInfo::parseShader(
@@ -62,6 +68,7 @@ void DescriptorSetInfo::parseShader(
     const auto& spvBinding = *spv.bindings[i];
 
     vk::DescriptorSetLayoutBinding apiBinding{};
+    vk::DescriptorBindingFlags apiFlags{};
     apiBinding.descriptorCount = 1;
 
     for (uint32_t j = 0; j < spvBinding.array.dims_count; j++)
@@ -73,30 +80,82 @@ void DescriptorSetInfo::parseShader(
     apiBinding.stageFlags = stage;
     apiBinding.pImmutableSamplers = nullptr;
     apiBinding.binding = spvBinding.binding;
-    addResource(apiBinding);
+
+    if (apiBinding.descriptorCount == SPV_REFLECT_ARRAY_DIM_RUNTIME)
+    {
+      if (hasDynDescriptorArray)
+      {
+        ETNA_PANIC(
+          "DescriptorSetInfo: Only one dyn array binding allowed per set, but declared {} and {}",
+          getMaxBinding(),
+          apiBinding.binding);
+      }
+
+      apiBinding.descriptorCount = get_num_descriptors_in_pool_for_type(apiBinding.descriptorType);
+      apiFlags |= vk::DescriptorBindingFlagBits::ePartiallyBound |
+        vk::DescriptorBindingFlagBits::eVariableDescriptorCount;
+
+      hasDynDescriptorArray = true;
+    }
+    else if (hasDynDescriptorArray && usedBindingsCap <= apiBinding.binding)
+    {
+      ETNA_PANIC(
+        "DescriptorSetInfo: dyn array binding {} must be last in set, but binding {} was declared",
+        getMaxBinding(),
+        apiBinding.binding);
+    }
+
+    addResource(apiBinding, apiFlags);
   }
 }
 
 void DescriptorSetInfo::merge(const DescriptorSetInfo& info)
 {
-  for (uint32_t binding = 0; binding < info.maxUsedBinding; binding++)
+  if (hasDynDescriptorArray || info.hasDynDescriptorArray)
+  {
+    if (
+      hasDynDescriptorArray && info.hasDynDescriptorArray &&
+      usedBindingsCap != info.usedBindingsCap)
+    {
+      ETNA_PANIC(
+        "DescriptorSetInfo: can't merge two dsets with different dynamic array slots {} and {}",
+        getMaxBinding(),
+        info.getMaxBinding());
+    }
+    else if (
+      (!hasDynDescriptorArray && usedBindingsCap >= info.usedBindingsCap) ||
+      (!info.hasDynDescriptorArray && info.usedBindingsCap >= usedBindingsCap))
+    {
+      ETNA_PANIC(
+        "DescriptorSetInfo: can't merge two dsets with if dynamic array slot {} will not be max",
+        std::min(getMaxBinding(), info.getMaxBinding()));
+    }
+
+    hasDynDescriptorArray = true;
+  }
+
+  for (uint32_t binding = 0; binding < info.usedBindingsCap; binding++)
   {
     if (!info.usedBindings.test(binding))
       continue;
-    addResource(info.bindings[binding]);
+    addResource(info.bindings[binding], info.bindingFlags[binding]);
   }
 }
 
 bool DescriptorSetInfo::operator==(const DescriptorSetInfo& rhs) const
 {
-  if (maxUsedBinding != rhs.maxUsedBinding)
+  if (usedBindingsCap != rhs.usedBindingsCap)
     return false;
   if (usedBindings != rhs.usedBindings)
     return false;
+  if (hasDynDescriptorArray != rhs.hasDynDescriptorArray)
+    return false;
 
-  for (uint32_t i = 0; i < maxUsedBinding; i++)
+  for (uint32_t i = 0; i < usedBindingsCap; i++)
   {
     if (bindings[i] != rhs.bindings[i])
+      return false;
+    if (bindingFlags[i] != rhs.bindingFlags[i])
       return false;
   }
 
@@ -106,15 +165,21 @@ bool DescriptorSetInfo::operator==(const DescriptorSetInfo& rhs) const
 vk::DescriptorSetLayout DescriptorSetInfo::createVkLayout(vk::Device device) const
 {
   std::vector<vk::DescriptorSetLayoutBinding> apiBindings;
-  for (uint32_t i = 0; i < maxUsedBinding; i++)
+  std::vector<vk::DescriptorBindingFlags> apiFlags;
+  for (uint32_t i = 0; i < usedBindingsCap; i++)
   {
     if (!usedBindings.test(i))
       continue;
     apiBindings.push_back(bindings[i]);
+    apiFlags.push_back(bindingFlags[i]);
   }
+
+  vk::DescriptorSetLayoutBindingFlagsCreateInfo flagsInfo{};
+  flagsInfo.setBindingFlags(apiFlags);
 
   vk::DescriptorSetLayoutCreateInfo info{};
   info.setBindings(apiBindings);
+  info.setPNext(&flagsInfo);
 
   return unwrap_vk_result(device.createDescriptorSetLayout(info));
 }
@@ -130,7 +195,9 @@ std::size_t DescriptorSetLayoutHash::operator()(const DescriptorSetInfo& res) co
 {
   size_t hash = 0;
 
-  for (uint32_t i = 0; i < res.maxUsedBinding; i++)
+  hash_combine(hash, res.hasDynDescriptorArray);
+
+  for (uint32_t i = 0; i < res.usedBindingsCap; i++)
   {
     if (!res.usedBindings.test(i))
       continue;
@@ -139,6 +206,7 @@ std::size_t DescriptorSetLayoutHash::operator()(const DescriptorSetInfo& res) co
     hash_combine(hash, static_cast<uint32_t>(res.bindings[i].descriptorType));
     hash_combine(hash, res.bindings[i].descriptorCount);
     hash_combine(hash, static_cast<uint32_t>(res.bindings[i].stageFlags));
+    hash_combine(hash, static_cast<uint32_t>(res.bindingFlags[i]));
   }
 
   return hash;

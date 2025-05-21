@@ -165,6 +165,8 @@ private:
 template <class TDescriptorSet>
 void write_set(const TDescriptorSet& dst, bool allow_unbound_slots = false);
 
+uint32_t get_num_descriptors_in_pool_for_type(vk::DescriptorType type);
+
 } // namespace etna
 
 #endif // ETNA_DESCRIPTOR_SET_HPP_INCLUDED
