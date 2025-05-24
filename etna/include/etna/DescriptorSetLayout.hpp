@@ -24,7 +24,8 @@ struct DescriptorSetLayoutHash;
 struct DescriptorSetInfo
 {
   void parseShader(vk::ShaderStageFlagBits stage, const SpvReflectDescriptorSet& spv);
-  void addResource(const vk::DescriptorSetLayoutBinding& binding);
+  void addResource(
+    const vk::DescriptorSetLayoutBinding& binding, vk::DescriptorBindingFlags flags = {});
   void merge(const DescriptorSetInfo& info);
 
   bool operator==(const DescriptorSetInfo& rhs) const;
@@ -35,7 +36,13 @@ struct DescriptorSetInfo
 
   bool isBindingUsed(uint32_t binding) const
   {
-    return binding < maxUsedBinding && usedBindings.test(binding);
+    return binding < usedBindingsCap && usedBindings.test(binding);
+  }
+
+  uint32_t getMaxBinding() const
+  {
+    ETNA_VERIFY(usedBindingsCap > 0);
+    return usedBindingsCap - 1;
   }
 
   const vk::DescriptorSetLayoutBinding& getBinding(uint32_t binding) const
@@ -44,12 +51,29 @@ struct DescriptorSetInfo
     return bindings.at(binding);
   }
 
+  vk::DescriptorBindingFlags getBindingFlags(uint32_t binding) const
+  {
+    ETNA_VERIFY(isBindingUsed(binding));
+    return bindingFlags.at(binding);
+  }
+
+  bool hasDynamicDescriptorArray() const { return hasDynDescriptorArray; }
+  uint32_t getDynamicDescriptorArraySizeCap() const
+  {
+    ETNA_VERIFY(hasDynamicDescriptorArray());
+    return getBinding(getMaxBinding()).descriptorCount;
+  }
+
 private:
-  uint32_t maxUsedBinding = 0;
+  uint32_t usedBindingsCap = 0;
   uint32_t dynOffsets = 0;
 
   std::bitset<MAX_DESCRIPTOR_BINDINGS> usedBindings{};
   std::array<vk::DescriptorSetLayoutBinding, MAX_DESCRIPTOR_BINDINGS> bindings{};
+  std::array<vk::DescriptorBindingFlags, MAX_DESCRIPTOR_BINDINGS> bindingFlags{};
+
+  // If this is true, the array is guaranteed to be in the usedBindingsCap - 1 slot
+  bool hasDynDescriptorArray = false;
 
   friend DescriptorSetLayoutHash;
 };

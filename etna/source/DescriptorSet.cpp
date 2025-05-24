@@ -32,6 +32,64 @@ static constexpr std::array<vk::DescriptorPoolSize, 6> DEFAULT_POOL_SIZES{
   vk::DescriptorPoolSize{vk::DescriptorType::eStorageImage, NUM_RW_TEXTURES},
   vk::DescriptorPoolSize{vk::DescriptorType::eCombinedImageSampler, NUM_TEXTURES}};
 
+uint32_t get_num_descriptors_in_pool_for_type(vk::DescriptorType type)
+{
+  for (const auto& size : DEFAULT_POOL_SIZES)
+  {
+    if (type == size.type)
+      return size.descriptorCount;
+  }
+
+  // MSVC doesn't like me putting an assert here because it is unreachable,
+  // guess it doesn't know about casts
+  return 0;
+}
+
+static vk::DescriptorSet allocate_desciptor_set_from_pool(
+  vk::Device vk_device,
+  vk::DescriptorPool pool,
+  DescriptorLayoutId layout_id,
+  std::span<const Binding> bindings)
+{
+  auto& dslCache = get_context().getDescriptorSetLayouts();
+  auto setLayouts = {dslCache.getVkLayout(layout_id)};
+
+  vk::DescriptorSetAllocateInfo info{};
+  info.setDescriptorPool(pool);
+  info.setSetLayouts(setLayouts);
+
+  vk::DescriptorSetVariableDescriptorCountAllocateInfo dynCountInfo{};
+  std::array dynCounts = {0u};
+  if (const auto& setInfo = dslCache.getLayoutInfo(layout_id); setInfo.hasDynamicDescriptorArray())
+  {
+    uint32_t arrBinding = setInfo.getMaxBinding();
+    uint32_t arrSizeCap = setInfo.getDynamicDescriptorArraySizeCap();
+
+    uint32_t count = 0;
+
+    for (const auto& binding : bindings)
+    {
+      if (binding.binding == arrBinding)
+        count = std::max(count, binding.arrayElem + 1);
+    }
+    if (count > arrSizeCap)
+    {
+      ETNA_PANIC(
+        "Descriptor set allocation : trying to allocate dynamic array of size {} while max is {}",
+        count,
+        arrSizeCap);
+    }
+
+    dynCounts[0] = count;
+    dynCountInfo.setDescriptorCounts(dynCounts);
+    info.setPNext(&dynCountInfo);
+  }
+
+  vk::DescriptorSet vkSet{};
+  ETNA_VERIFY(vk_device.allocateDescriptorSets(&info, &vkSet) == vk::Result::eSuccess);
+  return vkSet;
+}
+
 DynamicDescriptorPool::DynamicDescriptorPool(vk::Device dev, const GpuWorkCount& work_count)
   : vkDevice{dev}
   , workCount{work_count}
@@ -61,15 +119,8 @@ DescriptorSet DynamicDescriptorPool::allocateSet(
   vk::CommandBuffer command_buffer,
   BarrierBehavior behavior)
 {
-  auto& dslCache = get_context().getDescriptorSetLayouts();
-  auto setLayouts = {dslCache.getVkLayout(layout_id)};
-
-  vk::DescriptorSetAllocateInfo info{};
-  info.setDescriptorPool(pools.get().get());
-  info.setSetLayouts(setLayouts);
-
-  vk::DescriptorSet vkSet{};
-  ETNA_VERIFY(vkDevice.allocateDescriptorSets(&info, &vkSet) == vk::Result::eSuccess);
+  vk::DescriptorSet vkSet =
+    allocate_desciptor_set_from_pool(vkDevice, pools.get().get(), layout_id, bindings);
   return DescriptorSet{
     workCount.batchIndex(), layout_id, vkSet, std::move(bindings), command_buffer, behavior};
 }
@@ -86,15 +137,8 @@ PersistentDescriptorPool::PersistentDescriptorPool(vk::Device dev)
 PersistentDescriptorSet PersistentDescriptorPool::allocateSet(
   DescriptorLayoutId layout_id, std::vector<Binding> bindings)
 {
-  auto& dslCache = get_context().getDescriptorSetLayouts();
-  auto setLayouts = {dslCache.getVkLayout(layout_id)};
-
-  vk::DescriptorSetAllocateInfo info{};
-  info.setDescriptorPool(pool.get());
-  info.setSetLayouts(setLayouts);
-
-  vk::DescriptorSet vkSet{};
-  ETNA_VERIFY(vkDevice.allocateDescriptorSets(&info, &vkSet) == vk::Result::eSuccess);
+  vk::DescriptorSet vkSet =
+    allocate_desciptor_set_from_pool(vkDevice, pool.get(), layout_id, bindings);
   return PersistentDescriptorSet{layout_id, vkSet, std::move(bindings)};
 }
 
@@ -120,7 +164,8 @@ static bool is_image_resource(vk::DescriptorType ds_type)
 }
 
 template <class TDescriptorSet>
-static void validate_descriptor_write(const TDescriptorSet& dst, bool allow_unbound_slots)
+static void validate_descriptor_write(
+  const TDescriptorSet& dst, std::bitset<MAX_DESCRIPTOR_BINDINGS> partially_writable_bindings)
 {
   const auto& layoutInfo = get_context().getDescriptorSetLayouts().getLayoutInfo(dst.getLayoutId());
   const auto& bindings = dst.getBindings();
@@ -154,16 +199,13 @@ static void validate_descriptor_write(const TDescriptorSet& dst, bool allow_unbo
     unboundResources[binding.binding] -= 1;
   }
 
-  if (!allow_unbound_slots)
+  for (uint32_t binding = 0; binding < MAX_DESCRIPTOR_BINDINGS; binding++)
   {
-    for (uint32_t binding = 0; binding < MAX_DESCRIPTOR_BINDINGS; binding++)
-    {
-      if (unboundResources[binding] > 0)
-        ETNA_PANIC(
-          "Descriptor write error: slot {} has {} unbound resources",
-          binding,
-          unboundResources[binding]);
-    }
+    if (unboundResources[binding] > 0 && !partially_writable_bindings.test(binding))
+      ETNA_PANIC(
+        "Descriptor write error: slot {} has {} unbound resources",
+        binding,
+        unboundResources[binding]);
   }
 }
 
@@ -171,15 +213,32 @@ template <class TDescriptorSet>
 void write_set(const TDescriptorSet& dst, bool allow_unbound_slots)
 {
   ETNA_VERIFY(dst.isValid());
-  validate_descriptor_write(dst, allow_unbound_slots);
+
+  std::bitset<MAX_DESCRIPTOR_BINDINGS> partiallyWritableBindings{};
+
+  // @TODO: maybe allow_unbound_slots should be opt-in on layout creation with proper vk flags
+  if (allow_unbound_slots)
+    partiallyWritableBindings.set();
+
+  const auto& layoutInfo = get_context().getDescriptorSetLayouts().getLayoutInfo(dst.getLayoutId());
+
+  for (uint32_t i = 0; i < MAX_DESCRIPTOR_BINDINGS; ++i)
+  {
+    if (
+      layoutInfo.isBindingUsed(i) &&
+      (layoutInfo.getBindingFlags(i) & vk::DescriptorBindingFlagBits::ePartiallyBound))
+    {
+      partiallyWritableBindings.set(i);
+    }
+  }
+
+  validate_descriptor_write(dst, partiallyWritableBindings);
 
   std::vector<vk::WriteDescriptorSet> writes;
   writes.reserve(dst.getBindings().size());
 
   uint32_t numBufferInfo = 0;
   uint32_t numImageInfo = 0;
-
-  const auto& layoutInfo = get_context().getDescriptorSetLayouts().getLayoutInfo(dst.getLayoutId());
 
   for (auto& binding : dst.getBindings())
   {
