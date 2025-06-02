@@ -7,6 +7,40 @@
 namespace etna
 {
 
+void ResourceStates::setBufferState(
+  vk::CommandBuffer com_buffer,
+  vk::Buffer buffer,
+  vk::PipelineStageFlags2 pipeline_stage_flag,
+  vk::AccessFlags2 access_flags,
+  ForceSetState force)
+{
+  HandleType resHandle = std::bit_cast<HandleType>(static_cast<VkBuffer>(buffer));
+  if (currentStates.count(resHandle) == 0)
+  {
+    currentStates[resHandle] = BufferState{.owner = com_buffer};
+  }
+  BufferState newState{
+    .piplineStageFlags = pipeline_stage_flag,
+    .accessFlags = access_flags,
+    .owner = com_buffer,
+  };
+  auto& oldState = std::get<1>(currentStates[resHandle]);
+  if (force == ForceSetState::eFalse && newState == oldState)
+    return;
+  bufBarriersToFlush.push_back(vk::BufferMemoryBarrier2{
+    .srcStageMask = oldState.piplineStageFlags,
+    .srcAccessMask = oldState.accessFlags,
+    .dstStageMask = newState.piplineStageFlags,
+    .dstAccessMask = newState.accessFlags,
+    .srcQueueFamilyIndex = vk::QueueFamilyIgnored,
+    .dstQueueFamilyIndex = vk::QueueFamilyIgnored,
+    .buffer = buffer,
+    .offset = 0,
+    .size = VK_WHOLE_SIZE,
+  });
+  oldState = newState;
+}
+
 void ResourceStates::setExternalTextureState(
   vk::Image image,
   vk::PipelineStageFlags2 pipeline_stage_flag,
@@ -45,7 +79,7 @@ void ResourceStates::setTextureState(
   auto& oldState = std::get<0>(currentStates[resHandle]);
   if (force == ForceSetState::eFalse && newState == oldState)
     return;
-  barriersToFlush.push_back(vk::ImageMemoryBarrier2{
+  imgBarriersToFlush.push_back(vk::ImageMemoryBarrier2{
     .srcStageMask = oldState.piplineStageFlags,
     .srcAccessMask = oldState.accessFlags,
     .dstStageMask = newState.piplineStageFlags,
@@ -69,15 +103,18 @@ void ResourceStates::setTextureState(
 
 void ResourceStates::flushBarriers(vk::CommandBuffer com_buf)
 {
-  if (barriersToFlush.empty())
+  if (imgBarriersToFlush.empty() && bufBarriersToFlush.empty())
     return;
   vk::DependencyInfo depInfo{
     .dependencyFlags = vk::DependencyFlagBits::eByRegion,
-    .imageMemoryBarrierCount = static_cast<uint32_t>(barriersToFlush.size()),
-    .pImageMemoryBarriers = barriersToFlush.data(),
+    .bufferMemoryBarrierCount = static_cast<uint32_t>(bufBarriersToFlush.size()),
+    .pBufferMemoryBarriers = bufBarriersToFlush.data(),
+    .imageMemoryBarrierCount = static_cast<uint32_t>(imgBarriersToFlush.size()),
+    .pImageMemoryBarriers = imgBarriersToFlush.data(),
   };
   com_buf.pipelineBarrier2(depInfo);
-  barriersToFlush.clear();
+  imgBarriersToFlush.clear();
+  bufBarriersToFlush.clear();
 }
 
 void ResourceStates::setColorTarget(
