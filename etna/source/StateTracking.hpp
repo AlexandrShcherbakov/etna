@@ -10,7 +10,6 @@
 
 namespace etna
 {
-
 class ResourceStates
 {
   using HandleType = uint64_t;
@@ -22,11 +21,27 @@ class ResourceStates
     vk::CommandBuffer owner = {};
     bool operator==(const TextureState& other) const = default;
   };
-  using State = std::variant<TextureState>; // TODO: Add buffers
+  struct BufferState
+  {
+    vk::PipelineStageFlags2 piplineStageFlags = {};
+    vk::AccessFlags2 accessFlags = {};
+    vk::CommandBuffer owner = {};
+    bool operator==(const BufferState& other) const = default;
+  };
+
+  using State = std::variant<TextureState, BufferState>;
   std::unordered_map<HandleType, State> currentStates;
-  std::vector<vk::ImageMemoryBarrier2> barriersToFlush;
+  std::vector<vk::ImageMemoryBarrier2> imgBarriersToFlush;
+  std::vector<vk::BufferMemoryBarrier2> bufBarriersToFlush;
 
 public:
+  void setBufferState(
+    vk::CommandBuffer com_buffer,
+    vk::Buffer buffer,
+    vk::PipelineStageFlags2 pipeline_stage_flag,
+    vk::AccessFlags2 access_flags,
+    ForceSetState force = ForceSetState::eFalse);
+
   void setExternalTextureState(
     vk::Image image,
     vk::PipelineStageFlags2 pipeline_stage_flag,
