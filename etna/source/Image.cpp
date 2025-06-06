@@ -156,6 +156,12 @@ vk::ImageView Image::getView(Image::ViewParams params) const
         .baseArrayLayer = params.baseLayer,
         .layerCount = params.layerCount,
       }};
+    vk::ImageViewUsageCreateInfo usageOverride{};
+    if (params.usageFlags.has_value())
+    {
+      usageOverride.usage = params.usageFlags.value();
+      viewInfo.pNext = &usageOverride;
+    }
     auto view = unwrap_vk_result(etna::get_context().getDevice().createImageViewUnique(viewInfo));
     set_debug_name(view.get(), name.c_str());
     it = views.emplace(params, std::move(view)).first;
