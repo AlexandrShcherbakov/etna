@@ -131,6 +131,7 @@ public:
 
   vk::Extent3D getExtent() const { return extent; }
   vk::Format getFormat() const { return format; }
+  std::string_view getName() const { return name; }
 
 private:
   struct ViewParamsHasher
