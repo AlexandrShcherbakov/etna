@@ -113,6 +113,7 @@ public:
     std::optional<vk::ImageViewType> type = std::nullopt;
 
     std::optional<vk::Format> format = std::nullopt;
+    std::optional<vk::ImageUsageFlags> usageFlags = std::nullopt;
 
     bool operator==(const ViewParams& b) const = default;
   };
@@ -122,7 +123,8 @@ public:
   ImageBinding genBinding(
     vk::Sampler sampler,
     vk::ImageLayout layout,
-    ViewParams params = {0, vk::RemainingMipLevels, 0, vk::RemainingArrayLayers, {}, {}, {}}) const;
+    ViewParams params = {
+      0, vk::RemainingMipLevels, 0, vk::RemainingArrayLayers, {}, {}, {}, {}}) const;
 
   // Returns the "all" aspects combination of flags based on the image's real format
   vk::ImageAspectFlags getAspectMaskByFormat() const;
