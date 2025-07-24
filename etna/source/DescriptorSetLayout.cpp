@@ -63,6 +63,8 @@ void DescriptorSetInfo::clear()
 void DescriptorSetInfo::parseShader(
   vk::ShaderStageFlagBits stage, const SpvReflectDescriptorSet& spv)
 {
+  uint32_t dynamicArrayBinding = uint32_t(-1);
+
   for (uint32_t i = 0u; i < spv.binding_count; i++)
   {
     const auto& spvBinding = *spv.bindings[i];
@@ -85,10 +87,17 @@ void DescriptorSetInfo::parseShader(
     {
       if (hasDynDescriptorArray)
       {
-        ETNA_PANIC(
-          "DescriptorSetInfo: Only one dyn array binding allowed per set, but declared {} and {}",
-          getMaxBinding(),
-          apiBinding.binding);
+        if (dynamicArrayBinding == apiBinding.binding)
+        {
+          continue;
+        }
+        else
+        {
+          ETNA_PANIC(
+            "DescriptorSetInfo: Only one dyn array binding allowed per set, but declared {} and {}",
+            getMaxBinding(),
+            apiBinding.binding);
+        }
       }
 
       apiBinding.descriptorCount = get_num_descriptors_in_pool_for_type(apiBinding.descriptorType);
@@ -96,6 +105,7 @@ void DescriptorSetInfo::parseShader(
         vk::DescriptorBindingFlagBits::eVariableDescriptorCount;
 
       hasDynDescriptorArray = true;
+      dynamicArrayBinding = apiBinding.binding;
     }
     else if (hasDynDescriptorArray && usedBindingsCap <= apiBinding.binding)
     {
