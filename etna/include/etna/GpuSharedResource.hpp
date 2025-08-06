@@ -3,6 +3,7 @@
 #define ETNA_GPU_SHARED_RESOURCE_HPP_INCLUDED
 
 #include <array>
+#include <concepts>
 
 #include <etna/detail/ManualLifetime.hpp>
 #include <etna/EtnaConfig.hpp>
@@ -25,45 +26,69 @@ template <class T>
 class GpuSharedResource
 {
 public:
-  GpuSharedResource(const GpuSharedResource&) = delete;
-  GpuSharedResource& operator=(const GpuSharedResource&) = delete;
+  GpuSharedResource(const GpuSharedResource& other)
+    requires std::copy_constructible<T>
+    : workCount{other.workCount}
+  {
+    for (std::size_t i = 0; i < workCount->multiBufferingCount(); ++i)
+      impl[i].construct(std::in_place, other.impl[i].get());
+  }
+  GpuSharedResource& operator=(const GpuSharedResource& other)
+    requires std::copyable<T>
+  {
+    ETNA_ASSERT(workCount == other.workCount);
+    for (std::size_t i = 0; i < workCount->multiBufferingCount(); ++i)
+      impl[i].get() = other.impl[i].get();
+  }
 
-  GpuSharedResource(GpuSharedResource&&) = delete;
-  GpuSharedResource& operator=(GpuSharedResource&&) = delete;
+  GpuSharedResource(GpuSharedResource&& other)
+    requires std::move_constructible<T>
+    : workCount{other.workCount}
+  {
+    for (std::size_t i = 0; i < workCount->multiBufferingCount(); ++i)
+      impl[i].construct(std::in_place, std::move(other.impl[i].get()));
+  }
+  GpuSharedResource& operator=(GpuSharedResource&& other)
+    requires std::movable<T>
+  {
+    ETNA_ASSERT(workCount == other.workCount);
+    for (std::size_t i = 0; i < workCount->multiBufferingCount(); ++i)
+      impl[i].get() = std::move(other.impl[i].get());
+  }
 
   template <class... Args>
   explicit GpuSharedResource(const GpuWorkCount& count, std::in_place_t, const Args&... args)
-    : workCount{count}
+    : workCount{&count}
   {
-    for (std::size_t i = 0; i < workCount.multiBufferingCount(); ++i)
+    for (std::size_t i = 0; i < workCount->multiBufferingCount(); ++i)
       impl[i].construct(std::in_place, args...);
   }
 
   explicit GpuSharedResource(const GpuWorkCount& count, const std::invocable<std::size_t> auto& f)
-    : workCount{count}
+    : workCount{&count}
   {
-    for (std::size_t i = 0; i < workCount.multiBufferingCount(); ++i)
+    for (std::size_t i = 0; i < workCount->multiBufferingCount(); ++i)
       impl[i].construct([&f, i]() { return f(i); });
   }
 
-  T& get() & { return impl[workCount.currentResource()].get(); }
-  const T& get() const& { return impl[workCount.currentResource()].get(); }
+  T& get() & { return impl[workCount->currentResource()].get(); }
+  const T& get() const& { return impl[workCount->currentResource()].get(); }
 
   template <std::invocable<T&> F>
   void iterate(const F& f) &
   {
-    for (std::size_t i = 0; i < workCount.multiBufferingCount(); ++i)
+    for (std::size_t i = 0; i < workCount->multiBufferingCount(); ++i)
       f(impl[i].get());
   }
 
   ~GpuSharedResource() noexcept
   {
-    for (std::size_t i = 0; i < workCount.multiBufferingCount(); ++i)
+    for (std::size_t i = 0; i < workCount->multiBufferingCount(); ++i)
       impl[i].destroy();
   }
 
 private:
-  const GpuWorkCount& workCount;
+  const GpuWorkCount* workCount;
   std::array<detail::ManualLifetime<T>, MAX_FRAMES_INFLIGHT> impl;
 };
 
