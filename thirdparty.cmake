@@ -38,7 +38,7 @@ set_property(TARGET spirv-reflect-static PROPERTY SYSTEM TRUE)
 CPMAddPackage(
   NAME fmt
   GITHUB_REPOSITORY fmtlib/fmt
-  GIT_TAG 10.2.1
+  GIT_TAG 11.2.0
   OPTIONS
     "FMT_SYSTEM_HEADERS"
     "FMT_DOC OFF"
@@ -50,7 +50,7 @@ CPMAddPackage(
 CPMAddPackage(
   NAME spdlog
   GITHUB_REPOSITORY gabime/spdlog
-  VERSION 1.13.0
+  VERSION 1.15.3
   OPTIONS
     SPDLOG_FMT_EXTERNAL
 )
