@@ -67,7 +67,6 @@ public:
 private:
   GpuWorkCount mainWorkStream;
 
-  vk::DynamicLoader vkDynamicLoader;
   vk::UniqueInstance vkInstance{};
   vk::UniqueDebugUtilsMessengerEXT vkDebugCallback{};
   vk::PhysicalDevice vkPhysDevice{};

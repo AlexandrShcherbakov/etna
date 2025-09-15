@@ -268,21 +268,21 @@ static vk::UniqueDevice create_logical_device(
 }
 
 #ifndef NDEBUG
-static VkBool32 debugCallback(
-  VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
-  VkDebugUtilsMessageTypeFlagsEXT /*messageType*/,
-  const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
+static vk::Bool32 debugCallback(
+  vk::DebugUtilsMessageSeverityFlagBitsEXT message_severity,
+  vk::DebugUtilsMessageTypeFlagsEXT /*messageType*/,
+  const vk::DebugUtilsMessengerCallbackDataEXT* callback_data,
   void* /*pUserData*/)
 {
-  if ((message_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) != 0)
+  if (message_severity & vk::DebugUtilsMessageSeverityFlagBitsEXT::eError)
   {
     spdlog::error(callback_data->pMessage);
   }
-  else if ((message_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) != 0)
+  else if (message_severity & vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning)
   {
     spdlog::warn(callback_data->pMessage);
   }
-  else if ((message_severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) != 0)
+  else if (message_severity & vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo)
   {
     spdlog::info(callback_data->pMessage);
   }
@@ -291,7 +291,7 @@ static VkBool32 debugCallback(
     spdlog::trace(callback_data->pMessage);
   }
 
-  return VK_FALSE;
+  return vk::False;
 }
 #endif
 
@@ -311,8 +311,7 @@ GlobalContext::GlobalContext(const InitParams& params)
   // 1) load version-independent symbols
   // 2) load device-independent symbols
   // 3) load device-specific symbols
-  VULKAN_HPP_DEFAULT_DISPATCHER.init(
-    vkDynamicLoader.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr"));
+  VULKAN_HPP_DEFAULT_DISPATCHER.init();
 
   vkInstance = createInstance(params);
   VULKAN_HPP_DEFAULT_DISPATCHER.init(vkInstance.get());
