@@ -13,6 +13,9 @@ Image::Image(VmaAllocator alloc, CreateInfo info)
   , format{info.format}
   , name{info.name}
   , extent{info.extent}
+  , layers{info.layers}
+  , mipLevels{info.mipLevels}
+  , creationFlags{info.flags}
 {
   vk::ImageCreateInfo imageInfo{
     .flags = info.flags,
@@ -66,6 +69,9 @@ void Image::swap(Image& other)
   std::swap(format, other.format);
   std::swap(name, other.name);
   std::swap(extent, other.extent);
+  std::swap(layers, other.layers);
+  std::swap(mipLevels, other.mipLevels);
+  std::swap(creationFlags, other.creationFlags);
 }
 
 Image::Image(Image&& other) noexcept

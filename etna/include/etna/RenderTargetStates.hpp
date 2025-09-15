@@ -37,6 +37,15 @@ public:
     vk::ResolveModeFlagBits resolveMode = vk::ResolveModeFlagBits::eNone;
   };
 
+  struct RenderPassInfo
+  {
+    vk::Rect2D rect;
+    std::vector<AttachmentParams> colorAttachments;
+    AttachmentParams depthAttachment;
+    AttachmentParams stencilAttachment = {};
+    BarrierBehavior behavior = BarrierBehavior::eDefault;
+  };
+
   RenderTargetState(
     vk::CommandBuffer cmd_buff,
     vk::Rect2D rect,
@@ -54,6 +63,17 @@ public:
     AttachmentParams depth_attachment,
     BarrierBehavior behavior = BarrierBehavior::eDefault)
     : RenderTargetState(cmd_buff, rect, color_attachments, depth_attachment, {}, behavior)
+  {
+  }
+
+  RenderTargetState(vk::CommandBuffer cmd_buff, RenderPassInfo rpi)
+    : RenderTargetState(
+        cmd_buff,
+        rpi.rect,
+        rpi.colorAttachments,
+        rpi.depthAttachment,
+        rpi.stencilAttachment,
+        rpi.behavior)
   {
   }
 

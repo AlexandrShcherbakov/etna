@@ -131,6 +131,10 @@ public:
 
   vk::Extent3D getExtent() const { return extent; }
   vk::Format getFormat() const { return format; }
+  std::string_view getName() const { return name; }
+  std::size_t getLayerCount() const { return layers; }
+  std::size_t getMipLevelCount() const { return mipLevels; }
+  vk::ImageCreateFlags getCreationFlags() const { return creationFlags; }
 
 private:
   struct ViewParamsHasher
@@ -160,6 +164,9 @@ private:
   vk::Format format;
   std::string name;
   vk::Extent3D extent;
+  std::size_t layers;
+  std::size_t mipLevels;
+  vk::ImageCreateFlags creationFlags;
 };
 
 } // namespace etna
