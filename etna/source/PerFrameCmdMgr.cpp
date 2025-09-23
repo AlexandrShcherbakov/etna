@@ -2,6 +2,8 @@
 
 #include <tracy/Tracy.hpp>
 
+#include "DebugUtils.hpp"
+
 
 namespace etna
 {
@@ -19,6 +21,7 @@ PerFrameCmdMgr::PerFrameCmdMgr(const Dependencies &deps)
   , commandsSubmitted{deps.workCount, std::in_place, false}
   , gpuDone{unwrap_vk_result(deps.device.createSemaphoreUnique({}))}
 {
+  set_debug_name(gpuDone.get(), "GPU work done");
   vk::CommandBufferAllocateInfo cbInfo{
     .commandPool = pool.get(),
     .level = vk::CommandBufferLevel::ePrimary,

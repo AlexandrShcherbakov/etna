@@ -1,4 +1,5 @@
 #pragma once
+#include "etna/GpuWorkCount.hpp"
 #ifndef ETNA_WINDOW_HPP_INCLUDED
 #define ETNA_WINDOW_HPP_INCLUDED
 
@@ -106,6 +107,16 @@ private:
     // size as work count multi-buffering, and vice-versa, multi-buffering count
     // should NOT be equal to the swap chain image count.
     std::vector<SwapchainElement> elements;
+
+    // NOTE: present operations and GPU work occur concurrently, and a semaphore
+    // may not be used until the present operation is done using it. As there is
+    // no way to know whether a present operation is done without the
+    // VK_KHR_swapchain_maintenance1 extension, we have no choice but to synchronize
+    // via the swapchain image being available again. Hence, one semaphore per image.
+    // Now, we don't really know which image will be acquired next, so we have no choice
+    // but to have a dedicated ring buffer of semaphores of the same size as the swapchain.
+    std::vector<vk::UniqueSemaphore> imageAvailable;
+    std::size_t presentCounter = 0;
   };
 
   SwapchainData createSwapchain(const DesiredProperties& props) const;
@@ -121,12 +132,6 @@ private:
   vk::Queue presentQueue;
 
   SwapchainData currentSwapchain{};
-
-  // NOTE: technically, the semaphore is not GPU-CPU shared,
-  // as it is a GPU-only synchronization primitive, but due to
-  // the way WSI works, it is still kind-of sort-of shared between
-  // the OS and the GPU, and so needs to be multi-buffered.
-  GpuSharedResource<vk::UniqueSemaphore> imageAvailableSem;
 
   bool swapchainInvalid{false};
 };

@@ -2,6 +2,7 @@
 
 #include <bit>
 #include <type_traits>
+#include <vulkan/vulkan_handles.hpp>
 
 #include "etna/GlobalContext.hpp"
 
@@ -54,6 +55,11 @@ void set_debug_name(vk::Buffer buffer, const char* name)
 void set_debug_name(vk::Sampler sampler, const char* name)
 {
   set_debug_name_base(sampler, vk::ObjectType::eSampler, name);
+}
+
+void set_debug_name(vk::Semaphore semaphore, const char* name)
+{
+  set_debug_name_base(semaphore, vk::ObjectType::eSemaphore, name);
 }
 
 } // namespace etna

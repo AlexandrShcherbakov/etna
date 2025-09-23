@@ -8,6 +8,7 @@
 
 #include "StateTracking.hpp"
 #include "DebugUtils.hpp"
+#include "etna/GpuWorkCount.hpp"
 
 
 namespace etna
@@ -80,9 +81,6 @@ Window::Window(const Dependencies& deps, CreateInfo info)
   , surface(std::move(info.surface))
   , queueFamily{deps.queueFamily}
   , presentQueue{deps.presentQueue}
-  , imageAvailableSem(deps.workCount, [&deps](std::size_t) {
-    return unwrap_vk_result(deps.device.createSemaphoreUnique(vk::SemaphoreCreateInfo{}));
-  })
 {
 }
 
@@ -93,7 +91,10 @@ std::optional<Window::SwapchainImage> Window::acquireNext()
   if (swapchainInvalid)
     return std::nullopt;
 
-  auto sem = imageAvailableSem.get().get();
+  auto sem =
+    currentSwapchain
+      .imageAvailable[currentSwapchain.presentCounter++ % currentSwapchain.imageAvailable.size()]
+      .get();
 
   // This blocks on mobile when the swapchain has no available images.
   vk::AcquireNextImageInfoKHR info{
@@ -193,6 +194,15 @@ Window::SwapchainData Window::createSwapchain(const DesiredProperties& props) co
     imageCount = std::min(imageCount, surfaceCaps.maxImageCount);
 
   SwapchainData newSwapchain;
+
+  newSwapchain.imageAvailable.resize(imageCount);
+  for (std::size_t i = 0; i < newSwapchain.imageAvailable.size(); ++i)
+  {
+    newSwapchain.imageAvailable[i] =
+      unwrap_vk_result(device.createSemaphoreUnique(vk::SemaphoreCreateInfo{}));
+    set_debug_name(
+      newSwapchain.imageAvailable[i].get(), fmt::format("Swapchain image {} available", i).c_str());
+  }
 
   {
     vk::SwapchainCreateInfoKHR info{
