@@ -40,6 +40,7 @@ public:
     vk::Image image;
     vk::ImageView view;
     vk::Semaphore available;
+    vk::Semaphore readyForPresent;
   };
 
   /**
@@ -116,6 +117,7 @@ private:
     // Now, we don't really know which image will be acquired next, so we have no choice
     // but to have a dedicated ring buffer of semaphores of the same size as the swapchain.
     std::vector<vk::UniqueSemaphore> imageAvailable;
+    std::vector<vk::UniqueSemaphore> imageReadyForPresent;
     std::size_t presentCounter = 0;
   };
 
