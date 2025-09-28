@@ -23,7 +23,7 @@ jobs:
         check-path: 'etna'
         fallback-style: 'none'
 
-    - uses: ZedThree/clang-tidy-review@v0.20.1
+    - uses: ZedThree/clang-tidy-review@v0.21.0
       id: review
       with:
         apt_packages: 'wget,libx11-dev'
