@@ -90,19 +90,23 @@ std::optional<Window::SwapchainImage> Window::acquireNext()
 
   if (swapchainInvalid)
     return std::nullopt;
+  const auto presentNo = currentSwapchain.presentCounter++;
 
-  auto sem =
-    currentSwapchain
-      .imageAvailable[currentSwapchain.presentCounter++ % currentSwapchain.imageAvailable.size()]
+  auto available =
+    currentSwapchain.imageAvailable[presentNo % currentSwapchain.imageAvailable.size()].get();
+
+  auto readyForPresent =
+    currentSwapchain.imageReadyForPresent[presentNo % currentSwapchain.imageReadyForPresent.size()]
       .get();
 
   // This blocks on mobile when the swapchain has no available images.
   vk::AcquireNextImageInfoKHR info{
     .swapchain = currentSwapchain.swapchain.get(),
     .timeout = 100000000000,
-    .semaphore = sem,
+    .semaphore = available,
     .deviceMask = 1,
   };
+
   uint32_t index;
   const auto res = device.acquireNextImage2KHR(&info, &index);
 
@@ -130,7 +134,8 @@ std::optional<Window::SwapchainImage> Window::acquireNext()
   return SwapchainImage{
     .image = element.image,
     .view = element.image_view.get(),
-    .available = sem,
+    .available = available,
+    .readyForPresent = readyForPresent,
   };
 }
 
@@ -202,6 +207,16 @@ Window::SwapchainData Window::createSwapchain(const DesiredProperties& props) co
       unwrap_vk_result(device.createSemaphoreUnique(vk::SemaphoreCreateInfo{}));
     set_debug_name(
       newSwapchain.imageAvailable[i].get(), fmt::format("Swapchain image {} available", i).c_str());
+  }
+
+  newSwapchain.imageReadyForPresent.resize(imageCount);
+  for (std::size_t i = 0; i < newSwapchain.imageReadyForPresent.size(); ++i)
+  {
+    newSwapchain.imageReadyForPresent[i] =
+      unwrap_vk_result(device.createSemaphoreUnique(vk::SemaphoreCreateInfo{}));
+    set_debug_name(
+      newSwapchain.imageReadyForPresent[i].get(),
+      fmt::format("Swapchain image {} ready for present", i).c_str());
   }
 
   {

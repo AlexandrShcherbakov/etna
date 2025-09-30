@@ -43,10 +43,14 @@ public:
    * write to color attachments only after the `after` semaphore is signaled.
    * Intended to be used with a semaphore that signals availability of the
    * swap chain image used in the buffer (see etna::Window::acquireNext).
-   * Returns a semaphore that is signaled when GPU has done executing the buffer,
-   * which is intended to be used for presenting the swap chain image (see etna::Window::present).
+   * Consumes a semaphore that is signaled when GPU has done executing the buffer,
+   * which is intended to be used for presenting the swap chain image (see etna::Window::present),
+   * and returns it (possibly renamed). It is rvalue, because semaphore must be signaled once.
    */
-  vk::Semaphore submit(vk::CommandBuffer what, vk::Semaphore write_attachments_after);
+  [[nodiscard]] vk::Semaphore submit(
+    vk::CommandBuffer what,
+    vk::Semaphore write_attachments_after,
+    vk::Semaphore&& use_result_after);
 
 private:
   vk::Device device;
@@ -55,9 +59,6 @@ private:
   vk::UniqueCommandPool pool;
   GpuSharedResource<vk::UniqueFence> commandsComplete;
   GpuSharedResource<bool> commandsSubmitted;
-
-  // NOTE: semaphores are GPU-only resources, no need to multi-buffer them.
-  vk::UniqueSemaphore gpuDone;
 
   std::optional<GpuSharedResource<vk::UniqueCommandBuffer>> buffers;
 };
