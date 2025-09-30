@@ -78,9 +78,11 @@ public:
     bool vsync = false;
 
     /**
-     * Auto-gamma selects an Srgb image format for the swapchain, which assumes all
-     * writes to be in linear color space and automatically performs gamma-correction
-     * after each and every write to a swapchain image.
+     * Auto-gamma selects a Unorm image format for the swapchain, which indicates that
+     * the application used linear color space when writing to swapchain images and
+     * did not perform gamma-correction. This makes the OS do a gamma-correction of its own.
+     * When this property is false, Srgb is used for swapchain images, which tells the OS
+     * that gamma-correction has already been done.
      * Should be disabled whenever tone mapping is being performed manually in shaders.
      */
     bool autoGamma = true;

@@ -23,7 +23,7 @@ static vk::SurfaceFormatKHR chose_surface_format(
 
   auto selected = formats[0];
 
-  const auto desiredFormat = auto_gamma ? vk::Format::eB8G8R8A8Srgb : vk::Format::eB8G8R8A8Unorm;
+  const auto desiredFormat = auto_gamma ? vk::Format::eB8G8R8A8Unorm : vk::Format::eB8G8R8A8Srgb;
 
   auto found = std::find_if(
     formats.begin(), formats.end(), [&desiredFormat](const vk::SurfaceFormatKHR& format) {
