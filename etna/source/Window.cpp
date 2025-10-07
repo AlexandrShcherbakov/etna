@@ -8,7 +8,7 @@
 
 #include "StateTracking.hpp"
 #include "DebugUtils.hpp"
-#include "etna/GpuWorkCount.hpp"
+#include <etna/GpuWorkCount.hpp>
 
 
 namespace etna
@@ -194,13 +194,22 @@ Window::SwapchainData Window::createSwapchain(const DesiredProperties& props) co
   // wayland and there is nothing we can do about it.
   const auto extent = chose_swap_extent(surfaceCaps, props.resolution);
 
+  // Why + 1 ? see https://vulkan-tutorial.com/Drawing_a_triangle/Presentation/Swap_chain
   std::uint32_t imageCount = surfaceCaps.minImageCount + 1;
   if (surfaceCaps.maxImageCount > 0)
     imageCount = std::min(imageCount, surfaceCaps.maxImageCount);
 
   SwapchainData newSwapchain;
 
-  newSwapchain.imageAvailable.resize(imageCount);
+  // We must have unique sems (aquire and preset) for each inflight frame,
+  // because we don't want to complicate synchronization with fences.
+  // There is no sync between CPU and GPU (because prev line),
+  // so if you want to change MAX_FRAMES_INFLIGHT to a higher value,
+  // think twice about it!
+  const auto numFramesInFlight = static_cast<std::uint32_t>(props.numFramesInFlight);
+  std::uint32_t semsCount = std::max(imageCount, numFramesInFlight);
+
+  newSwapchain.imageAvailable.resize(semsCount);
   for (std::size_t i = 0; i < newSwapchain.imageAvailable.size(); ++i)
   {
     newSwapchain.imageAvailable[i] =
@@ -209,7 +218,7 @@ Window::SwapchainData Window::createSwapchain(const DesiredProperties& props) co
       newSwapchain.imageAvailable[i].get(), fmt::format("Swapchain image {} available", i).c_str());
   }
 
-  newSwapchain.imageReadyForPresent.resize(imageCount);
+  newSwapchain.imageReadyForPresent.resize(semsCount);
   for (std::size_t i = 0; i < newSwapchain.imageReadyForPresent.size(); ++i)
   {
     newSwapchain.imageReadyForPresent[i] =

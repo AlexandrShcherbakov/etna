@@ -86,6 +86,11 @@ public:
      * Should be disabled whenever tone mapping is being performed manually in shaders.
      */
     bool autoGamma = true;
+
+    /**
+     * Should be equal to the number of command buffers used to draw images in the swapchain.
+     */
+    uint32_t numFramesInFlight = 1;
   };
   /**
    * Recreates the swapchain with the provided desired resolution
