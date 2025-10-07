@@ -215,8 +215,14 @@ Window::SwapchainData Window::createSwapchain(const DesiredProperties& props) co
       newSwapchain.imageAvailable[i].get(), fmt::format("Swapchain image {} available", i).c_str());
   }
 
+#ifdef linux
+  int aboba_ = 0;
+  (void)aboba_;
+#endif
+
   // imageReadyForPresent is signaled by queue to present the result,
   // so we need exactly imageCount sems
+
   newSwapchain.imageReadyForPresent.resize(imageCount);
   for (std::size_t i = 0; i < newSwapchain.imageReadyForPresent.size(); ++i)
   {
