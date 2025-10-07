@@ -1,4 +1,4 @@
-name: comment-lint-results
+name: comment-test-results
 
 permissions:
   checks: write
@@ -6,7 +6,7 @@ permissions:
 
 on:
   workflow_run:
-    workflows: ["lint"]
+    workflows: [lint, linux, windows]
     types:
       - completed
 
