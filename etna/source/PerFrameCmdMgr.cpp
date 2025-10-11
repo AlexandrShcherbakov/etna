@@ -91,4 +91,9 @@ vk::Semaphore PerFrameCmdMgr::submit(
   return use_result_after;
 }
 
+std::size_t PerFrameCmdMgr::getCmdBufferCount() const
+{
+  return buffers->getWorkCount()->multiBufferingCount();
+}
+
 } // namespace etna

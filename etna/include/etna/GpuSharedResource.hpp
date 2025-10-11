@@ -81,6 +81,8 @@ public:
       f(impl[i].get());
   }
 
+  const GpuWorkCount* getWorkCount() const { return workCount; }
+
   ~GpuSharedResource() noexcept
   {
     for (std::size_t i = 0; i < workCount->multiBufferingCount(); ++i)

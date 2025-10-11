@@ -52,6 +52,8 @@ public:
     vk::Semaphore write_attachments_after,
     vk::Semaphore&& use_result_after);
 
+  std::size_t getCmdBufferCount() const;
+
 private:
   vk::Device device;
   vk::Queue submitQueue;
