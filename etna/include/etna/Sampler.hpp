@@ -15,8 +15,9 @@ public:
 
   struct CreateInfo
   {
-    vk::Filter filter = vk::Filter::eNearest;
+    vk::Filter filter = vk::Filter::eLinear;
     vk::SamplerAddressMode addressMode = vk::SamplerAddressMode::eClampToEdge;
+    vk::SamplerMipmapMode mipmapMode = vk::SamplerMipmapMode::eLinear;
     std::string_view name;
     float minLod = 0.0f;
     float maxLod = VK_LOD_CLAMP_NONE;
