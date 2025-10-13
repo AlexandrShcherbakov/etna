@@ -198,15 +198,15 @@ Window::SwapchainData Window::createSwapchain(const DesiredProperties& props) co
 
   SwapchainData newSwapchain;
 
-  // We must have unique sems (aquire and preset) for each inflight frame,
+  // We must have a unique aquire sem for each inflight frame,
   // because we don't want to complicate synchronization with fences.
   // There is no sync between CPU and GPU (because prev line),
   // so if you want to change MAX_FRAMES_INFLIGHT to a higher value,
   // think twice about it!
-  const auto numFramesInFlight = static_cast<std::uint32_t>(props.numFramesInFlight);
-  std::uint32_t semsCount = std::max(imageCount, numFramesInFlight);
+  const auto numFramesInFlight = props.numFramesInFlight;
+  std::uint32_t imageAvailableSemsCount = std::max(imageCount, numFramesInFlight);
 
-  newSwapchain.imageAvailable.resize(semsCount);
+  newSwapchain.imageAvailable.resize(imageAvailableSemsCount);
   for (std::size_t i = 0; i < newSwapchain.imageAvailable.size(); ++i)
   {
     newSwapchain.imageAvailable[i] =
@@ -215,7 +215,9 @@ Window::SwapchainData Window::createSwapchain(const DesiredProperties& props) co
       newSwapchain.imageAvailable[i].get(), fmt::format("Swapchain image {} available", i).c_str());
   }
 
-  newSwapchain.imageReadyForPresent.resize(semsCount);
+  // imageReadyForPresent is signaled by queue to present the result,
+  // so we need exactly imageCount sems
+  newSwapchain.imageReadyForPresent.resize(imageCount);
   for (std::size_t i = 0; i < newSwapchain.imageReadyForPresent.size(); ++i)
   {
     newSwapchain.imageReadyForPresent[i] =
