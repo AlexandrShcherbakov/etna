@@ -11,7 +11,7 @@ Sampler::Sampler(CreateInfo info)
   vk::SamplerCreateInfo createInfo{
     .magFilter = info.filter,
     .minFilter = info.filter,
-    .mipmapMode = vk::SamplerMipmapMode::eLinear,
+    .mipmapMode = info.mipmapMode,
     .addressModeU = info.addressMode,
     .addressModeV = info.addressMode,
     .addressModeW = info.addressMode,
