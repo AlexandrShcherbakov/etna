@@ -95,10 +95,6 @@ std::optional<Window::SwapchainImage> Window::acquireNext()
   auto available =
     currentSwapchain.imageAvailable[presentNo % currentSwapchain.imageAvailable.size()].get();
 
-  auto readyForPresent =
-    currentSwapchain.imageReadyForPresent[presentNo % currentSwapchain.imageReadyForPresent.size()]
-      .get();
-
   // This blocks on mobile when the swapchain has no available images.
   vk::AcquireNextImageInfoKHR info{
     .swapchain = currentSwapchain.swapchain.get(),
@@ -121,6 +117,7 @@ std::optional<Window::SwapchainImage> Window::acquireNext()
     ETNA_PANIC("Swapchain element acquisition failed! Error code {}", vk::to_string(res));
 
   auto& element = currentSwapchain.elements[index];
+  auto readyForPresent = currentSwapchain.imageReadyForPresent[index].get();
 
   // NOTE: Sometimes swapchain returns the same image twice in a row.
   // This might break stuff, but I'm not sure how right now.
