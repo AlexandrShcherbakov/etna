@@ -5,7 +5,7 @@
 
 #include <etna/DescriptorSet.hpp>
 #include <etna/Etna.hpp>
-
+#include <etna/Vulkan.hpp>
 
 namespace etna
 {
@@ -105,12 +105,13 @@ DynamicDescriptorPool::DynamicDescriptorPool(vk::Device dev, const GpuWorkCount&
 
 void DynamicDescriptorPool::beginFrame()
 {
-  vkDevice.resetDescriptorPool(pools.get().get());
+  ETNA_CHECK_VK_RESULT(vkDevice.resetDescriptorPool(pools.get().get()));
 }
 
 void DynamicDescriptorPool::destroyAllocatedSets()
 {
-  pools.iterate([this](auto& pool) { vkDevice.resetDescriptorPool(pool.get()); });
+  pools.iterate(
+    [this](auto& pool) { ETNA_CHECK_VK_RESULT(vkDevice.resetDescriptorPool(pool.get())); });
 }
 
 DescriptorSet DynamicDescriptorPool::allocateSet(

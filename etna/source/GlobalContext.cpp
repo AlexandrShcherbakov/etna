@@ -254,17 +254,14 @@ static vk::UniqueDevice create_logical_device(
   // extensions support. Now pNext has to point to a
   // PhysicalDeviceFeatures2 structure while the actual
   // pEnabledFeatures has to be nullptr.
-  vk::DeviceCreateInfo creatInfo{
-    .pNext = &sync2Feature,
-    .queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size()),
-    .pQueueCreateInfos = queueInfos.data(),
-    .enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size()),
-    .ppEnabledExtensionNames = deviceExtensions.data(),
-  };
+  vk::DeviceCreateInfo createInfo{};
+  createInfo.setPNext(&sync2Feature);
+  createInfo.setQueueCreateInfos(queueInfos);
+  createInfo.setPEnabledExtensionNames(deviceExtensions);
 
   spdlog::info("Creating a logical device with the following extensions: {}", deviceExtensions);
 
-  return unwrap_vk_result(pdevice.createDeviceUnique(creatInfo));
+  return unwrap_vk_result(pdevice.createDeviceUnique(createInfo));
 }
 
 #ifndef NDEBUG
