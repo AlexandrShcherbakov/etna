@@ -17,6 +17,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Prepare Vulkan SDK
+      uses: humbletim/setup-vulkan-sdk@v1.2.1
+      with:
+        vulkan-query-version: 1.4.328.1
+        vulkan-components: Vulkan-Headers, Vulkan-Loader
+        vulkan-use-cache: true
+
+
     - uses: jidicula/clang-format-action@v4.11.0
       with:
         clang-format-version: '17'
@@ -28,13 +36,7 @@ jobs:
       with:
         apt_packages: 'wget,libx11-dev'
         build_dir: build
-        cmake_command: | # Awful, dirty hacks to get the vulkan-sdk version we need
-          wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | \
-            tee /etc/apt/trusted.gpg.d/lunarg.asc && \
-          wget -qO /etc/apt/sources.list.d/lunarg-vulkan-1.4.313-noble.list \
-            https://packages.lunarg.com/vulkan/1.4.313/lunarg-vulkan-1.4.313-noble.list && \
-          apt update && \
-          apt-get -y install libvulkan-dev vulkan-headers && \
+        cmake_command: |
           cmake -Bbuild -S. -DCMAKE_EXPORT_COMPILE_COMMANDS=on
         clang_tidy_checks: '' # Use closest .clang-tidy config, not some weird default
         split_workflow: true # So that comments work with fork PRs
@@ -42,3 +44,8 @@ jobs:
     # Upload review results as artifacts, a different workflow posts them
     # as comments. This is required due to security stuff.
     - uses: ZedThree/clang-tidy-review/upload@v0.21.0
+      id: upload-review
+
+    # If there are any comments, fail the check
+    - if: steps.review.outputs.total_comments > 0
+      run: exit 1

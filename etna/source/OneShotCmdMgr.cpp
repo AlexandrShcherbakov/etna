@@ -44,8 +44,8 @@ void OneShotCmdMgr::submitAndWait(vk::CommandBuffer buffer)
   ETNA_CHECK_VK_RESULT(submitQueue.submit2({sInfo}, oneShotFinished.get()));
   ETNA_CHECK_VK_RESULT(device.waitForFences({oneShotFinished.get()}, vk::True, 1000000000));
 
-  device.resetFences({oneShotFinished.get()});
-  commandBuffer->reset();
+  ETNA_CHECK_VK_RESULT(device.resetFences({oneShotFinished.get()}));
+  ETNA_CHECK_VK_RESULT(commandBuffer->reset());
 }
 
 } // namespace etna
