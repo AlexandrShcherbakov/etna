@@ -21,6 +21,8 @@ public:
     std::string_view name;
     float minLod = 0.0f;
     float maxLod = VK_LOD_CLAMP_NONE;
+    bool compareEnable = false;
+    vk::CompareOp compareOp = vk::CompareOp::eLessOrEqual;
   };
 
   explicit Sampler(CreateInfo info);
