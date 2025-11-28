@@ -91,8 +91,9 @@ Image create_image_from_bytes(Image::CreateInfo info, vk::CommandBuffer cmd_buf,
 {
   const auto blockSize = vk::blockSize(info.format);
   const auto imageSize = blockSize * info.extent.width * info.extent.height * info.extent.depth;
+  const auto fullSize = imageSize * info.layers;
   etna::Buffer stagingBuf = gContext->createBuffer(etna::Buffer::CreateInfo{
-    .size = imageSize,
+    .size = fullSize,
     .bufferUsage = vk::BufferUsageFlagBits::eTransferSrc,
     .memoryUsage = VMA_MEMORY_USAGE_AUTO,
     .allocationCreate =
@@ -101,7 +102,7 @@ Image create_image_from_bytes(Image::CreateInfo info, vk::CommandBuffer cmd_buf,
   });
 
   auto* mappedMem = stagingBuf.map();
-  std::memcpy(mappedMem, data, imageSize);
+  std::memcpy(mappedMem, data, fullSize);
   stagingBuf.unmap();
 
   ETNA_CHECK_VK_RESULT(cmd_buf.begin(vk::CommandBufferBeginInfo{
