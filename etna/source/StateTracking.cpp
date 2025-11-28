@@ -17,14 +17,14 @@ void ResourceStates::setBufferState(
   HandleType resHandle = std::bit_cast<HandleType>(static_cast<VkBuffer>(buffer));
   if (currentStates.count(resHandle) == 0)
   {
-    currentStates[resHandle] = BufferState{.owner = com_buffer};
+    currentStates.emplace(resHandle, BufferState{.owner = com_buffer});
   }
   BufferState newState{
     .piplineStageFlags = pipeline_stage_flag,
     .accessFlags = access_flags,
     .owner = com_buffer,
   };
-  auto& oldState = std::get<1>(currentStates[resHandle]);
+  auto& oldState = std::get<1>(currentStates.at(resHandle));
   if (force == ForceSetState::eFalse && newState == oldState)
     return;
   bufBarriersToFlush.push_back(vk::BufferMemoryBarrier2{
@@ -48,12 +48,14 @@ void ResourceStates::setExternalTextureState(
   vk::ImageLayout layout)
 {
   HandleType resHandle = std::bit_cast<HandleType>(static_cast<VkImage>(image));
-  currentStates[resHandle] = TextureState{
-    .piplineStageFlags = pipeline_stage_flag,
-    .accessFlags = access_flags,
-    .layout = layout,
-    .owner = {},
-  };
+  currentStates.emplace(
+    resHandle,
+    TextureState{
+      .piplineStageFlags = pipeline_stage_flag,
+      .accessFlags = access_flags,
+      .layout = layout,
+      .owner = {},
+    });
 }
 
 void ResourceStates::setTextureState(
@@ -68,7 +70,7 @@ void ResourceStates::setTextureState(
   HandleType resHandle = std::bit_cast<HandleType>(static_cast<VkImage>(image));
   if (currentStates.count(resHandle) == 0)
   {
-    currentStates[resHandle] = TextureState{.owner = com_buffer};
+    currentStates.emplace(resHandle, TextureState{.owner = com_buffer});
   }
   TextureState newState{
     .piplineStageFlags = pipeline_stage_flag,
@@ -76,7 +78,7 @@ void ResourceStates::setTextureState(
     .layout = layout,
     .owner = com_buffer,
   };
-  auto& oldState = std::get<0>(currentStates[resHandle]);
+  auto& oldState = std::get<0>(currentStates.at(resHandle));
   if (force == ForceSetState::eFalse && newState == oldState)
     return;
   imgBarriersToFlush.push_back(vk::ImageMemoryBarrier2{
