@@ -16,7 +16,7 @@ Buffer::Buffer(VmaAllocator alloc, CreateInfo info)
     .sharingMode = vk::SharingMode::eExclusive,
   };
 
-  VmaAllocationCreateInfo allocInfo{
+  VmaAllocationCreateInfo allocCreateInfo{
     .flags = info.allocationCreate,
     .usage = info.memoryUsage,
     .requiredFlags = 0,
@@ -27,14 +27,16 @@ Buffer::Buffer(VmaAllocator alloc, CreateInfo info)
     .priority = 0.f,
   };
 
+  VmaAllocationInfo allocInfo;
+
   VkBuffer buf;
   auto retcode = vmaCreateBuffer(
     allocator,
     &static_cast<const VkBufferCreateInfo&>(bufInfo),
-    &allocInfo,
+    &allocCreateInfo,
     &buf,
     &allocation,
-    nullptr);
+    &allocInfo);
   // Note that usually vulkan.hpp handles doing the assertion
   // and a pretty message, but VMA cannot do that.
   ETNA_VERIFYF(
@@ -42,6 +44,11 @@ Buffer::Buffer(VmaAllocator alloc, CreateInfo info)
     "Error {} occurred while trying to allocate an etna::Buffer!",
     vk::to_string(static_cast<vk::Result>(retcode)));
   buffer = vk::Buffer(buf);
+
+  // make map() optional if allocationCreate has VMA_ALLOCATION_CREATE_MAPPED_BIT
+  mapped = reinterpret_cast<std::byte*>(allocInfo.pMappedData);
+  ETNA_VERIFY(mapped == nullptr || info.allocationCreate & VMA_ALLOCATION_CREATE_MAPPED_BIT);
+
   etna::set_debug_name(buffer, info.name.data());
 }
 
