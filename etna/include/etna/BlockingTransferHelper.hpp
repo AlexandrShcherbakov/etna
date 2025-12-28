@@ -61,7 +61,7 @@ public:
     OneShotCmdMgr& cmd_mgr, std::span<std::byte> dst, const Buffer& src, std::uint32_t offset);
 
 
-  // NOTE: uploads only mip 0 and layer 0 for now and doesn't support 3D images
+  // NOTE: for now doesn't support 3D images
   void uploadImage(
     OneShotCmdMgr& cmd_mgr,
     Image& dst,
