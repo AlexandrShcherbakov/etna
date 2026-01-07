@@ -74,7 +74,7 @@ struct DescriptorSet
 
   uint64_t getGen() const { return generation; }
 
-  const std::vector<Binding>& getBindings() const { return bindings; }
+  std::span<Binding const> getBindings() const { return bindings; }
 
   void processBarriers() const;
 
@@ -90,10 +90,14 @@ struct PersistentDescriptorSet
 {
   PersistentDescriptorSet() = default;
   PersistentDescriptorSet(
-    DescriptorLayoutId id, vk::DescriptorSet vk_set, std::vector<Binding> resources)
+    DescriptorLayoutId id,
+    vk::DescriptorSet vk_set,
+    std::vector<Binding> resources,
+    bool allow_unbound_slots)
     : layoutId{id}
     , set{vk_set}
     , bindings{std::move(resources)}
+    , allowUnboundSlots{allow_unbound_slots}
   {
   }
 
@@ -103,14 +107,18 @@ struct PersistentDescriptorSet
 
   DescriptorLayoutId getLayoutId() const { return layoutId; }
 
-  const std::vector<Binding>& getBindings() const { return bindings; }
+  std::span<Binding const> getBindings() const { return bindings; }
 
   void processBarriers(vk::CommandBuffer cmd_buffer) const;
+
+  // @NOTE: has to be called BEFORE binding the dset
+  void updateBindings(std::span<Binding const> new_bindings);
 
 private:
   DescriptorLayoutId layoutId{};
   vk::DescriptorSet set{};
   std::vector<Binding> bindings{};
+  bool allowUnboundSlots = false;
 };
 
 /**
@@ -155,7 +163,8 @@ struct PersistentDescriptorPool
 {
   explicit PersistentDescriptorPool(vk::Device dev);
 
-  PersistentDescriptorSet allocateSet(DescriptorLayoutId layout_id, std::vector<Binding> bindings);
+  PersistentDescriptorSet allocateSet(
+    DescriptorLayoutId layout_id, std::vector<Binding> bindings, bool allow_unbound_slots = false);
 
 private:
   vk::Device vkDevice;
@@ -163,7 +172,8 @@ private:
 };
 
 template <class TDescriptorSet>
-void write_set(const TDescriptorSet& dst, bool allow_unbound_slots = false);
+void write_set(
+  const TDescriptorSet& dst, std::span<Binding const> bindings, bool allow_unbound_slots = false);
 
 uint32_t get_num_descriptors_in_pool_for_type(vk::DescriptorType type);
 
