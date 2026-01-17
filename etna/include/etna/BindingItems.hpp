@@ -13,13 +13,13 @@ class Image;
 
 struct BufferBinding
 {
-  const Buffer& buffer;
+  const Buffer* buffer;
   vk::DescriptorBufferInfo descriptor_info;
 };
 
 struct ImageBinding
 {
-  const Image& image;
+  const Image* image;
   vk::DescriptorImageInfo descriptor_info;
 };
 

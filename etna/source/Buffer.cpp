@@ -112,7 +112,7 @@ void Buffer::unmap()
 
 BufferBinding Buffer::genBinding(vk::DeviceSize offset, vk::DeviceSize range) const
 {
-  return BufferBinding{*this, vk::DescriptorBufferInfo{get(), offset, range}};
+  return BufferBinding{this, vk::DescriptorBufferInfo{get(), offset, range}};
 }
 
 } // namespace etna

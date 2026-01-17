@@ -136,11 +136,11 @@ PersistentDescriptorPool::PersistentDescriptorPool(vk::Device dev)
 }
 
 PersistentDescriptorSet PersistentDescriptorPool::allocateSet(
-  DescriptorLayoutId layout_id, std::vector<Binding> bindings)
+  DescriptorLayoutId layout_id, std::vector<Binding> bindings, bool allow_unbound_slots)
 {
   vk::DescriptorSet vkSet =
     allocate_desciptor_set_from_pool(vkDevice, pool.get(), layout_id, bindings);
-  return PersistentDescriptorSet{layout_id, vkSet, std::move(bindings)};
+  return PersistentDescriptorSet{layout_id, vkSet, std::move(bindings), allow_unbound_slots};
 }
 
 static bool is_image_resource(vk::DescriptorType ds_type)
@@ -211,7 +211,8 @@ static void validate_descriptor_write(
 }
 
 template <class TDescriptorSet>
-void write_set(const TDescriptorSet& dst, bool allow_unbound_slots)
+void write_set(
+  const TDescriptorSet& dst, std::span<Binding const> bindings, bool allow_unbound_slots)
 {
   ETNA_VERIFY(dst.isValid());
 
@@ -241,7 +242,7 @@ void write_set(const TDescriptorSet& dst, bool allow_unbound_slots)
   uint32_t numBufferInfo = 0;
   uint32_t numImageInfo = 0;
 
-  for (auto& binding : dst.getBindings())
+  for (auto& binding : bindings)
   {
     const auto& bindingInfo = layoutInfo.getBinding(binding.binding);
     if (is_image_resource(bindingInfo.descriptorType))
@@ -257,7 +258,7 @@ void write_set(const TDescriptorSet& dst, bool allow_unbound_slots)
   numImageInfo = 0;
   numBufferInfo = 0;
 
-  for (const auto& binding : dst.getBindings())
+  for (const auto& binding : bindings)
   {
     const auto& bindingInfo = layoutInfo.getBinding(binding.binding);
     vk::WriteDescriptorSet write{};
@@ -291,8 +292,9 @@ void write_set(const TDescriptorSet& dst, bool allow_unbound_slots)
   get_context().getDevice().updateDescriptorSets(writes, {});
 }
 
-template void write_set<DescriptorSet>(const DescriptorSet&, bool);
-template void write_set<PersistentDescriptorSet>(const PersistentDescriptorSet&, bool);
+template void write_set<DescriptorSet>(const DescriptorSet&, std::span<Binding const>, bool);
+template void write_set<PersistentDescriptorSet>(
+  const PersistentDescriptorSet&, std::span<Binding const>, bool);
 
 constexpr static vk::PipelineStageFlags2 shader_stage_to_pipeline_stage(
   vk::ShaderStageFlags shader_stages)
@@ -361,11 +363,11 @@ static void process_barriers_to_cmd_buf(
     const ImageBinding& imgData = std::get<ImageBinding>(binding.resources);
     etna::set_state(
       cmd_buffer,
-      imgData.image.get(),
+      imgData.image->get(),
       shader_stage_to_pipeline_stage(bindingInfo.stageFlags),
       descriptor_type_to_access_flag(bindingInfo.descriptorType),
       imgData.descriptor_info.imageLayout,
-      imgData.image.getAspectMaskByFormat());
+      imgData.image->getAspectMaskByFormat());
   }
 }
 
@@ -377,6 +379,28 @@ void DescriptorSet::processBarriers() const
 void PersistentDescriptorSet::processBarriers(vk::CommandBuffer cmd_buffer) const
 {
   process_barriers_to_cmd_buf(cmd_buffer, layoutId, bindings);
+}
+
+void PersistentDescriptorSet::updateBindings(std::span<Binding const> new_bindings)
+{
+  // @NOTE: O(nm), but shouldn't be an issue for actual etna applications
+  for (const auto& newBind : new_bindings)
+  {
+    bool replaced = false;
+    for (auto& slot : bindings)
+    {
+      if (slot.binding == newBind.binding && slot.arrayElem == newBind.arrayElem)
+      {
+        slot = newBind;
+        replaced = true;
+        break;
+      }
+    }
+    if (!replaced)
+      bindings.push_back(newBind);
+  }
+
+  write_set(*this, new_bindings, allowUnboundSlots);
 }
 
 } // namespace etna

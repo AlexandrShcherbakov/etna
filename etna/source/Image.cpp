@@ -178,7 +178,7 @@ vk::ImageView Image::getView(Image::ViewParams params) const
 
 ImageBinding Image::genBinding(vk::Sampler sampler, vk::ImageLayout layout, ViewParams params) const
 {
-  return ImageBinding{*this, vk::DescriptorImageInfo{sampler, getView(params), layout}};
+  return ImageBinding{this, vk::DescriptorImageInfo{sampler, getView(params), layout}};
 }
 
 } // namespace etna
