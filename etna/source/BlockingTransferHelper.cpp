@@ -109,7 +109,7 @@ void BlockingTransferHelper::uploadImage(
 
   const std::size_t bytesPerPixel = vk::blockSize(dst.getFormat());
 
-  ETNA_ASSERTF(d == 1, "3D image uploads are not implemented yet!");
+  ETNA_ASSERTF(d == 1, "3D image blocking uploads are not implemented yet!");
 
   ETNA_ASSERTF(
     w * h * bytesPerPixel == src.size(),
