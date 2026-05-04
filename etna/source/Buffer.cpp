@@ -46,7 +46,7 @@ Buffer::Buffer(VmaAllocator alloc, CreateInfo info)
   buffer = vk::Buffer(buf);
 
   // make map() forbidden for the user if allocationCreate has VMA_ALLOCATION_CREATE_MAPPED_BIT
-  if (info.allocationCreate & VMA_ALLOCATION_CREATE_MAPPED_BIT)
+  if ((info.allocationCreate & VMA_ALLOCATION_CREATE_MAPPED_BIT) != 0u)
     mapped = map();
 
   ETNA_VERIFY(mapped == nullptr || info.allocationCreate & VMA_ALLOCATION_CREATE_MAPPED_BIT);
