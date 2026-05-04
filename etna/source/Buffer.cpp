@@ -97,6 +97,7 @@ void Buffer::reset()
 
 std::byte* Buffer::map()
 {
+  ETNA_VERIFY(mapped == nullptr);
   void* result;
 
   // I can't think of a use case where failing to do a mapping
