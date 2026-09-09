@@ -108,12 +108,10 @@ void BlockingTransferHelper::uploadImage(
 
   const std::size_t bytesPerPixel = vk::blockSize(dst.getFormat());
 
-  ETNA_ASSERTF(d == 1, "3D image blocking uploads are not implemented yet!");
-
   ETNA_ASSERTF(
-    w * h * bytesPerPixel == src.size(),
+    w * h * d * bytesPerPixel == src.size(),
     "Image size mismatch between CPU and GPU! Expected {} bytes, but got {}!",
-    w * h * bytesPerPixel,
+    w * h * d * bytesPerPixel,
     src.size());
 
   const std::size_t bytesPerLine = w * bytesPerPixel;
@@ -125,68 +123,72 @@ void BlockingTransferHelper::uploadImage(
     stagingSize,
     w * bytesPerPixel);
 
-  for (std::size_t uploadedLines = 0; uploadedLines < h; uploadedLines += linesPerUpload)
+  bool transitionedToTransfer = false;
+  for (std::size_t z = 0; z < d; ++z)
   {
-    const std::size_t linesThisUpload = std::min(linesPerUpload, h - uploadedLines);
-    std::memcpy(
-      stagingBuffer.data(),
-      src.data() + uploadedLines * bytesPerLine,
-      linesThisUpload * bytesPerLine);
-
-    auto cmdBuf = cmd_mgr.start();
-
-    ETNA_CHECK_VK_RESULT(cmdBuf.begin(vk::CommandBufferBeginInfo{}));
+    for (std::size_t uploadedLines = 0; uploadedLines < h; uploadedLines += linesPerUpload)
     {
-      if (uploadedLines == 0)
-      {
-        etna::set_state(
-          cmdBuf,
-          dst.get(),
-          vk::PipelineStageFlagBits2::eTransfer,
-          vk::AccessFlagBits2::eTransferWrite,
-          vk::ImageLayout::eTransferDstOptimal,
-          dst.getAspectMaskByFormat());
-        etna::flush_barriers(cmdBuf);
-      }
+      const std::size_t linesThisUpload = std::min(linesPerUpload, h - uploadedLines);
+      const std::size_t srcOffset = (z * h + uploadedLines) * bytesPerLine;
+      std::memcpy(stagingBuffer.data(), src.data() + srcOffset, linesThisUpload * bytesPerLine);
 
-      vk::BufferImageCopy2 copy{
-        .bufferOffset = 0,
-        .bufferRowLength = 0,
-        .bufferImageHeight = 0,
-        .imageSubresource =
-          vk::ImageSubresourceLayers{
-            .aspectMask = dst.getAspectMaskByFormat(),
-            .mipLevel = mip_level,
-            .baseArrayLayer = layer,
-            .layerCount = 1,
-          },
-        .imageOffset = vk::Offset3D{0, static_cast<int32_t>(uploadedLines), 0},
-        .imageExtent = vk::Extent3D{w, static_cast<uint32_t>(linesThisUpload), 1},
-      };
-      vk::CopyBufferToImageInfo2 info{
-        .srcBuffer = stagingBuffer.get(),
-        .dstImage = dst.get(),
-        .dstImageLayout = vk::ImageLayout::eTransferDstOptimal,
-        .regionCount = 1,
-        .pRegions = &copy,
-      };
-      cmdBuf.copyBufferToImage2(info);
+      auto cmdBuf = cmd_mgr.start();
 
-      if (uploadedLines + linesPerUpload >= h)
+      ETNA_CHECK_VK_RESULT(cmdBuf.begin(vk::CommandBufferBeginInfo{}));
       {
-        etna::set_state(
-          cmdBuf,
-          dst.get(),
-          {},
-          {},
-          vk::ImageLayout::eShaderReadOnlyOptimal,
-          dst.getAspectMaskByFormat());
-        etna::flush_barriers(cmdBuf);
+        if (!transitionedToTransfer)
+        {
+          etna::set_state(
+            cmdBuf,
+            dst.get(),
+            vk::PipelineStageFlagBits2::eTransfer,
+            vk::AccessFlagBits2::eTransferWrite,
+            vk::ImageLayout::eTransferDstOptimal,
+            dst.getAspectMaskByFormat());
+          etna::flush_barriers(cmdBuf);
+          transitionedToTransfer = true;
+        }
+
+        vk::BufferImageCopy2 copy{
+          .bufferOffset = 0,
+          .bufferRowLength = 0,
+          .bufferImageHeight = 0,
+          .imageSubresource =
+            vk::ImageSubresourceLayers{
+              .aspectMask = dst.getAspectMaskByFormat(),
+              .mipLevel = mip_level,
+              .baseArrayLayer = layer,
+              .layerCount = 1,
+            },
+          .imageOffset =
+            vk::Offset3D{0, static_cast<int32_t>(uploadedLines), static_cast<int32_t>(z)},
+          .imageExtent = vk::Extent3D{w, static_cast<uint32_t>(linesThisUpload), 1},
+        };
+        vk::CopyBufferToImageInfo2 info{
+          .srcBuffer = stagingBuffer.get(),
+          .dstImage = dst.get(),
+          .dstImageLayout = vk::ImageLayout::eTransferDstOptimal,
+          .regionCount = 1,
+          .pRegions = &copy,
+        };
+        cmdBuf.copyBufferToImage2(info);
+
+        if (z + 1 == d && uploadedLines + linesThisUpload == h)
+        {
+          etna::set_state(
+            cmdBuf,
+            dst.get(),
+            {},
+            {},
+            vk::ImageLayout::eShaderReadOnlyOptimal,
+            dst.getAspectMaskByFormat());
+          etna::flush_barriers(cmdBuf);
+        }
       }
+      ETNA_CHECK_VK_RESULT(cmdBuf.end());
+
+      cmd_mgr.submitAndWait(std::move(cmdBuf));
     }
-    ETNA_CHECK_VK_RESULT(cmdBuf.end());
-
-    cmd_mgr.submitAndWait(std::move(cmdBuf));
   }
 }
 
