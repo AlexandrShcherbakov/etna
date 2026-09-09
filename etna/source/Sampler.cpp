@@ -1,5 +1,7 @@
 #include <etna/Sampler.hpp>
 
+#include <algorithm>
+
 #include <etna/GlobalContext.hpp>
 #include "DebugUtils.hpp"
 
@@ -8,6 +10,9 @@ namespace etna
 
 Sampler::Sampler(CreateInfo info)
 {
+  const auto physicalDeviceProperties = etna::get_context().getPhysicalDevice().getProperties();
+  const float maxAnisotropy =
+    std::min(info.maxAnisotropy, physicalDeviceProperties.limits.maxSamplerAnisotropy);
   vk::SamplerCreateInfo createInfo{
     .magFilter = info.filter,
     .minFilter = info.filter,
@@ -16,7 +21,8 @@ Sampler::Sampler(CreateInfo info)
     .addressModeV = info.addressMode,
     .addressModeW = info.addressMode,
     .mipLodBias = 0.0f,
-    .maxAnisotropy = 1.0f,
+    .anisotropyEnable = static_cast<vk::Bool32>(info.enableAnisotropy),
+    .maxAnisotropy = maxAnisotropy,
     .compareEnable = static_cast<vk::Bool32>(info.compareEnable),
     .compareOp = info.compareOp,
     .minLod = info.minLod,

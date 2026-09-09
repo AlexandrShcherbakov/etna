@@ -23,6 +23,8 @@ public:
     float maxLod = VK_LOD_CLAMP_NONE;
     bool compareEnable = false;
     vk::CompareOp compareOp = vk::CompareOp::eLessOrEqual;
+    bool enableAnisotropy = false;
+    float maxAnisotropy = 16.0f;
   };
 
   explicit Sampler(CreateInfo info);
