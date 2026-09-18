@@ -5,6 +5,7 @@
 #include <etna/Vulkan.hpp>
 #include <etna/VertexInput.hpp>
 #include <etna/PipelineBase.hpp>
+#include <etna/SpecializationConstants.hpp>
 
 
 namespace etna
@@ -115,6 +116,12 @@ public:
       vk::DynamicState::eViewport,
       vk::DynamicState::eScissor,
     };
+
+    SpecializationConstants vertexSpecConsts{};
+    SpecializationConstants tessellationControlSpecConsts{};
+    SpecializationConstants tessellationEvalSpecConsts{};
+    SpecializationConstants geometrySpecConsts{};
+    SpecializationConstants fragmentSpecConsts{};
   };
 };
 

@@ -12,6 +12,7 @@
 #include <etna/Vulkan.hpp>
 #include <etna/Forward.hpp>
 #include <etna/DescriptorSetLayout.hpp>
+#include <etna/SpecializationConstants.hpp>
 
 
 namespace etna
@@ -28,6 +29,10 @@ struct ShaderModule
   vk::ShaderStageFlagBits getStage() const { return stage; }
   const std::string& getName() const { return entryPoint; }
   vk::PushConstantRange getPushConst() const { return pushConst; }
+  ShaderModuleSpecializationConstants getSpecializationConstants() const
+  {
+    return specializationConstants;
+  }
 
   ShaderModule(const ShaderModule& mod) = delete;
   ShaderModule& operator=(const ShaderModule& mod) = delete;
@@ -40,6 +45,7 @@ private:
   vk::UniqueShaderModule vkModule;
   std::vector<std::pair<uint32_t, DescriptorSetInfo>> resources{}; /*set index - set resources*/
   vk::PushConstantRange pushConst{};
+  ShaderModuleSpecializationConstants specializationConstants{};
   /*Todo: add vertex input info*/
 };
 
@@ -106,7 +112,10 @@ struct ShaderProgramManager
   }
 
   // for pipeline creation
-  std::vector<vk::PipelineShaderStageCreateInfo> getShaderStages(ShaderProgramId id) const;
+  std::pair<
+    std::vector<vk::PipelineShaderStageCreateInfo>,
+    std::vector<ShaderModuleSpecializationConstants>>
+  getShaderStages(ShaderProgramId id) const;
 
   ShaderProgramManager(const ShaderProgramManager&) = delete;
   ShaderProgramManager& operator=(const ShaderProgramManager&) = delete;
