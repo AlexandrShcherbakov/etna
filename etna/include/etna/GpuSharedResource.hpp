@@ -39,6 +39,7 @@ public:
     ETNA_ASSERT(workCount == other.workCount);
     for (std::size_t i = 0; i < workCount->multiBufferingCount(); ++i)
       impl[i].get() = other.impl[i].get();
+    return *this;
   }
 
   GpuSharedResource(GpuSharedResource&& other)
@@ -54,6 +55,7 @@ public:
     ETNA_ASSERT(workCount == other.workCount);
     for (std::size_t i = 0; i < workCount->multiBufferingCount(); ++i)
       impl[i].get() = std::move(other.impl[i].get());
+    return *this;
   }
 
   template <class... Args>
