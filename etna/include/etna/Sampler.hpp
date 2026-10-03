@@ -25,6 +25,7 @@ public:
     vk::CompareOp compareOp = vk::CompareOp::eLessOrEqual;
     bool enableAnisotropy = false;
     float maxAnisotropy = 16.0f;
+    vk::BorderColor borderColor = vk::BorderColor::eFloatTransparentBlack;
   };
 
   explicit Sampler(CreateInfo info);

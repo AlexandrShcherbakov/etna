@@ -5,6 +5,7 @@
 #include <etna/Vulkan.hpp>
 #include <etna/VertexInput.hpp>
 #include <etna/PipelineBase.hpp>
+#include <etna/SpecializationConstants.hpp>
 
 
 namespace etna
@@ -25,6 +26,7 @@ public:
   ComputePipeline() = default;
   struct CreateInfo
   {
+    SpecializationConstants specializationConstants{};
   };
 };
 

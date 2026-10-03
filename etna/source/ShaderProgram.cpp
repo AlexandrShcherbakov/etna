@@ -112,6 +112,60 @@ void ShaderModule::reload(vk::Device device)
     pushConst.offset = 0u;
     pushConst.stageFlags = vk::ShaderStageFlags{};
   }
+
+  if (auto specConstantCount = spvModule->spec_constant_count; specConstantCount > 0)
+  {
+    specializationConstants.reserve(specConstantCount);
+    for (uint32_t i = 0; i < specConstantCount; ++i)
+    {
+      const auto& specConst = spvModule->spec_constants[i];
+      // TODO: support 64-bit specialization constants
+      if (specConst.default_value_size == 8)
+      {
+        ETNA_PANIC("SPIRV {} parse error: 64-bit specialization constants are not supported", path);
+      }
+
+      // TODO: this is legal for build-in constants redefinition, but we don't support it yet
+      if (specConst.name == nullptr)
+      {
+        ETNA_PANIC(
+          "SPIRV {} parse error: specialization constant {} has no name",
+          path,
+          specConst.constant_id);
+      }
+
+      if (specConst.default_value == nullptr)
+      {
+        ETNA_PANIC(
+          "SPIRV {} parse error: specialization constant {} has no default value",
+          path,
+          specConst.constant_id);
+      }
+
+      using Type = ShaderModuleSpecializationConstant::Type;
+      Type type = Type::Bool;
+      switch (specConst.type_description->type_flags)
+      {
+      case SPV_REFLECT_TYPE_FLAG_BOOL:
+        type = Type::Bool;
+        break;
+      case SPV_REFLECT_TYPE_FLAG_INT:
+        type = Type::Int;
+        break;
+      case SPV_REFLECT_TYPE_FLAG_FLOAT:
+        type = Type::Float;
+        break;
+      default:
+        ETNA_PANIC(
+          "SPIRV {} parse error: unsupported specialization constant type {}",
+          path,
+          specConst.type_description->type_flags);
+      }
+
+      specializationConstants.insert(
+        {specConst.name, ShaderModuleSpecializationConstant{specConst.constant_id, type}});
+    }
+  }
 }
 
 uint32_t ShaderProgramManager::registerModule(std::filesystem::path path)
@@ -325,6 +379,23 @@ std::vector<vk::PipelineShaderStageCreateInfo> ShaderProgramManager::getShaderSt
     stages.push_back(info);
   }
   return stages;
+}
+
+std::vector<ShaderModuleSpecializationConstants> ShaderProgramManager::getShaderStagesSpecConsts(
+  ShaderProgramId id) const
+{
+  auto& prog = getProgInternal(id);
+
+  std::vector<ShaderModuleSpecializationConstants> specConsts;
+  specConsts.reserve(prog.moduleIds.size());
+
+  for (auto modId : prog.moduleIds)
+  {
+    const auto& shaderMod = getModule(modId);
+    specConsts.push_back(shaderMod.getSpecializationConstants());
+  }
+
+  return specConsts;
 }
 
 vk::DescriptorSetLayout ShaderProgramManager::getDescriptorLayout(
